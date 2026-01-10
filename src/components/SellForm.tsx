@@ -25,6 +25,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const formSchema = z.object({
@@ -42,6 +43,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 const SellForm = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,6 +81,11 @@ const SellForm = () => {
   };
 
   const onSubmit = async (values: FormValues) => {
+    if (!user) {
+      toast.error('Please login to post a listing');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       let imageUrl = null;
@@ -110,6 +117,7 @@ const SellForm = () => {
         is_email_binded: values.is_email_binded,
         binded_email: values.is_email_binded ? values.binded_email : null,
         security_code: values.is_email_binded ? values.security_code : null,
+        seller_id: user.id,
       });
 
       if (error) throw error;
