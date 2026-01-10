@@ -8,23 +8,45 @@ import {
   Calendar,
   Tag,
   Loader2,
+  Lock,
+  ShoppingCart,
+  Check,
+  Clock,
 } from 'lucide-react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { IdListing } from '@/types/listing';
+import { useAuth } from '@/hooks/useAuth';
+import AuthModal from '@/components/AuthModal';
+import { toast } from 'sonner';
+
+interface Purchase {
+  id: string;
+  status: 'pending' | 'approved' | 'rejected';
+}
 
 const ListingDetails = () => {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
   const [listing, setListing] = useState<IdListing | null>(null);
   const [loading, setLoading] = useState(true);
+  const [purchase, setPurchase] = useState<Purchase | null>(null);
+  const [purchasing, setPurchasing] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
       fetchListing();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (id && user) {
+      fetchPurchaseStatus();
+    }
+  }, [id, user]);
 
   const fetchListing = async () => {
     try {
@@ -40,6 +62,52 @@ const ListingDetails = () => {
       console.error('Error fetching listing:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPurchaseStatus = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('purchases')
+        .select('id, status')
+        .eq('listing_id', id)
+        .eq('buyer_id', user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      setPurchase(data as Purchase | null);
+    } catch (error) {
+      console.error('Error fetching purchase status:', error);
+    }
+  };
+
+  const handleRequestPurchase = async () => {
+    if (!user) {
+      setAuthModalOpen(true);
+      return;
+    }
+
+    setPurchasing(true);
+    try {
+      const { data, error } = await supabase
+        .from('purchases')
+        .insert({
+          listing_id: id,
+          buyer_id: user.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      setPurchase({ id: data.id, status: 'pending' as const });
+      toast.success('Purchase request submitted! Contact seller to arrange payment.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to request purchase');
+    } finally {
+      setPurchasing(false);
     }
   };
 
@@ -69,6 +137,9 @@ const ListingDetails = () => {
       );
     }
   };
+
+  const isPurchaseApproved = purchase?.status === 'approved';
+  const canViewSensitiveData = isPurchaseApproved;
 
   if (loading) {
     return (
@@ -154,7 +225,7 @@ const ListingDetails = () => {
               </div>
             </div>
 
-            {/* Email Bind Status */}
+            {/* Email Bind Status - Protected Section */}
             <div className="card-gaming p-6">
               <h3 className="font-display text-lg font-bold mb-4 flex items-center gap-2">
                 <Shield className="h-5 w-5 text-primary" />
@@ -167,19 +238,35 @@ const ListingDetails = () => {
                     <Shield className="h-4 w-4 mr-1" />
                     Email Secured
                   </Badge>
-                  {listing.binded_email && (
-                    <p className="text-sm">
-                      <span className="text-muted-foreground">Bound to: </span>
-                      <span className="font-medium">{listing.binded_email}</span>
-                    </p>
-                  )}
-                  {listing.security_code && (
-                    <p className="text-sm">
-                      <span className="text-muted-foreground">Security Code: </span>
-                      <span className="font-mono font-medium">
-                        {listing.security_code}
-                      </span>
-                    </p>
+                  
+                  {/* Protected Data - Only visible after payment approval */}
+                  {canViewSensitiveData ? (
+                    <>
+                      {listing.binded_email && (
+                        <p className="text-sm">
+                          <span className="text-muted-foreground">Bound to: </span>
+                          <span className="font-medium">{listing.binded_email}</span>
+                        </p>
+                      )}
+                      {listing.security_code && (
+                        <p className="text-sm">
+                          <span className="text-muted-foreground">Security Code: </span>
+                          <span className="font-mono font-medium">
+                            {listing.security_code}
+                          </span>
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <div className="bg-secondary/50 rounded-lg p-4 flex items-center gap-3">
+                      <Lock className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium">Account Details Hidden</p>
+                        <p className="text-xs text-muted-foreground">
+                          Email & security code visible after payment approval
+                        </p>
+                      </div>
+                    </div>
                   )}
                 </div>
               ) : (
@@ -196,10 +283,73 @@ const ListingDetails = () => {
                 <Tag className="h-5 w-5 text-primary" />
                 Key Items
               </h3>
-              <p className="text-secondary-foreground whitespace-pre-wrap">
-                {listing.key_items}
-              </p>
+              <div className="flex flex-wrap gap-2">
+                {listing.key_items.split(',').map((item, index) => (
+                  <Badge key={index} variant="outline" className="text-sm">
+                    {item.trim()}
+                  </Badge>
+                ))}
+              </div>
             </div>
+
+            {/* Purchase Status / Actions */}
+            {purchase ? (
+              <div className="card-gaming p-4">
+                {purchase.status === 'pending' && (
+                  <div className="flex items-center gap-3 text-yellow-500">
+                    <Clock className="h-5 w-5" />
+                    <div>
+                      <p className="font-medium">Payment Pending</p>
+                      <p className="text-sm text-muted-foreground">
+                        Contact seller to arrange payment. Admin will approve once confirmed.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {purchase.status === 'approved' && (
+                  <div className="flex items-center gap-3 text-gaming-success">
+                    <Check className="h-5 w-5" />
+                    <div>
+                      <p className="font-medium">Payment Approved!</p>
+                      <p className="text-sm text-muted-foreground">
+                        You can now view the account details above.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {purchase.status === 'rejected' && (
+                  <div className="flex items-center gap-3 text-destructive">
+                    <ShieldOff className="h-5 w-5" />
+                    <div>
+                      <p className="font-medium">Purchase Rejected</p>
+                      <p className="text-sm text-muted-foreground">
+                        Contact support for more information.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Button
+                variant="gaming"
+                size="xl"
+                className="w-full"
+                onClick={handleRequestPurchase}
+                disabled={purchasing}
+              >
+                {purchasing ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="h-5 w-5" />
+                    Request to Buy
+                  </>
+                )}
+              </Button>
+            )}
 
             {/* WhatsApp Button */}
             <Button
@@ -214,6 +364,12 @@ const ListingDetails = () => {
           </div>
         </div>
       </div>
+
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        defaultTab="login"
+      />
     </div>
   );
 };
