@@ -1,13 +1,24 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Edit2, ExternalLink, Loader2, Package } from 'lucide-react';
+import { Edit2, ExternalLink, Loader2, Package, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { IdListing } from '@/types/listing';
 import EditListingModal from '@/components/EditListingModal';
+import { toast } from 'sonner';
 
 const SellerDashboard = () => {
   const { user, loading: authLoading } = useAuth();
@@ -15,6 +26,8 @@ const SellerDashboard = () => {
   const [listings, setListings] = useState<IdListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingListing, setEditingListing] = useState<IdListing | null>(null);
+  const [deletingListing, setDeletingListing] = useState<IdListing | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -50,6 +63,28 @@ const SellerDashboard = () => {
   const handleEditSuccess = () => {
     setEditingListing(null);
     fetchMyListings();
+  };
+
+  const handleDelete = async () => {
+    if (!deletingListing) return;
+    
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('id_listings')
+        .delete()
+        .eq('id', deletingListing.id);
+
+      if (error) throw error;
+
+      toast.success('Listing deleted successfully');
+      setDeletingListing(null);
+      fetchMyListings();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete listing');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (authLoading || loading) {
@@ -145,6 +180,14 @@ const SellerDashboard = () => {
                             <Edit2 className="h-4 w-4 mr-1" />
                             Edit
                           </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => setDeletingListing(listing)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                           <Button variant="ghost" size="sm" asChild>
                             <Link to={`/listing/${listing.id}`}>
                               <ExternalLink className="h-4 w-4" />
@@ -168,6 +211,35 @@ const SellerDashboard = () => {
         onClose={() => setEditingListing(null)}
         onSuccess={handleEditSuccess}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deletingListing} onOpenChange={(open) => !open && setDeletingListing(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Listing</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this listing? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
