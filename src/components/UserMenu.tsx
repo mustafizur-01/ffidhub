@@ -7,6 +7,7 @@ import {
   LogOut,
   Users,
   ChevronDown,
+  Package,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -93,6 +94,13 @@ const UserMenu = () => {
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
+
+        <Link to="/my-listings">
+          <DropdownMenuItem className="cursor-pointer">
+            <Package className="h-4 w-4 mr-2" />
+            My Listings
+          </DropdownMenuItem>
+        </Link>
 
         <Link to="/profile">
           <DropdownMenuItem className="cursor-pointer">
