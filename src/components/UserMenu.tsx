@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   User,
@@ -8,6 +7,7 @@ import {
   Users,
   ChevronDown,
   Package,
+  Shield,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -19,10 +19,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { useAdminRole } from '@/hooks/useAdminRole';
 import { toast } from 'sonner';
 
 const UserMenu = () => {
   const { user, profile, signOut } = useAuth();
+  const { isAdmin } = useAdminRole();
 
   const handleCopyReferralCode = () => {
     if (profile?.referral_code) {
@@ -94,6 +96,15 @@ const UserMenu = () => {
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
+
+        {isAdmin && (
+          <Link to="/admin">
+            <DropdownMenuItem className="cursor-pointer text-primary">
+              <Shield className="h-4 w-4 mr-2" />
+              Admin Dashboard
+            </DropdownMenuItem>
+          </Link>
+        )}
 
         <Link to="/my-listings">
           <DropdownMenuItem className="cursor-pointer">
