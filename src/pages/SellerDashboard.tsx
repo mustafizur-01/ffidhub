@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Edit2, ExternalLink, Loader2, Package, Trash2 } from 'lucide-react';
+import { Edit2, ExternalLink, Loader2, Package, Trash2, MessageSquare, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,16 +18,23 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { IdListing } from '@/types/listing';
 import EditListingModal from '@/components/EditListingModal';
+import MessageModal from '@/components/MessageModal';
 import { toast } from 'sonner';
+
+interface ListingWithStatus extends IdListing {
+  pendingPurchases: number;
+  unreadMessages: number;
+}
 
 const SellerDashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [listings, setListings] = useState<IdListing[]>([]);
+  const [listings, setListings] = useState<ListingWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingListing, setEditingListing] = useState<IdListing | null>(null);
   const [deletingListing, setDeletingListing] = useState<IdListing | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [messagingListing, setMessagingListing] = useState<ListingWithStatus | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -45,14 +52,51 @@ const SellerDashboard = () => {
     
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // Fetch listings
+      const { data: listingsData, error: listingsError } = await supabase
         .from('id_listings')
         .select('*')
         .eq('seller_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setListings((data as IdListing[]) || []);
+      if (listingsError) throw listingsError;
+
+      const listingIds = (listingsData || []).map(l => l.id);
+      
+      // Fetch pending purchases for these listings
+      const { data: purchasesData } = await supabase
+        .from('purchases')
+        .select('listing_id, status')
+        .in('listing_id', listingIds)
+        .eq('status', 'pending');
+
+      // Fetch unread messages for these listings
+      const { data: messagesData } = await supabase
+        .from('messages')
+        .select('listing_id, read')
+        .in('listing_id', listingIds)
+        .eq('receiver_id', user.id)
+        .eq('read', false);
+
+      // Count per listing
+      const pendingCounts: Record<string, number> = {};
+      const unreadCounts: Record<string, number> = {};
+      
+      purchasesData?.forEach(p => {
+        pendingCounts[p.listing_id] = (pendingCounts[p.listing_id] || 0) + 1;
+      });
+      
+      messagesData?.forEach(m => {
+        unreadCounts[m.listing_id] = (unreadCounts[m.listing_id] || 0) + 1;
+      });
+
+      const listingsWithStatus: ListingWithStatus[] = (listingsData || []).map(listing => ({
+        ...(listing as IdListing),
+        pendingPurchases: pendingCounts[listing.id] || 0,
+        unreadMessages: unreadCounts[listing.id] || 0,
+      }));
+
+      setListings(listingsWithStatus);
     } catch (error) {
       console.error('Error fetching listings:', error);
     } finally {
@@ -155,6 +199,18 @@ const SellerDashboard = () => {
                               Email Secured
                             </Badge>
                           )}
+                          {listing.pendingPurchases > 0 && (
+                            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                              <Clock className="h-3 w-3 mr-1" />
+                              {listing.pendingPurchases} Pending
+                            </Badge>
+                          )}
+                          {listing.unreadMessages > 0 && (
+                            <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                              <MessageSquare className="h-3 w-3 mr-1" />
+                              {listing.unreadMessages} New
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-sm text-muted-foreground line-clamp-2">
                           {listing.key_items}
@@ -179,6 +235,14 @@ const SellerDashboard = () => {
                           >
                             <Edit2 className="h-4 w-4 mr-1" />
                             Edit
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setMessagingListing(listing)}
+                            className={listing.unreadMessages > 0 ? 'text-blue-500 hover:text-blue-600' : ''}
+                          >
+                            <MessageSquare className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="outline"
@@ -240,6 +304,19 @@ const SellerDashboard = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Message Modal for Seller */}
+      {messagingListing && user && (
+        <MessageModal
+          isOpen={!!messagingListing}
+          onClose={() => {
+            setMessagingListing(null);
+            fetchMyListings(); // Refresh to update unread counts
+          }}
+          listingId={messagingListing.id}
+          sellerId={user.id}
+        />
+      )}
     </div>
   );
 };
