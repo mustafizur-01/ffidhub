@@ -12,6 +12,7 @@ import {
   ShoppingCart,
   Check,
   Clock,
+  Send,
 } from 'lucide-react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { IdListing } from '@/types/listing';
 import { useAuth } from '@/hooks/useAuth';
 import AuthModal from '@/components/AuthModal';
+import MessageModal from '@/components/MessageModal';
 import { toast } from 'sonner';
 
 interface Purchase {
@@ -35,6 +37,7 @@ const ListingDetails = () => {
   const [purchase, setPurchase] = useState<Purchase | null>(null);
   const [purchasing, setPurchasing] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -351,6 +354,25 @@ const ListingDetails = () => {
               </Button>
             )}
 
+            {/* In-App Message Button */}
+            {listing.seller_id !== user?.id && (
+              <Button
+                variant="outline"
+                size="xl"
+                className="w-full"
+                onClick={() => {
+                  if (!user) {
+                    setAuthModalOpen(true);
+                  } else {
+                    setMessageModalOpen(true);
+                  }
+                }}
+              >
+                <Send className="h-5 w-5" />
+                Message Seller
+              </Button>
+            )}
+
             {/* WhatsApp Button */}
             <Button
               variant="whatsapp"
@@ -370,6 +392,15 @@ const ListingDetails = () => {
         onClose={() => setAuthModalOpen(false)}
         defaultTab="login"
       />
+
+      {listing && user && (
+        <MessageModal
+          isOpen={messageModalOpen}
+          onClose={() => setMessageModalOpen(false)}
+          listingId={listing.id}
+          sellerId={listing.seller_id || ''}
+        />
+      )}
     </div>
   );
 };
