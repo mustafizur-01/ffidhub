@@ -24,8 +24,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye } from 'lucide-react';
+import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Message {
   id: string;
@@ -52,6 +63,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'read' | 'unread'>('all');
+  const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
   const [stats, setStats] = useState({
     totalMessages: 0,
     unreadMessages: 0,
@@ -172,6 +184,24 @@ const AdminDashboard = () => {
       supabase.removeChannel(channel);
     };
   }, [isAdmin]);
+
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .delete()
+        .eq('id', messageId);
+
+      if (error) throw error;
+
+      toast.success('Message deleted successfully');
+      setDeletingMessageId(null);
+      fetchMessages();
+      fetchStats();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete message');
+    }
+  };
 
   const filteredMessages = messages.filter(msg => {
     const matchesSearch = 
@@ -328,6 +358,7 @@ const AdminDashboard = () => {
                       <TableHead>Listing</TableHead>
                       <TableHead className="max-w-[300px]">Message</TableHead>
                       <TableHead>Date</TableHead>
+                      <TableHead className="w-[80px]">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -361,6 +392,16 @@ const AdminDashboard = () => {
                         <TableCell className="text-xs text-muted-foreground">
                           {format(new Date(message.created_at), 'MMM d, yyyy HH:mm')}
                         </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => setDeletingMessageId(message.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -369,6 +410,27 @@ const AdminDashboard = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deletingMessageId} onOpenChange={() => setDeletingMessageId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Message</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this message? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => deletingMessageId && handleDeleteMessage(deletingMessageId)}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </main>
     </div>
   );
