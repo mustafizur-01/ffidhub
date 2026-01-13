@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { Flame, Menu, X, LogIn } from 'lucide-react';
+import { Flame, Menu, X, LogIn, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import UserMenu from './UserMenu';
 import AuthModal from './AuthModal';
 
 const Header = () => {
   const location = useLocation();
   const { user, loading } = useAuth();
+  const unreadCount = useUnreadMessages();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authDefaultTab, setAuthDefaultTab] = useState<'login' | 'signup'>('login');
@@ -61,7 +63,19 @@ const Header = () => {
             {loading ? (
               <div className="w-24 h-9 bg-muted animate-pulse rounded-md" />
             ) : user ? (
-              <UserMenu />
+              <>
+                <Link to="/my-listings" className="relative">
+                  <Button variant="ghost" size="icon">
+                    <MessageCircle className="h-5 w-5" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
+                  </Button>
+                </Link>
+                <UserMenu />
+              </>
             ) : (
               <>
                 <Button variant="ghost" size="sm" onClick={() => openAuthModal('login')}>
