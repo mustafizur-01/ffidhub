@@ -25,6 +25,7 @@ interface Message {
   content: string;
   read: boolean;
   created_at: string;
+  sender_email?: string;
 }
 
 interface BuyerThread {
@@ -165,7 +166,28 @@ const MessageModal = ({ isOpen, onClose, listingId, sellerId, sellerEmail }: Mes
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+      
+      // Fetch sender emails for messages
+      const senderIds = [...new Set((data || []).map(m => m.sender_id))];
+      const emailMap = new Map<string, string>();
+      
+      for (const senderId of senderIds) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('user_id', senderId)
+          .single();
+        if (profile?.email) {
+          emailMap.set(senderId, profile.email);
+        }
+      }
+      
+      const messagesWithEmail = (data || []).map(msg => ({
+        ...msg,
+        sender_email: emailMap.get(msg.sender_id) || 'Unknown'
+      }));
+      
+      setMessages(messagesWithEmail);
     } catch (error: any) {
       toast.error('Failed to load messages');
     } finally {
@@ -319,8 +341,13 @@ const MessageModal = ({ isOpen, onClose, listingId, sellerId, sellerEmail }: Mes
                     {messages.map((msg) => (
                       <div
                         key={msg.id}
-                        className={`flex ${msg.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}
+                        className={`flex flex-col ${msg.sender_id === user?.id ? 'items-end' : 'items-start'}`}
                       >
+                        <span className={`text-xs mb-1 ${
+                          msg.sender_id === user?.id ? 'text-muted-foreground' : 'text-primary font-medium'
+                        }`}>
+                          {msg.sender_id === user?.id ? 'You' : (msg.sender_email || 'Unknown')}
+                        </span>
                         <div
                           className={`max-w-[80%] rounded-lg px-3 py-2 ${
                             msg.sender_id === user?.id
