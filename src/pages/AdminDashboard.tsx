@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye, Trash2 } from 'lucide-react';
+import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye, Trash2, Wallet, IndianRupee, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import {
@@ -54,16 +54,28 @@ interface MessageWithDetails extends Message {
   listing_level?: number;
 }
 
+interface UserProfile {
+  id: string;
+  user_id: string;
+  email: string;
+  balance: number;
+}
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, loading: adminLoading } = useAdminRole();
   
   const [messages, setMessages] = useState<MessageWithDetails[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usersLoading, setUsersLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [userSearchTerm, setUserSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'read' | 'unread'>('all');
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [addAmount, setAddAmount] = useState('');
   const [stats, setStats] = useState({
     totalMessages: 0,
     unreadMessages: 0,
@@ -87,6 +99,7 @@ const AdminDashboard = () => {
     if (isAdmin) {
       fetchMessages();
       fetchStats();
+      fetchUsers();
     }
   }, [isAdmin]);
 
@@ -108,6 +121,23 @@ const AdminDashboard = () => {
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      setUsersLoading(true);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, user_id, email, balance')
+        .order('email', { ascending: true });
+
+      if (error) throw error;
+      setUsers(data || []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setUsersLoading(false);
     }
   };
 
@@ -203,6 +233,38 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleAddBalance = async () => {
+    if (!selectedUser || !addAmount) return;
+
+    const amount = parseFloat(addAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('Please enter a valid amount');
+      return;
+    }
+
+    try {
+      const newBalance = selectedUser.balance + amount;
+      const { error } = await supabase
+        .from('profiles')
+        .update({ balance: newBalance })
+        .eq('id', selectedUser.id);
+
+      if (error) throw error;
+
+      toast.success(`₹${amount} added to ${selectedUser.email}`);
+      setSelectedUser(null);
+      setAddAmount('');
+      fetchUsers();
+      fetchStats();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add balance');
+    }
+  };
+
+  const filteredUsers = users.filter(user =>
+    user.email.toLowerCase().includes(userSearchTerm.toLowerCase())
+  );
+
   const filteredMessages = messages.filter(msg => {
     const matchesSearch = 
       msg.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -297,6 +359,81 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Balance Management */}
+        <Card className="glass-card mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Wallet className="h-5 w-5" />
+              Balance Management
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search users by email..."
+                  value={userSearchTerm}
+                  onChange={(e) => setUserSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button variant="outline" onClick={fetchUsers}>
+                Refresh
+              </Button>
+            </div>
+
+            {usersLoading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map(i => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : filteredUsers.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No users found</p>
+              </div>
+            ) : (
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Current Balance</TableHead>
+                      <TableHead className="w-[120px]">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">{user.email}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="font-mono">
+                            <IndianRupee className="h-3 w-3 mr-1" />
+                            {user.balance.toFixed(2)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="gap-1"
+                            onClick={() => setSelectedUser(user)}
+                          >
+                            <Plus className="h-4 w-4" />
+                            Add ₹
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Messages Table */}
         <Card className="glass-card">
@@ -427,6 +564,42 @@ const AdminDashboard = () => {
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
                 Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Add Balance Dialog */}
+        <AlertDialog open={!!selectedUser} onOpenChange={() => { setSelectedUser(null); setAddAmount(''); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <Wallet className="h-5 w-5" />
+                Add Balance
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Add balance to <strong>{selectedUser?.email}</strong>
+                <br />
+                Current balance: <strong>₹{selectedUser?.balance.toFixed(2)}</strong>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="py-4">
+              <div className="flex items-center gap-2">
+                <IndianRupee className="h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="number"
+                  placeholder="Enter amount"
+                  value={addAmount}
+                  onChange={(e) => setAddAmount(e.target.value)}
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleAddBalance}>
+                Add Balance
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
