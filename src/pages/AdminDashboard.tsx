@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye, Trash2, Wallet, IndianRupee, Plus } from 'lucide-react';
+import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye, Trash2, Wallet, IndianRupee, Plus, Minus } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import {
@@ -76,6 +76,8 @@ const AdminDashboard = () => {
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [addAmount, setAddAmount] = useState('');
+  const [removeUser, setRemoveUser] = useState<UserProfile | null>(null);
+  const [removeAmount, setRemoveAmount] = useState('');
   const [stats, setStats] = useState({
     totalMessages: 0,
     unreadMessages: 0,
@@ -261,6 +263,39 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleRemoveBalance = async () => {
+    if (!removeUser || !removeAmount) return;
+
+    const amount = parseFloat(removeAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('Please enter a valid amount');
+      return;
+    }
+
+    if (amount > removeUser.balance) {
+      toast.error('Cannot remove more than current balance');
+      return;
+    }
+
+    try {
+      const newBalance = removeUser.balance - amount;
+      const { error } = await supabase
+        .from('profiles')
+        .update({ balance: newBalance })
+        .eq('id', removeUser.id);
+
+      if (error) throw error;
+
+      toast.success(`₹${amount} removed from ${removeUser.email}`);
+      setRemoveUser(null);
+      setRemoveAmount('');
+      fetchUsers();
+      fetchStats();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to remove balance');
+    }
+  };
+
   const filteredUsers = users.filter(user =>
     user.email.toLowerCase().includes(userSearchTerm.toLowerCase())
   );
@@ -416,15 +451,26 @@ const AdminDashboard = () => {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className="gap-1"
-                            onClick={() => setSelectedUser(user)}
-                          >
-                            <Plus className="h-4 w-4" />
-                            Add ₹
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="gap-1"
+                              onClick={() => setSelectedUser(user)}
+                            >
+                              <Plus className="h-4 w-4" />
+                              Add
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="gap-1"
+                              onClick={() => setRemoveUser(user)}
+                            >
+                              <Minus className="h-4 w-4" />
+                              Remove
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -600,6 +646,46 @@ const AdminDashboard = () => {
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={handleAddBalance}>
                 Add Balance
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Remove Balance Dialog */}
+        <AlertDialog open={!!removeUser} onOpenChange={() => { setRemoveUser(null); setRemoveAmount(''); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                <Wallet className="h-5 w-5" />
+                Remove Balance
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Remove balance from <strong>{removeUser?.email}</strong>
+                <br />
+                Current balance: <strong>₹{removeUser?.balance.toFixed(2)}</strong>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="py-4">
+              <div className="flex items-center gap-2">
+                <IndianRupee className="h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="number"
+                  placeholder="Enter amount to remove"
+                  value={removeAmount}
+                  onChange={(e) => setRemoveAmount(e.target.value)}
+                  min="0"
+                  max={removeUser?.balance || 0}
+                  step="0.01"
+                />
+              </div>
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleRemoveBalance}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Remove Balance
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
