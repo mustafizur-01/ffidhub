@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye, Trash2, Wallet, IndianRupee, Plus, Minus } from 'lucide-react';
+import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye, Trash2, Wallet, IndianRupee, Plus, Minus, History, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import {
@@ -61,6 +61,19 @@ interface UserProfile {
   balance: number;
 }
 
+interface BalanceTransaction {
+  id: string;
+  profile_id: string;
+  admin_id: string;
+  amount: number;
+  transaction_type: 'add' | 'remove';
+  previous_balance: number;
+  new_balance: number;
+  note: string | null;
+  created_at: string;
+  user_email?: string;
+}
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -68,16 +81,21 @@ const AdminDashboard = () => {
   
   const [messages, setMessages] = useState<MessageWithDetails[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
+  const [transactions, setTransactions] = useState<BalanceTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [usersLoading, setUsersLoading] = useState(true);
+  const [transactionsLoading, setTransactionsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [transactionSearchTerm, setTransactionSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'read' | 'unread'>('all');
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [addAmount, setAddAmount] = useState('');
+  const [addNote, setAddNote] = useState('');
   const [removeUser, setRemoveUser] = useState<UserProfile | null>(null);
   const [removeAmount, setRemoveAmount] = useState('');
+  const [removeNote, setRemoveNote] = useState('');
   const [stats, setStats] = useState({
     totalMessages: 0,
     unreadMessages: 0,
@@ -102,6 +120,7 @@ const AdminDashboard = () => {
       fetchMessages();
       fetchStats();
       fetchUsers();
+      fetchTransactions();
     }
   }, [isAdmin]);
 
@@ -140,6 +159,40 @@ const AdminDashboard = () => {
       console.error('Error fetching users:', error);
     } finally {
       setUsersLoading(false);
+    }
+  };
+
+  const fetchTransactions = async () => {
+    try {
+      setTransactionsLoading(true);
+      const { data: transactionsData, error: transactionsError } = await supabase
+        .from('balance_transactions')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      if (transactionsError) throw transactionsError;
+
+      // Get profile emails
+      const profileIds = [...new Set((transactionsData || []).map(t => t.profile_id))];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, email')
+        .in('id', profileIds);
+
+      const profileMap = new Map(profilesData?.map(p => [p.id, p.email]));
+
+      const enrichedTransactions: BalanceTransaction[] = (transactionsData || []).map(t => ({
+        ...t,
+        transaction_type: t.transaction_type as 'add' | 'remove',
+        user_email: profileMap.get(t.profile_id) || 'Unknown',
+      }));
+
+      setTransactions(enrichedTransactions);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    } finally {
+      setTransactionsLoading(false);
     }
   };
 
@@ -236,7 +289,7 @@ const AdminDashboard = () => {
   };
 
   const handleAddBalance = async () => {
-    if (!selectedUser || !addAmount) return;
+    if (!selectedUser || !addAmount || !user) return;
 
     const amount = parseFloat(addAmount);
     if (isNaN(amount) || amount <= 0) {
@@ -246,25 +299,44 @@ const AdminDashboard = () => {
 
     try {
       const newBalance = selectedUser.balance + amount;
-      const { error } = await supabase
+      
+      // Update balance
+      const { error: updateError } = await supabase
         .from('profiles')
         .update({ balance: newBalance })
         .eq('id', selectedUser.id);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
+
+      // Log transaction
+      const { error: logError } = await supabase
+        .from('balance_transactions')
+        .insert({
+          profile_id: selectedUser.id,
+          admin_id: user.id,
+          amount: amount,
+          transaction_type: 'add',
+          previous_balance: selectedUser.balance,
+          new_balance: newBalance,
+          note: addNote || null,
+        });
+
+      if (logError) console.error('Failed to log transaction:', logError);
 
       toast.success(`₹${amount} added to ${selectedUser.email}`);
       setSelectedUser(null);
       setAddAmount('');
+      setAddNote('');
       fetchUsers();
       fetchStats();
+      fetchTransactions();
     } catch (error: any) {
       toast.error(error.message || 'Failed to add balance');
     }
   };
 
   const handleRemoveBalance = async () => {
-    if (!removeUser || !removeAmount) return;
+    if (!removeUser || !removeAmount || !user) return;
 
     const amount = parseFloat(removeAmount);
     if (isNaN(amount) || amount <= 0) {
@@ -279,22 +351,46 @@ const AdminDashboard = () => {
 
     try {
       const newBalance = removeUser.balance - amount;
-      const { error } = await supabase
+      
+      // Update balance
+      const { error: updateError } = await supabase
         .from('profiles')
         .update({ balance: newBalance })
         .eq('id', removeUser.id);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
+
+      // Log transaction
+      const { error: logError } = await supabase
+        .from('balance_transactions')
+        .insert({
+          profile_id: removeUser.id,
+          admin_id: user.id,
+          amount: amount,
+          transaction_type: 'remove',
+          previous_balance: removeUser.balance,
+          new_balance: newBalance,
+          note: removeNote || null,
+        });
+
+      if (logError) console.error('Failed to log transaction:', logError);
 
       toast.success(`₹${amount} removed from ${removeUser.email}`);
       setRemoveUser(null);
       setRemoveAmount('');
+      setRemoveNote('');
       fetchUsers();
       fetchStats();
+      fetchTransactions();
     } catch (error: any) {
       toast.error(error.message || 'Failed to remove balance');
     }
   };
+
+  const filteredTransactions = transactions.filter(t =>
+    t.user_email?.toLowerCase().includes(transactionSearchTerm.toLowerCase()) ||
+    t.note?.toLowerCase().includes(transactionSearchTerm.toLowerCase())
+  );
 
   const filteredUsers = users.filter(user =>
     user.email.toLowerCase().includes(userSearchTerm.toLowerCase())
@@ -481,6 +577,100 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
+        {/* Transaction History */}
+        <Card className="glass-card mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <History className="h-5 w-5" />
+              Transaction History
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by email or note..."
+                  value={transactionSearchTerm}
+                  onChange={(e) => setTransactionSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button variant="outline" onClick={fetchTransactions}>
+                Refresh
+              </Button>
+            </div>
+
+            {transactionsLoading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map(i => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : filteredTransactions.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No transactions found</p>
+              </div>
+            ) : (
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Type</TableHead>
+                      <TableHead>User</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Previous</TableHead>
+                      <TableHead>New</TableHead>
+                      <TableHead>Note</TableHead>
+                      <TableHead>Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredTransactions.map((transaction) => (
+                      <TableRow key={transaction.id}>
+                        <TableCell>
+                          {transaction.transaction_type === 'add' ? (
+                            <Badge className="bg-green-500/20 text-green-500 border-green-500/30">
+                              <ArrowUpCircle className="h-3 w-3 mr-1" />
+                              Add
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-red-500/20 text-red-500 border-red-500/30">
+                              <ArrowDownCircle className="h-3 w-3 mr-1" />
+                              Remove
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-medium text-sm">
+                          {transaction.user_email}
+                        </TableCell>
+                        <TableCell>
+                          <span className={transaction.transaction_type === 'add' ? 'text-green-500' : 'text-red-500'}>
+                            {transaction.transaction_type === 'add' ? '+' : '-'}₹{transaction.amount.toFixed(2)}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          ₹{transaction.previous_balance.toFixed(2)}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          ₹{transaction.new_balance.toFixed(2)}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground max-w-[150px] truncate">
+                          {transaction.note || '-'}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {format(new Date(transaction.created_at), 'MMM d, yyyy HH:mm')}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Messages Table */}
         <Card className="glass-card">
           <CardHeader>
@@ -616,7 +806,7 @@ const AdminDashboard = () => {
         </AlertDialog>
 
         {/* Add Balance Dialog */}
-        <AlertDialog open={!!selectedUser} onOpenChange={() => { setSelectedUser(null); setAddAmount(''); }}>
+        <AlertDialog open={!!selectedUser} onOpenChange={() => { setSelectedUser(null); setAddAmount(''); setAddNote(''); }}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle className="flex items-center gap-2">
@@ -629,7 +819,7 @@ const AdminDashboard = () => {
                 Current balance: <strong>₹{selectedUser?.balance.toFixed(2)}</strong>
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <div className="py-4">
+            <div className="py-4 space-y-4">
               <div className="flex items-center gap-2">
                 <IndianRupee className="h-4 w-4 text-muted-foreground" />
                 <Input
@@ -641,6 +831,11 @@ const AdminDashboard = () => {
                   step="0.01"
                 />
               </div>
+              <Input
+                placeholder="Note (optional)"
+                value={addNote}
+                onChange={(e) => setAddNote(e.target.value)}
+              />
             </div>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -652,7 +847,7 @@ const AdminDashboard = () => {
         </AlertDialog>
 
         {/* Remove Balance Dialog */}
-        <AlertDialog open={!!removeUser} onOpenChange={() => { setRemoveUser(null); setRemoveAmount(''); }}>
+        <AlertDialog open={!!removeUser} onOpenChange={() => { setRemoveUser(null); setRemoveAmount(''); setRemoveNote(''); }}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle className="flex items-center gap-2 text-destructive">
@@ -665,7 +860,7 @@ const AdminDashboard = () => {
                 Current balance: <strong>₹{removeUser?.balance.toFixed(2)}</strong>
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <div className="py-4">
+            <div className="py-4 space-y-4">
               <div className="flex items-center gap-2">
                 <IndianRupee className="h-4 w-4 text-muted-foreground" />
                 <Input
@@ -678,6 +873,11 @@ const AdminDashboard = () => {
                   step="0.01"
                 />
               </div>
+              <Input
+                placeholder="Note (optional)"
+                value={removeNote}
+                onChange={(e) => setRemoveNote(e.target.value)}
+              />
             </div>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>

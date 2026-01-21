@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      balance_transactions: {
+        Row: {
+          admin_id: string
+          amount: number
+          created_at: string
+          id: string
+          new_balance: number
+          note: string | null
+          previous_balance: number
+          profile_id: string
+          transaction_type: string
+        }
+        Insert: {
+          admin_id: string
+          amount: number
+          created_at?: string
+          id?: string
+          new_balance: number
+          note?: string | null
+          previous_balance: number
+          profile_id: string
+          transaction_type: string
+        }
+        Update: {
+          admin_id?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          new_balance?: number
+          note?: string | null
+          previous_balance?: number
+          profile_id?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "balance_transactions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       id_listings: {
         Row: {
           binded_email: string | null
