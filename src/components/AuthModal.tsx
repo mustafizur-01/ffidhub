@@ -112,6 +112,17 @@ const AuthModal = ({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) =>
     setIsGoogleLoading(false);
   };
 
+  const handleAppleSignIn = async () => {
+    setIsAppleLoading(true);
+    const result = await lovable.auth.signInWithOAuth("apple", {
+      redirect_uri: window.location.origin,
+    });
+    if (result?.error) {
+      toast.error('Apple sign-in failed. Please try again.');
+    }
+    setIsAppleLoading(false);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md bg-card border-border">
