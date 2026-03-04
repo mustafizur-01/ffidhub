@@ -52,6 +52,7 @@ const AuthModal = ({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) =>
   const { signIn, signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isAppleLoading, setIsAppleLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   const loginForm = useForm<LoginValues>({
