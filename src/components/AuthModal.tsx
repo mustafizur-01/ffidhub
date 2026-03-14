@@ -172,6 +172,40 @@ const AuthModal = ({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) =>
           </TabsList>
 
           <TabsContent value="login" className="mt-4">
+            {showForgotPassword ? (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">Enter your email and we'll send you a link to reset your password.</p>
+                <Input
+                  type="email"
+                  placeholder="your@email.com"
+                  className="input-gaming"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                />
+                <Button
+                  variant="gaming"
+                  className="w-full"
+                  disabled={isSendingReset}
+                  onClick={handleForgotPassword}
+                >
+                  {isSendingReset ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    'Send Reset Link'
+                  )}
+                </Button>
+                <button
+                  type="button"
+                  className="text-sm text-primary hover:underline w-full text-center"
+                  onClick={() => setShowForgotPassword(false)}
+                >
+                  ← Back to login
+                </button>
+              </div>
+            ) : (
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
                 <FormField
@@ -197,7 +231,16 @@ const AuthModal = ({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) =>
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <div className="flex items-center justify-between">
+                        <FormLabel>Password</FormLabel>
+                        <button
+                          type="button"
+                          className="text-xs text-primary hover:underline"
+                          onClick={() => setShowForgotPassword(true)}
+                        >
+                          Forgot password?
+                        </button>
+                      </div>
                       <FormControl>
                         <Input
                           type="password"
