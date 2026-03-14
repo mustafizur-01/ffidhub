@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -54,6 +55,9 @@ const AuthModal = ({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) =>
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isAppleLoading, setIsAppleLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [isSendingReset, setIsSendingReset] = useState(false);
 
   const loginForm = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -72,6 +76,25 @@ const AuthModal = ({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) =>
       referralCode: '',
     },
   });
+
+  const handleForgotPassword = async () => {
+    if (!forgotEmail || !z.string().email().safeParse(forgotEmail).success) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+    setIsSendingReset(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: window.location.origin + '/reset-password',
+    });
+    setIsSendingReset(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success('Password reset link sent! Check your email 📧');
+      setShowForgotPassword(false);
+      setForgotEmail('');
+    }
+  };
 
   const handleLogin = async (values: LoginValues) => {
     setIsLoading(true);
@@ -132,7 +155,7 @@ const AuthModal = ({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) =>
             <span className="font-display text-xl font-bold text-gradient">FF MAX</span>
           </div>
           <DialogTitle className="text-center">
-            {activeTab === 'login' ? 'Welcome Back!' : 'Join the Market'}
+            {showForgotPassword ? 'Reset Password' : activeTab === 'login' ? 'Welcome Back!' : 'Join the Market'}
           </DialogTitle>
         </DialogHeader>
 
@@ -149,6 +172,40 @@ const AuthModal = ({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) =>
           </TabsList>
 
           <TabsContent value="login" className="mt-4">
+            {showForgotPassword ? (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">Enter your email and we'll send you a link to reset your password.</p>
+                <Input
+                  type="email"
+                  placeholder="your@email.com"
+                  className="input-gaming"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                />
+                <Button
+                  variant="gaming"
+                  className="w-full"
+                  disabled={isSendingReset}
+                  onClick={handleForgotPassword}
+                >
+                  {isSendingReset ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    'Send Reset Link'
+                  )}
+                </Button>
+                <button
+                  type="button"
+                  className="text-sm text-primary hover:underline w-full text-center"
+                  onClick={() => setShowForgotPassword(false)}
+                >
+                  ← Back to login
+                </button>
+              </div>
+            ) : (
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
                 <FormField
@@ -174,7 +231,16 @@ const AuthModal = ({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) =>
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <div className="flex items-center justify-between">
+                        <FormLabel>Password</FormLabel>
+                        <button
+                          type="button"
+                          className="text-xs text-primary hover:underline"
+                          onClick={() => setShowForgotPassword(true)}
+                        >
+                          Forgot password?
+                        </button>
+                      </div>
                       <FormControl>
                         <Input
                           type="password"
@@ -236,6 +302,7 @@ const AuthModal = ({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) =>
                 </Button>
               </form>
             </Form>
+            )}
           </TabsContent>
 
           <TabsContent value="signup" className="mt-4">
