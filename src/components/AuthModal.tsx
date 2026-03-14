@@ -76,6 +76,25 @@ const AuthModal = ({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) =>
     },
   });
 
+  const handleForgotPassword = async () => {
+    if (!forgotEmail || !z.string().email().safeParse(forgotEmail).success) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+    setIsSendingReset(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: window.location.origin + '/reset-password',
+    });
+    setIsSendingReset(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success('Password reset link sent! Check your email 📧');
+      setShowForgotPassword(false);
+      setForgotEmail('');
+    }
+  };
+
   const handleLogin = async (values: LoginValues) => {
     setIsLoading(true);
     const { error } = await signIn(values.email, values.password);
