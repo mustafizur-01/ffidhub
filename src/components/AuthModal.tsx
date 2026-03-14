@@ -54,6 +54,9 @@ const AuthModal = ({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) =>
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isAppleLoading, setIsAppleLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [isSendingReset, setIsSendingReset] = useState(false);
 
   const loginForm = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
