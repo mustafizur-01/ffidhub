@@ -1,40 +1,26 @@
 
 
-## Phone Number Sign-In with OTP Verification
+## Forgot Password / Reset Password Flow
 
 ### Overview
-Add a phone number + OTP sign-in flow to the AuthModal, allowing users to enter their phone number, receive an SMS OTP, and verify it to sign in.
+Add a "Forgot password?" link in the login tab of AuthModal, plus a new `/reset-password` page where users set a new password after clicking the email link.
 
-### Important Consideration
-Supabase Auth supports phone sign-in with OTP natively via `supabase.auth.signInWithOtp({ phone })` and `supabase.auth.verifyOtp({ phone, token, type: 'sms' })`. However, this requires an SMS provider (like Twilio) to be configured on the backend. Since this project uses Lovable Cloud, SMS provider configuration may not be available through the standard tools.
+### Changes
 
-### Database Changes
-- **Profiles table**: The `email` column is currently required (`NOT NULL`). For phone-only users, we need to make `email` nullable or store the phone number. We'll update the `handle_new_user` trigger to handle users who sign up with a phone number (where `email` may be null, using `phone` instead).
-- **Migration**: `ALTER TABLE public.profiles ALTER COLUMN email DROP NOT NULL;` and update the `handle_new_user` function to use `COALESCE(NEW.email, NEW.phone, 'unknown')`.
+**1. `src/components/AuthModal.tsx`**
+- Add a "Forgot password?" view within the login tab
+- When clicked, show an email input form that calls `supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/reset-password' })`
+- Add a "Back to login" link to return to normal login form
 
-### Frontend Changes
+**2. `src/pages/ResetPassword.tsx`** (new)
+- Public page at `/reset-password`
+- On mount, detect `type=recovery` in URL hash (Supabase redirects with this)
+- Show a form with new password + confirm password fields
+- Call `supabase.auth.updateUser({ password })` to set the new password
+- On success, redirect to home page with a success toast
 
-**1. Update `src/components/AuthModal.tsx`**
-- Add a new "Phone" tab or a phone sign-in section within the existing login/signup tabs
-- Two-step flow:
-  - **Step 1**: Phone number input with country code (defaulting to +91 for India based on ₹ currency usage). Submit calls `supabase.auth.signInWithOtp({ phone })`.
-  - **Step 2**: OTP input (6 digits) using the existing `InputOTP` component. Submit calls `supabase.auth.verifyOtp({ phone, token, type: 'sms' })`.
-- Add loading states, error handling, and a "Resend OTP" button.
+**3. `src/App.tsx`**
+- Add `<Route path="/reset-password" element={<ResetPassword />} />`
 
-**2. Update `src/hooks/useAuth.tsx`**
-- Add `signInWithPhone(phone: string)` method that calls `supabase.auth.signInWithOtp({ phone })`.
-- Add `verifyPhoneOtp(phone: string, token: string)` method that calls `supabase.auth.verifyOtp()`.
-
-### UI Flow
-1. User clicks "Continue with Phone" button in the auth modal
-2. Phone number input appears with a country code selector
-3. User enters number and clicks "Send OTP"
-4. OTP input field appears (6 digits using InputOTP component)
-5. User enters OTP and clicks "Verify"
-6. On success, user is signed in and modal closes
-
-### Files to Modify
-- `src/components/AuthModal.tsx` - Add phone sign-in UI with OTP flow
-- `src/hooks/useAuth.tsx` - Add phone auth methods
-- Database migration for profiles table email nullable + trigger update
+### No database or backend changes needed — uses built-in auth password reset functionality.
 
