@@ -302,6 +302,7 @@ const AuthModal = ({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) =>
                 </Button>
               </form>
             </Form>
+            )}
           </TabsContent>
 
           <TabsContent value="signup" className="mt-4">
