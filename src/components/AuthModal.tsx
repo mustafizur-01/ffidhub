@@ -155,7 +155,7 @@ const AuthModal = ({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) =>
             <span className="font-display text-xl font-bold text-gradient">FF MAX</span>
           </div>
           <DialogTitle className="text-center">
-            {activeTab === 'login' ? 'Welcome Back!' : 'Join the Market'}
+            {showForgotPassword ? 'Reset Password' : activeTab === 'login' ? 'Welcome Back!' : 'Join the Market'}
           </DialogTitle>
         </DialogHeader>
 
