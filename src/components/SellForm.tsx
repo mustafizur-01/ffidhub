@@ -34,6 +34,8 @@ const formSchema = z.object({
   key_items: z.string().min(10, 'Please describe key items (at least 10 characters)').max(500),
   price: z.number().min(100, 'Minimum price is ₹100'),
   contact_number: z.string().regex(/^\d{10}$/, 'Enter valid 10-digit WhatsApp number'),
+  account_login_id: z.string().min(1, 'Login ID is required'),
+  account_password: z.string().min(1, 'Password is required'),
   is_email_binded: z.boolean(),
   binded_email: z.string().email('Enter valid email').optional().or(z.literal('')),
   security_code: z.string().optional().or(z.literal('')),
