@@ -58,6 +58,8 @@ const SellForm = () => {
       key_items: '',
       price: 100,
       contact_number: '',
+      account_login_id: '',
+      account_password: '',
       is_email_binded: false,
       binded_email: '',
       security_code: '',
