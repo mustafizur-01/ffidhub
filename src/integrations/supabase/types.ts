@@ -60,6 +60,8 @@ export type Database = {
       }
       id_listings: {
         Row: {
+          account_login_id: string | null
+          account_password: string | null
           binded_email: string | null
           contact_number: string
           created_at: string
@@ -75,6 +77,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          account_login_id?: string | null
+          account_password?: string | null
           binded_email?: string | null
           contact_number: string
           created_at?: string
@@ -90,6 +94,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          account_login_id?: string | null
+          account_password?: string | null
           binded_email?: string | null
           contact_number?: string
           created_at?: string
