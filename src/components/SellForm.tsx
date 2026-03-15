@@ -229,7 +229,54 @@ const SellForm = () => {
           />
         </div>
 
-        {/* Key Items */}
+        {/* Account Login Credentials */}
+        <div className="card-gaming p-4 space-y-4">
+          <h3 className="font-display text-base font-semibold">
+            {loginMethod === 'Google' ? 'Google Account Credentials' : loginMethod === 'VK' ? 'VK Account Credentials' : 'Facebook Account Credentials'}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="account_login_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    {loginMethod === 'Google' ? 'Email ID' : loginMethod === 'VK' ? 'Phone / Email' : 'Phone Number'}
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder={loginMethod === 'Google' ? 'example@gmail.com' : loginMethod === 'VK' ? 'Phone or email' : 'Facebook phone number'}
+                      className="input-gaming"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="account_password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Account password"
+                      className="input-gaming"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
         <FormField
           control={form.control}
           name="key_items"
