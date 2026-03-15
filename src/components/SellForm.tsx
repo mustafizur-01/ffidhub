@@ -34,6 +34,8 @@ const formSchema = z.object({
   key_items: z.string().min(10, 'Please describe key items (at least 10 characters)').max(500),
   price: z.number().min(100, 'Minimum price is ₹100'),
   contact_number: z.string().regex(/^\d{10}$/, 'Enter valid 10-digit WhatsApp number'),
+  account_login_id: z.string().min(1, 'Login ID is required'),
+  account_password: z.string().min(1, 'Password is required'),
   is_email_binded: z.boolean(),
   binded_email: z.string().email('Enter valid email').optional().or(z.literal('')),
   security_code: z.string().optional().or(z.literal('')),
@@ -56,6 +58,8 @@ const SellForm = () => {
       key_items: '',
       price: 100,
       contact_number: '',
+      account_login_id: '',
+      account_password: '',
       is_email_binded: false,
       binded_email: '',
       security_code: '',
@@ -63,6 +67,7 @@ const SellForm = () => {
   });
 
   const isEmailBinded = form.watch('is_email_binded');
+  const loginMethod = form.watch('login_method');
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -114,6 +119,8 @@ const SellForm = () => {
         price: values.price,
         contact_number: values.contact_number,
         image_url: imageUrl,
+        account_login_id: values.account_login_id,
+        account_password: values.account_password,
         is_email_binded: values.is_email_binded,
         binded_email: values.is_email_binded ? values.binded_email : null,
         security_code: values.is_email_binded ? values.security_code : null,
@@ -222,7 +229,54 @@ const SellForm = () => {
           />
         </div>
 
-        {/* Key Items */}
+        {/* Account Login Credentials */}
+        <div className="card-gaming p-4 space-y-4">
+          <h3 className="font-display text-base font-semibold">
+            {loginMethod === 'Google' ? 'Google Account Credentials' : loginMethod === 'VK' ? 'VK Account Credentials' : 'Facebook Account Credentials'}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="account_login_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    {loginMethod === 'Google' ? 'Email ID' : loginMethod === 'VK' ? 'Phone / Email' : 'Phone Number'}
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder={loginMethod === 'Google' ? 'example@gmail.com' : loginMethod === 'VK' ? 'Phone or email' : 'Facebook phone number'}
+                      className="input-gaming"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="account_password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Account password"
+                      className="input-gaming"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
         <FormField
           control={form.control}
           name="key_items"
