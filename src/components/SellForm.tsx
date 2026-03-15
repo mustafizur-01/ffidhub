@@ -119,6 +119,8 @@ const SellForm = () => {
         price: values.price,
         contact_number: values.contact_number,
         image_url: imageUrl,
+        account_login_id: values.account_login_id,
+        account_password: values.account_password,
         is_email_binded: values.is_email_binded,
         binded_email: values.is_email_binded ? values.binded_email : null,
         security_code: values.is_email_binded ? values.security_code : null,
