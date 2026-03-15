@@ -67,6 +67,7 @@ const SellForm = () => {
   });
 
   const isEmailBinded = form.watch('is_email_binded');
+  const loginMethod = form.watch('login_method');
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
