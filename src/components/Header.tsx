@@ -128,6 +128,18 @@ const Header = () => {
                 </Link>
               ))}
               
+              <a
+                href="https://github.com/YOUR_USERNAME/YOUR_REPO/actions"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Button variant="outline" className="w-full justify-start gap-2">
+                  <Download className="h-4 w-4" />
+                  Download APK
+                </Button>
+              </a>
+
               <div className="border-t border-border pt-4 mt-2">
                 {user ? (
                   <UserMenu />
