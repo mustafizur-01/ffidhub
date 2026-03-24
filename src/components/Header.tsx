@@ -61,7 +61,7 @@ const Header = () => {
           {/* Auth Section */}
           <div className="hidden md:flex items-center gap-2">
             <a
-              href="https://github.com/YOUR_USERNAME/YOUR_REPO/actions"
+              href="https://github.com/mustafizur-01/ffidhub/actions"
               target="_blank"
               rel="noopener noreferrer"
             >
