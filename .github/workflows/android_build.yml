@@ -1,0 +1,46 @@
+name: Build Android APK
+on:
+  push:
+    branches: [ main ] # আপনার মেইন ব্রাঞ্চের নাম অনুযায়ী পরিবর্তন করতে পারেন
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Web App
+        run: npm run build
+
+      - name: Install Capacitor
+        run: npm install @capacitor/core @capacitor/cli @capacitor/android
+
+      - name: Initialize Capacitor
+        run: npx cap init "Babu Learn" "com.babulearn.app" --web-dir dist
+
+      - name: Add Android Platform
+        run: npx cap add android
+
+      - name: Copy Web Assets
+        run: npx cap copy android
+
+      - name: Build APK
+        run: |
+          cd android
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: babu-learn-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          
