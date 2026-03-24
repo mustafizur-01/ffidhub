@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Flame, Menu, X, LogIn, MessageCircle } from 'lucide-react';
+import { Flame, Menu, X, LogIn, MessageCircle, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
