@@ -60,6 +60,16 @@ const Header = () => {
 
           {/* Auth Section */}
           <div className="hidden md:flex items-center gap-2">
+            <a
+              href="https://github.com/YOUR_USERNAME/YOUR_REPO/actions"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Download className="h-4 w-4" />
+                Download
+              </Button>
+            </a>
             {loading ? (
               <div className="w-24 h-9 bg-muted animate-pulse rounded-md" />
             ) : user ? (
