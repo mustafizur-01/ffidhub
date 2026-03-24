@@ -1,46 +1,59 @@
 name: Build Android APK
 on:
   push:
-    branches: [ main ] # আপনার মেইন ব্রাঞ্চের নাম অনুযায়ী পরিবর্তন করতে পারেন
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Install dependencies
         run: npm install
 
       - name: Build Web App
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         run: npm run build
 
       - name: Install Capacitor
         run: npm install @capacitor/core @capacitor/cli @capacitor/android
 
       - name: Initialize Capacitor
-        run: npx cap init "Babu Learn" "com.babulearn.app" --web-dir dist
+        run: npx cap init "FF ID Hub" "com.ffidhub.app" --web-dir dist || true
 
       - name: Add Android Platform
-        run: npx cap add android
+        run: npx cap add android || true
 
       - name: Copy Web Assets
         run: npx cap copy android
 
+      - name: Sync Capacitor
+        run: npx cap sync android
+
       - name: Build APK
         run: |
           cd android
+          chmod +x gradlew
           ./gradlew assembleDebug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: babu-learn-apk
+          name: ffidhub-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
-          
