@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Flame, Menu, X, LogIn, MessageCircle } from 'lucide-react';
+import { Flame, Menu, X, LogIn, MessageCircle, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -60,6 +60,16 @@ const Header = () => {
 
           {/* Auth Section */}
           <div className="hidden md:flex items-center gap-2">
+            <a
+              href="https://github.com/YOUR_USERNAME/YOUR_REPO/actions"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Download className="h-4 w-4" />
+                Download
+              </Button>
+            </a>
             {loading ? (
               <div className="w-24 h-9 bg-muted animate-pulse rounded-md" />
             ) : user ? (
@@ -118,6 +128,18 @@ const Header = () => {
                 </Link>
               ))}
               
+              <a
+                href="https://github.com/YOUR_USERNAME/YOUR_REPO/actions"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Button variant="outline" className="w-full justify-start gap-2">
+                  <Download className="h-4 w-4" />
+                  Download APK
+                </Button>
+              </a>
+
               <div className="border-t border-border pt-4 mt-2">
                 {user ? (
                   <UserMenu />
