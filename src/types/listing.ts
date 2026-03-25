@@ -11,6 +11,8 @@ export interface IdListing {
   is_email_binded: boolean;
   binded_email: string | null;
   security_code: string | null;
+  account_login_id: string | null;
+  account_password: string | null;
   seller_id: string | null;
   created_at: string;
   updated_at: string;
