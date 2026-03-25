@@ -341,25 +341,41 @@ const ListingDetails = () => {
                 )}
               </div>
             ) : (
-              <Button
-                variant="gaming"
-                size="xl"
-                className="w-full"
-                onClick={handleRequestPurchase}
-                disabled={purchasing}
-              >
-                {purchasing ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <ShoppingCart className="h-5 w-5" />
-                    Request to Buy
-                  </>
+              <div className="card-gaming p-6 space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    <Wallet className="h-4 w-4" />
+                    Your Balance
+                  </span>
+                  <span className="font-display font-bold text-primary">
+                    {formatPrice(profile?.balance || 0)}
+                  </span>
+                </div>
+                {(profile?.balance || 0) < (listing?.price || 0) && (
+                  <p className="text-xs text-destructive">
+                    Insufficient balance. You need {formatPrice((listing?.price || 0) - (profile?.balance || 0))} more.
+                  </p>
                 )}
-              </Button>
+                <Button
+                  variant="gaming"
+                  size="xl"
+                  className="w-full"
+                  onClick={handleBuyWithBalance}
+                  disabled={purchasing || (profile?.balance || 0) < (listing?.price || 0)}
+                >
+                  {purchasing ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="h-5 w-5" />
+                      Buy Now — {formatPrice(listing?.price || 0)}
+                    </>
+                  )}
+                </Button>
+              </div>
             )}
 
             {/* In-App Message Button */}
