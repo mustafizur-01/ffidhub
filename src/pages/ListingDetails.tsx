@@ -87,29 +87,36 @@ const ListingDetails = () => {
     }
   };
 
-  const handleRequestPurchase = async () => {
+  const handleBuyWithBalance = async () => {
     if (!user) {
       setAuthModalOpen(true);
       return;
     }
 
+    if (!profile) {
+      toast.error('Profile not found. Please try again.');
+      return;
+    }
+
+    if (profile.balance < (listing?.price || 0)) {
+      toast.error(`Insufficient balance! You need ${formatPrice(listing?.price || 0)} but have ${formatPrice(profile.balance)}`);
+      return;
+    }
+
     setPurchasing(true);
     try {
-      const { data, error } = await supabase
-        .from('purchases')
-        .insert({
-          listing_id: id,
-          buyer_id: user.id,
-        })
-        .select()
-        .single();
+      const { data, error } = await supabase.functions.invoke('process-purchase', {
+        body: { listing_id: id },
+      });
 
       if (error) throw error;
+      if (data.error) throw new Error(data.error);
       
-      setPurchase({ id: data.id, status: 'pending' as const });
-      toast.success('Purchase request submitted! Contact seller to arrange payment.');
+      setPurchase({ id: data.purchase.id, status: 'approved' as const });
+      await refreshProfile();
+      toast.success('Purchase successful! Account details are now visible.');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to request purchase');
+      toast.error(error.message || 'Failed to purchase');
     } finally {
       setPurchasing(false);
     }
