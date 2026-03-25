@@ -291,11 +291,42 @@ const ListingDetails = () => {
                     </div>
                   )}
                 </div>
+              ) : canViewSensitiveData ? (
+                <div className="space-y-2 bg-secondary/30 rounded-lg p-4">
+                  <p className="text-xs font-medium text-primary mb-2">🔓 Account Details Unlocked</p>
+                  <Badge variant="secondary" className="flex items-center gap-1 w-fit mb-2">
+                    <ShieldOff className="h-4 w-4" />
+                    Not Email Bound
+                  </Badge>
+                  {listing.account_login_id && (
+                    <p className="text-sm">
+                      <span className="text-muted-foreground">Login ID: </span>
+                      <span className="font-mono font-medium">{listing.account_login_id}</span>
+                    </p>
+                  )}
+                  {listing.account_password && (
+                    <p className="text-sm">
+                      <span className="text-muted-foreground">Password: </span>
+                      <span className="font-mono font-medium">{listing.account_password}</span>
+                    </p>
+                  )}
+                </div>
               ) : (
-                <Badge variant="secondary" className="flex items-center gap-1 w-fit">
-                  <ShieldOff className="h-4 w-4" />
-                  Not Email Bound
-                </Badge>
+                <div>
+                  <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+                    <ShieldOff className="h-4 w-4" />
+                    Not Email Bound
+                  </Badge>
+                  <div className="bg-secondary/50 rounded-lg p-4 flex items-center gap-3 mt-3">
+                    <Lock className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Account Details Hidden</p>
+                      <p className="text-xs text-muted-foreground">
+                        Purchase to unlock account details
+                      </p>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
 
