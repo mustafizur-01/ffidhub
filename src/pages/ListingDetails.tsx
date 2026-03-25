@@ -252,22 +252,33 @@ const ListingDetails = () => {
                   
                   {/* Protected Data - Only visible after payment approval */}
                   {canViewSensitiveData ? (
-                    <>
+                    <div className="space-y-2 bg-secondary/30 rounded-lg p-4">
+                      <p className="text-xs font-medium text-primary mb-2">🔓 Account Details Unlocked</p>
                       {listing.binded_email && (
                         <p className="text-sm">
-                          <span className="text-muted-foreground">Bound to: </span>
+                          <span className="text-muted-foreground">Bound Email: </span>
                           <span className="font-medium">{listing.binded_email}</span>
                         </p>
                       )}
                       {listing.security_code && (
                         <p className="text-sm">
                           <span className="text-muted-foreground">Security Code: </span>
-                          <span className="font-mono font-medium">
-                            {listing.security_code}
-                          </span>
+                          <span className="font-mono font-medium">{listing.security_code}</span>
                         </p>
                       )}
-                    </>
+                      {listing.account_login_id && (
+                        <p className="text-sm">
+                          <span className="text-muted-foreground">Login ID: </span>
+                          <span className="font-mono font-medium">{listing.account_login_id}</span>
+                        </p>
+                      )}
+                      {listing.account_password && (
+                        <p className="text-sm">
+                          <span className="text-muted-foreground">Password: </span>
+                          <span className="font-mono font-medium">{listing.account_password}</span>
+                        </p>
+                      )}
+                    </div>
                   ) : (
                     <div className="bg-secondary/50 rounded-lg p-4 flex items-center gap-3">
                       <Lock className="h-5 w-5 text-muted-foreground" />
