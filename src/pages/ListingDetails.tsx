@@ -285,7 +285,7 @@ const ListingDetails = () => {
                       <div>
                         <p className="text-sm font-medium">Account Details Hidden</p>
                         <p className="text-xs text-muted-foreground">
-                          Email & security code visible after payment approval
+                          Purchase to unlock account details
                         </p>
                       </div>
                     </div>
