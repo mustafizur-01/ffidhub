@@ -32,7 +32,7 @@ interface Purchase {
 
 const ListingDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const [listing, setListing] = useState<IdListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchase, setPurchase] = useState<Purchase | null>(null);
