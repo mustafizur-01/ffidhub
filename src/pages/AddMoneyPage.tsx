@@ -116,9 +116,9 @@ const AddMoneyPage = () => {
               <img src="/images/phonepe-qr.jpg" alt="PhonePe QR Code" className="w-56 h-56 object-contain" />
             </div>
             <div className="text-center text-sm text-muted-foreground space-y-1">
-              <p>১. উপরের QR কোড স্ক্যান করুন</p>
-              <p>২. পেমেন্ট করুন</p>
-              <p>৩. Transaction ID / UTR নম্বর নিচে দিন</p>
+              <p>1. Scan the QR code above</p>
+              <p>2. Make the payment</p>
+              <p>3. Enter the Transaction ID / UTR below</p>
             </div>
           </CardContent>
         </Card>
