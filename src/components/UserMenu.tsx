@@ -84,6 +84,13 @@ const UserMenu = () => {
           </span>
         </DropdownMenuItem>
 
+        <Link to="/add-money">
+          <DropdownMenuItem className="cursor-pointer text-green-400">
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Add Money
+          </DropdownMenuItem>
+        </Link>
+
         {/* Referral Code */}
         <DropdownMenuItem onClick={handleCopyReferralCode} className="cursor-pointer">
           <span className="flex items-center gap-2">
