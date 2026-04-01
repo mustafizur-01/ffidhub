@@ -137,7 +137,7 @@ const AddMoneyPage = () => {
                 <label className="text-sm text-muted-foreground mb-1 block">Amount (₹)</label>
                 <Input
                   type="number"
-                  placeholder="যেমন: 100"
+                  placeholder="e.g. 100"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   min="1"
