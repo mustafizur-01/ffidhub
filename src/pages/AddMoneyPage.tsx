@@ -55,7 +55,7 @@ const AddMoneyPage = () => {
       return;
     }
     if (!utrNumber.trim()) {
-      toast.error('Transaction ID / UTR দিন');
+      toast.error('Please enter Transaction ID / UTR');
       return;
     }
 
