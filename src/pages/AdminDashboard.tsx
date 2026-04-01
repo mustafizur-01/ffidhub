@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye, Trash2, Wallet, IndianRupee, Plus, Minus, History, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye, Trash2, Wallet, IndianRupee, Plus, Minus, History, ArrowUpCircle, ArrowDownCircle, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import {
@@ -96,11 +96,14 @@ const AdminDashboard = () => {
   const [removeUser, setRemoveUser] = useState<UserProfile | null>(null);
   const [removeAmount, setRemoveAmount] = useState('');
   const [removeNote, setRemoveNote] = useState('');
+  const [depositRequests, setDepositRequests] = useState<any[]>([]);
+  const [depositsLoading, setDepositsLoading] = useState(true);
   const [stats, setStats] = useState({
     totalMessages: 0,
     unreadMessages: 0,
     totalListings: 0,
     totalUsers: 0,
+    pendingDeposits: 0,
   });
 
   useEffect(() => {
@@ -121,15 +124,17 @@ const AdminDashboard = () => {
       fetchStats();
       fetchUsers();
       fetchTransactions();
+      fetchDepositRequests();
     }
   }, [isAdmin]);
 
   const fetchStats = async () => {
     try {
-      const [messagesResult, listingsResult, profilesResult] = await Promise.all([
+      const [messagesResult, listingsResult, profilesResult, depositsResult] = await Promise.all([
         supabase.from('messages').select('id, read', { count: 'exact' }),
         supabase.from('id_listings').select('id', { count: 'exact' }),
         supabase.from('profiles').select('id', { count: 'exact' }),
+        supabase.from('deposit_requests').select('id', { count: 'exact' }).eq('status', 'pending'),
       ]);
 
       const unreadCount = messagesResult.data?.filter(m => !m.read).length || 0;
@@ -139,6 +144,7 @@ const AdminDashboard = () => {
         unreadMessages: unreadCount,
         totalListings: listingsResult.count || 0,
         totalUsers: profilesResult.count || 0,
+        pendingDeposits: depositsResult.count || 0,
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -387,6 +393,56 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchDepositRequests = async () => {
+    try {
+      setDepositsLoading(true);
+      const { data, error } = await supabase
+        .from('deposit_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      const enriched = await Promise.all((data || []).map(async (d: any) => {
+        const { data: profile } = await supabase.from('profiles').select('email').eq('user_id', d.user_id).maybeSingle();
+        return { ...d, user_email: profile?.email || 'Unknown' };
+      }));
+      setDepositRequests(enriched);
+    } catch (error) {
+      console.error('Error fetching deposit requests:', error);
+    } finally {
+      setDepositsLoading(false);
+    }
+  };
+
+  const handleApproveDeposit = async (deposit: any) => {
+    if (!user) return;
+    try {
+      const { data: profile, error: profileError } = await supabase.from('profiles').select('id, balance').eq('user_id', deposit.user_id).single();
+      if (profileError || !profile) throw new Error('Profile not found');
+      const newBalance = profile.balance + Number(deposit.amount);
+      await supabase.from('profiles').update({ balance: newBalance }).eq('id', profile.id);
+      await supabase.from('balance_transactions').insert({
+        profile_id: profile.id, admin_id: user.id, amount: Number(deposit.amount),
+        transaction_type: 'add', previous_balance: profile.balance, new_balance: newBalance,
+        note: `Deposit approved (UTR: ${deposit.utr_number})`,
+      });
+      await supabase.from('deposit_requests').update({ status: 'approved' }).eq('id', deposit.id);
+      toast.success(`₹${deposit.amount} approved for ${deposit.user_email}`);
+      fetchDepositRequests(); fetchUsers(); fetchStats(); fetchTransactions();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to approve deposit');
+    }
+  };
+
+  const handleRejectDeposit = async (deposit: any) => {
+    try {
+      await supabase.from('deposit_requests').update({ status: 'rejected', admin_note: 'Rejected by admin' }).eq('id', deposit.id);
+      toast.success('Deposit request rejected');
+      fetchDepositRequests(); fetchStats();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to reject deposit');
+    }
+  };
+
   const filteredTransactions = transactions.filter(t =>
     t.user_email?.toLowerCase().includes(transactionSearchTerm.toLowerCase()) ||
     t.note?.toLowerCase().includes(transactionSearchTerm.toLowerCase())
@@ -490,6 +546,71 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Pending Deposits Stat */}
+        
+
+        {/* Deposit Requests */}
+        <Card className="glass-card mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-yellow-500" />
+              Deposit Requests
+              {stats.pendingDeposits > 0 && (
+                <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">{stats.pendingDeposits} pending</Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {depositsLoading ? (
+              <Skeleton className="h-32" />
+            ) : depositRequests.length === 0 ? (
+              <p className="text-center text-muted-foreground py-4">No deposit requests</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>UTR</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {depositRequests.map((d: any) => (
+                      <TableRow key={d.id}>
+                        <TableCell className="text-sm">{d.user_email}</TableCell>
+                        <TableCell className="font-bold">₹{d.amount}</TableCell>
+                        <TableCell className="font-mono text-xs">{d.utr_number}</TableCell>
+                        <TableCell>
+                          {d.status === 'approved' && <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Approved</Badge>}
+                          {d.status === 'rejected' && <Badge variant="destructive">Rejected</Badge>}
+                          {d.status === 'pending' && <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Pending</Badge>}
+                        </TableCell>
+                        <TableCell className="text-xs">{format(new Date(d.created_at), 'dd MMM yyyy, hh:mm a')}</TableCell>
+                        <TableCell>
+                          {d.status === 'pending' && (
+                            <div className="flex gap-2">
+                              <Button size="sm" onClick={() => handleApproveDeposit(d)} className="bg-green-600 hover:bg-green-700 text-white">
+                                <CheckCircle className="h-3 w-3 mr-1" /> Approve
+                              </Button>
+                              <Button size="sm" variant="destructive" onClick={() => handleRejectDeposit(d)}>
+                                <XCircle className="h-3 w-3 mr-1" /> Reject
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Balance Management */}
         <Card className="glass-card mb-8">

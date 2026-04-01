@@ -8,6 +8,7 @@ import {
   ChevronDown,
   Package,
   Shield,
+  PlusCircle,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -82,6 +83,13 @@ const UserMenu = () => {
             {formatBalance(profile?.balance || 0)}
           </span>
         </DropdownMenuItem>
+
+        <Link to="/add-money">
+          <DropdownMenuItem className="cursor-pointer text-green-400">
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Add Money
+          </DropdownMenuItem>
+        </Link>
 
         {/* Referral Code */}
         <DropdownMenuItem onClick={handleCopyReferralCode} className="cursor-pointer">
