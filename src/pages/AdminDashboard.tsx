@@ -96,11 +96,14 @@ const AdminDashboard = () => {
   const [removeUser, setRemoveUser] = useState<UserProfile | null>(null);
   const [removeAmount, setRemoveAmount] = useState('');
   const [removeNote, setRemoveNote] = useState('');
+  const [depositRequests, setDepositRequests] = useState<any[]>([]);
+  const [depositsLoading, setDepositsLoading] = useState(true);
   const [stats, setStats] = useState({
     totalMessages: 0,
     unreadMessages: 0,
     totalListings: 0,
     totalUsers: 0,
+    pendingDeposits: 0,
   });
 
   useEffect(() => {
