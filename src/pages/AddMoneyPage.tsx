@@ -108,7 +108,7 @@ const AddMoneyPage = () => {
           <CardHeader className="text-center pb-2">
             <CardTitle className="flex items-center justify-center gap-2 text-lg">
               <QrCode className="h-5 w-5 text-primary" />
-              PhonePe দিয়ে পেমেন্ট করুন
+              Pay with PhonePe
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-4">
