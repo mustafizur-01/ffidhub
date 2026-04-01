@@ -130,10 +130,11 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const [messagesResult, listingsResult, profilesResult] = await Promise.all([
+      const [messagesResult, listingsResult, profilesResult, depositsResult] = await Promise.all([
         supabase.from('messages').select('id, read', { count: 'exact' }),
         supabase.from('id_listings').select('id', { count: 'exact' }),
         supabase.from('profiles').select('id', { count: 'exact' }),
+        supabase.from('deposit_requests').select('id', { count: 'exact' }).eq('status', 'pending'),
       ]);
 
       const unreadCount = messagesResult.data?.filter(m => !m.read).length || 0;
@@ -143,6 +144,7 @@ const AdminDashboard = () => {
         unreadMessages: unreadCount,
         totalListings: listingsResult.count || 0,
         totalUsers: profilesResult.count || 0,
+        pendingDeposits: depositsResult.count || 0,
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
