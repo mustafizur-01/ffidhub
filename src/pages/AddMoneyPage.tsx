@@ -169,7 +169,7 @@ const AddMoneyPage = () => {
             {depositsLoading ? (
               <p className="text-center text-muted-foreground py-4">Loading...</p>
             ) : deposits.length === 0 ? (
-              <p className="text-center text-muted-foreground py-4">কোনো deposit request নেই</p>
+              <p className="text-center text-muted-foreground py-4">No deposit requests yet</p>
             ) : (
               <div className="space-y-3">
                 {deposits.map((d) => (
