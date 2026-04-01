@@ -58,6 +58,39 @@ export type Database = {
           },
         ]
       }
+      deposit_requests: {
+        Row: {
+          admin_note: string | null
+          amount: number
+          created_at: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+          utr_number: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount: number
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          utr_number: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: number
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          utr_number?: string
+        }
+        Relationships: []
+      }
       id_listings: {
         Row: {
           account_login_id: string | null
