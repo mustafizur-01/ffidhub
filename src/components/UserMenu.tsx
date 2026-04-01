@@ -8,6 +8,7 @@ import {
   ChevronDown,
   Package,
   Shield,
+  PlusCircle,
 } from 'lucide-react';
 import {
   DropdownMenu,
