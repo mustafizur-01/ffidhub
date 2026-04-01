@@ -147,7 +147,7 @@ const AddMoneyPage = () => {
               <div>
                 <label className="text-sm text-muted-foreground mb-1 block">Transaction ID / UTR Number</label>
                 <Input
-                  placeholder="পেমেন্ট করার পরে UTR নম্বর দিন"
+                  placeholder="Enter UTR number after payment"
                   value={utrNumber}
                   onChange={(e) => setUtrNumber(e.target.value)}
                 />
