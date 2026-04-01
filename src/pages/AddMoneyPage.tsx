@@ -51,11 +51,11 @@ const AddMoneyPage = () => {
     e.preventDefault();
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) {
-      toast.error('সঠিক amount দিন');
+      toast.error('Please enter a valid amount');
       return;
     }
     if (!utrNumber.trim()) {
-      toast.error('Transaction ID / UTR দিন');
+      toast.error('Please enter Transaction ID / UTR');
       return;
     }
 
@@ -67,9 +67,9 @@ const AddMoneyPage = () => {
     });
 
     if (error) {
-      toast.error('সমস্যা হয়েছে, আবার চেষ্টা করুন');
+      toast.error('Something went wrong, please try again');
     } else {
-      toast.success('Deposit request পাঠানো হয়েছে! Admin approve করলে balance যোগ হবে।');
+      toast.success('Deposit request submitted! Balance will be added after admin approval.');
       setAmount('');
       setUtrNumber('');
       fetchDeposits();
@@ -108,7 +108,7 @@ const AddMoneyPage = () => {
           <CardHeader className="text-center pb-2">
             <CardTitle className="flex items-center justify-center gap-2 text-lg">
               <QrCode className="h-5 w-5 text-primary" />
-              PhonePe দিয়ে পেমেন্ট করুন
+              Pay with PhonePe
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-4">
@@ -116,9 +116,9 @@ const AddMoneyPage = () => {
               <img src="/images/phonepe-qr.jpg" alt="PhonePe QR Code" className="w-56 h-56 object-contain" />
             </div>
             <div className="text-center text-sm text-muted-foreground space-y-1">
-              <p>১. উপরের QR কোড স্ক্যান করুন</p>
-              <p>২. পেমেন্ট করুন</p>
-              <p>৩. Transaction ID / UTR নম্বর নিচে দিন</p>
+              <p>1. Scan the QR code above</p>
+              <p>2. Make the payment</p>
+              <p>3. Enter the Transaction ID / UTR below</p>
             </div>
           </CardContent>
         </Card>
@@ -137,7 +137,7 @@ const AddMoneyPage = () => {
                 <label className="text-sm text-muted-foreground mb-1 block">Amount (₹)</label>
                 <Input
                   type="number"
-                  placeholder="যেমন: 100"
+                  placeholder="e.g. 100"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   min="1"
@@ -147,7 +147,7 @@ const AddMoneyPage = () => {
               <div>
                 <label className="text-sm text-muted-foreground mb-1 block">Transaction ID / UTR Number</label>
                 <Input
-                  placeholder="পেমেন্ট করার পরে UTR নম্বর দিন"
+                  placeholder="Enter UTR number after payment"
                   value={utrNumber}
                   onChange={(e) => setUtrNumber(e.target.value)}
                 />
@@ -163,13 +163,13 @@ const AddMoneyPage = () => {
         {/* Deposit History */}
         <Card className="border-primary/20 bg-card">
           <CardHeader>
-            <CardTitle className="text-lg">আমার Deposit History</CardTitle>
+            <CardTitle className="text-lg">My Deposit History</CardTitle>
           </CardHeader>
           <CardContent>
             {depositsLoading ? (
               <p className="text-center text-muted-foreground py-4">Loading...</p>
             ) : deposits.length === 0 ? (
-              <p className="text-center text-muted-foreground py-4">কোনো deposit request নেই</p>
+              <p className="text-center text-muted-foreground py-4">No deposit requests yet</p>
             ) : (
               <div className="space-y-3">
                 {deposits.map((d) => (
