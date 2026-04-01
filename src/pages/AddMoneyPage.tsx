@@ -51,7 +51,7 @@ const AddMoneyPage = () => {
     e.preventDefault();
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) {
-      toast.error('সঠিক amount দিন');
+      toast.error('Please enter a valid amount');
       return;
     }
     if (!utrNumber.trim()) {
