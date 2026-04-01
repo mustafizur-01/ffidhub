@@ -11,6 +11,7 @@ import ProfilePage from "./pages/ProfilePage";
 import SellerDashboard from "./pages/SellerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ResetPassword from "./pages/ResetPassword";
+import AddMoneyPage from "./pages/AddMoneyPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
