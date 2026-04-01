@@ -163,7 +163,7 @@ const AddMoneyPage = () => {
         {/* Deposit History */}
         <Card className="border-primary/20 bg-card">
           <CardHeader>
-            <CardTitle className="text-lg">আমার Deposit History</CardTitle>
+            <CardTitle className="text-lg">My Deposit History</CardTitle>
           </CardHeader>
           <CardContent>
             {depositsLoading ? (
