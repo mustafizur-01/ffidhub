@@ -547,6 +547,71 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
+        {/* Pending Deposits Stat */}
+        
+
+        {/* Deposit Requests */}
+        <Card className="glass-card mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-yellow-500" />
+              Deposit Requests
+              {stats.pendingDeposits > 0 && (
+                <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">{stats.pendingDeposits} pending</Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {depositsLoading ? (
+              <Skeleton className="h-32" />
+            ) : depositRequests.length === 0 ? (
+              <p className="text-center text-muted-foreground py-4">No deposit requests</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>UTR</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {depositRequests.map((d: any) => (
+                      <TableRow key={d.id}>
+                        <TableCell className="text-sm">{d.user_email}</TableCell>
+                        <TableCell className="font-bold">₹{d.amount}</TableCell>
+                        <TableCell className="font-mono text-xs">{d.utr_number}</TableCell>
+                        <TableCell>
+                          {d.status === 'approved' && <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Approved</Badge>}
+                          {d.status === 'rejected' && <Badge variant="destructive">Rejected</Badge>}
+                          {d.status === 'pending' && <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Pending</Badge>}
+                        </TableCell>
+                        <TableCell className="text-xs">{format(new Date(d.created_at), 'dd MMM yyyy, hh:mm a')}</TableCell>
+                        <TableCell>
+                          {d.status === 'pending' && (
+                            <div className="flex gap-2">
+                              <Button size="sm" onClick={() => handleApproveDeposit(d)} className="bg-green-600 hover:bg-green-700 text-white">
+                                <CheckCircle className="h-3 w-3 mr-1" /> Approve
+                              </Button>
+                              <Button size="sm" variant="destructive" onClick={() => handleRejectDeposit(d)}>
+                                <XCircle className="h-3 w-3 mr-1" /> Reject
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Balance Management */}
         <Card className="glass-card mb-8">
           <CardHeader>
