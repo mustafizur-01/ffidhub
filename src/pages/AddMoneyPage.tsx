@@ -67,9 +67,9 @@ const AddMoneyPage = () => {
     });
 
     if (error) {
-      toast.error('সমস্যা হয়েছে, আবার চেষ্টা করুন');
+      toast.error('Something went wrong, please try again');
     } else {
-      toast.success('Deposit request পাঠানো হয়েছে! Admin approve করলে balance যোগ হবে।');
+      toast.success('Deposit request submitted! Balance will be added after admin approval.');
       setAmount('');
       setUtrNumber('');
       fetchDeposits();
