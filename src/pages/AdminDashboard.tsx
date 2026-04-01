@@ -393,6 +393,56 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchDepositRequests = async () => {
+    try {
+      setDepositsLoading(true);
+      const { data, error } = await supabase
+        .from('deposit_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      const enriched = await Promise.all((data || []).map(async (d: any) => {
+        const { data: profile } = await supabase.from('profiles').select('email').eq('user_id', d.user_id).maybeSingle();
+        return { ...d, user_email: profile?.email || 'Unknown' };
+      }));
+      setDepositRequests(enriched);
+    } catch (error) {
+      console.error('Error fetching deposit requests:', error);
+    } finally {
+      setDepositsLoading(false);
+    }
+  };
+
+  const handleApproveDeposit = async (deposit: any) => {
+    if (!user) return;
+    try {
+      const { data: profile, error: profileError } = await supabase.from('profiles').select('id, balance').eq('user_id', deposit.user_id).single();
+      if (profileError || !profile) throw new Error('Profile not found');
+      const newBalance = profile.balance + Number(deposit.amount);
+      await supabase.from('profiles').update({ balance: newBalance }).eq('id', profile.id);
+      await supabase.from('balance_transactions').insert({
+        profile_id: profile.id, admin_id: user.id, amount: Number(deposit.amount),
+        transaction_type: 'add', previous_balance: profile.balance, new_balance: newBalance,
+        note: `Deposit approved (UTR: ${deposit.utr_number})`,
+      });
+      await supabase.from('deposit_requests').update({ status: 'approved' }).eq('id', deposit.id);
+      toast.success(`₹${deposit.amount} approved for ${deposit.user_email}`);
+      fetchDepositRequests(); fetchUsers(); fetchStats(); fetchTransactions();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to approve deposit');
+    }
+  };
+
+  const handleRejectDeposit = async (deposit: any) => {
+    try {
+      await supabase.from('deposit_requests').update({ status: 'rejected', admin_note: 'Rejected by admin' }).eq('id', deposit.id);
+      toast.success('Deposit request rejected');
+      fetchDepositRequests(); fetchStats();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to reject deposit');
+    }
+  };
+
   const filteredTransactions = transactions.filter(t =>
     t.user_email?.toLowerCase().includes(transactionSearchTerm.toLowerCase()) ||
     t.note?.toLowerCase().includes(transactionSearchTerm.toLowerCase())
