@@ -9,6 +9,7 @@ import {
   Package,
   Shield,
   PlusCircle,
+  ShoppingBag,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -118,6 +119,13 @@ const UserMenu = () => {
           <DropdownMenuItem className="cursor-pointer">
             <Package className="h-4 w-4 mr-2" />
             My Listings
+          </DropdownMenuItem>
+        </Link>
+
+        <Link to="/my-purchases">
+          <DropdownMenuItem className="cursor-pointer">
+            <ShoppingBag className="h-4 w-4 mr-2" />
+            My Purchases
           </DropdownMenuItem>
         </Link>
 
