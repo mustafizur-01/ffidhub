@@ -9,6 +9,7 @@ import {
   Tag,
   Loader2,
   Lock,
+  Copy,
   ShoppingCart,
   Check,
   Clock,
