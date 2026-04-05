@@ -9,6 +9,7 @@ import {
   Package,
   Shield,
   PlusCircle,
+  ShoppingBag,
 } from 'lucide-react';
 import {
   DropdownMenu,
