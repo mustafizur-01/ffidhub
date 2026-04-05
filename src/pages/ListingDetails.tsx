@@ -150,7 +150,8 @@ const ListingDetails = () => {
   };
 
   const isPurchaseApproved = purchase?.status === 'approved';
-  const canViewSensitiveData = isPurchaseApproved;
+  const isOwner = user && listing?.seller_id === user.id;
+  const canViewSensitiveData = isPurchaseApproved || isOwner;
 
   if (loading) {
     return (
