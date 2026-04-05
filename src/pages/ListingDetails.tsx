@@ -9,6 +9,7 @@ import {
   Tag,
   Loader2,
   Lock,
+  Copy,
   ShoppingCart,
   Check,
   Clock,
@@ -150,7 +151,8 @@ const ListingDetails = () => {
   };
 
   const isPurchaseApproved = purchase?.status === 'approved';
-  const canViewSensitiveData = isPurchaseApproved;
+  const isOwner = user && listing?.seller_id === user.id;
+  const canViewSensitiveData = isPurchaseApproved || isOwner;
 
   if (loading) {
     return (
@@ -236,95 +238,71 @@ const ListingDetails = () => {
               </div>
             </div>
 
-            {/* Email Bind Status - Protected Section */}
+            {/* Email Bind Status */}
             <div className="card-gaming p-6">
               <h3 className="font-display text-lg font-bold mb-4 flex items-center gap-2">
                 <Shield className="h-5 w-5 text-primary" />
                 Email Bind Status
               </h3>
-
               {listing.is_email_binded ? (
-                <div className="space-y-3">
-                  <Badge className="bg-gaming-success/90 text-white border-0">
-                    <Shield className="h-4 w-4 mr-1" />
-                    Email Secured
-                  </Badge>
-                  
-                  {/* Protected Data - Only visible after payment approval */}
-                  {canViewSensitiveData ? (
-                    <div className="space-y-2 bg-secondary/30 rounded-lg p-4">
-                      <p className="text-xs font-medium text-primary mb-2">🔓 Account Details Unlocked</p>
-                      {listing.binded_email && (
-                        <p className="text-sm">
-                          <span className="text-muted-foreground">Bound Email: </span>
-                          <span className="font-medium">{listing.binded_email}</span>
-                        </p>
-                      )}
-                      {listing.security_code && (
-                        <p className="text-sm">
-                          <span className="text-muted-foreground">Security Code: </span>
-                          <span className="font-mono font-medium">{listing.security_code}</span>
-                        </p>
-                      )}
-                      {listing.account_login_id && (
-                        <p className="text-sm">
-                          <span className="text-muted-foreground">Login ID: </span>
-                          <span className="font-mono font-medium">{listing.account_login_id}</span>
-                        </p>
-                      )}
-                      {listing.account_password && (
-                        <p className="text-sm">
-                          <span className="text-muted-foreground">Password: </span>
-                          <span className="font-mono font-medium">{listing.account_password}</span>
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="bg-secondary/50 rounded-lg p-4 flex items-center gap-3">
-                      <Lock className="h-5 w-5 text-muted-foreground" />
+                <Badge className="bg-gaming-success/90 text-white border-0">
+                  <Shield className="h-4 w-4 mr-1" />
+                  Email Secured
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+                  <ShieldOff className="h-4 w-4" />
+                  Not Email Bound
+                </Badge>
+              )}
+            </div>
+
+            {/* Account Details - Protected Section */}
+            <div className="card-gaming p-6">
+              <h3 className="font-display text-lg font-bold mb-4 flex items-center gap-2">
+                {canViewSensitiveData ? (
+                  <Shield className="h-5 w-5 text-green-400" />
+                ) : (
+                  <Lock className="h-5 w-5 text-muted-foreground" />
+                )}
+                Account Details
+              </h3>
+
+              {canViewSensitiveData ? (
+                <div className="space-y-3 bg-secondary/30 rounded-lg p-4">
+                  <p className="text-xs font-medium text-green-400 mb-3">🔓 Details Unlocked — Copy and save these!</p>
+                  {[
+                    { label: 'Login ID', value: listing.account_login_id },
+                    { label: 'Password', value: listing.account_password },
+                    { label: 'Bound Email', value: listing.binded_email },
+                    { label: 'Security Code', value: listing.security_code },
+                  ].filter(item => item.value).map((item) => (
+                    <div key={item.label} className="flex items-center justify-between bg-background/50 rounded-md p-3">
                       <div>
-                        <p className="text-sm font-medium">Account Details Hidden</p>
-                        <p className="text-xs text-muted-foreground">
-                          Purchase to unlock account details
-                        </p>
+                        <p className="text-xs text-muted-foreground">{item.label}</p>
+                        <p className="font-mono font-medium text-sm">{item.value}</p>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(item.value!);
+                          toast.success(`${item.label} copied!`);
+                        }}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
                     </div>
-                  )}
-                </div>
-              ) : canViewSensitiveData ? (
-                <div className="space-y-2 bg-secondary/30 rounded-lg p-4">
-                  <p className="text-xs font-medium text-primary mb-2">🔓 Account Details Unlocked</p>
-                  <Badge variant="secondary" className="flex items-center gap-1 w-fit mb-2">
-                    <ShieldOff className="h-4 w-4" />
-                    Not Email Bound
-                  </Badge>
-                  {listing.account_login_id && (
-                    <p className="text-sm">
-                      <span className="text-muted-foreground">Login ID: </span>
-                      <span className="font-mono font-medium">{listing.account_login_id}</span>
-                    </p>
-                  )}
-                  {listing.account_password && (
-                    <p className="text-sm">
-                      <span className="text-muted-foreground">Password: </span>
-                      <span className="font-mono font-medium">{listing.account_password}</span>
-                    </p>
-                  )}
+                  ))}
                 </div>
               ) : (
-                <div>
-                  <Badge variant="secondary" className="flex items-center gap-1 w-fit">
-                    <ShieldOff className="h-4 w-4" />
-                    Not Email Bound
-                  </Badge>
-                  <div className="bg-secondary/50 rounded-lg p-4 flex items-center gap-3 mt-3">
-                    <Lock className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Account Details Hidden</p>
-                      <p className="text-xs text-muted-foreground">
-                        Purchase to unlock account details
-                      </p>
-                    </div>
+                <div className="bg-secondary/50 rounded-lg p-4 flex items-center gap-3">
+                  <Lock className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Account Details Hidden</p>
+                    <p className="text-xs text-muted-foreground">
+                      Purchase to unlock all account details
+                    </p>
                   </div>
                 </div>
               )}
