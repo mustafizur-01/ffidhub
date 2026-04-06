@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const Index = () => {
   const [listings, setListings] = useState<IdListing[]>([]);
+  const [soldListingIds, setSoldListingIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<ListingFilters>({
     search: '',
