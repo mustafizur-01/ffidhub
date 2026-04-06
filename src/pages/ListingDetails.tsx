@@ -49,6 +49,7 @@ const ListingDetails = () => {
   useEffect(() => {
     if (id) {
       fetchListing();
+      checkSoldStatus();
     }
   }, [id]);
 
