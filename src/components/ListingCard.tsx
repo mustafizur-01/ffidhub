@@ -6,9 +6,10 @@ import { Link } from 'react-router-dom';
 
 interface ListingCardProps {
   listing: IdListing;
+  isSold?: boolean;
 }
 
-const ListingCard = ({ listing }: ListingCardProps) => {
+const ListingCard = ({ listing, isSold = false }: ListingCardProps) => {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -18,7 +19,16 @@ const ListingCard = ({ listing }: ListingCardProps) => {
   };
 
   return (
-    <div className="card-gaming card-gaming-hover overflow-hidden group">
+    <div className={`card-gaming card-gaming-hover overflow-hidden group relative ${isSold ? 'opacity-75' : ''}`}>
+      {/* Sold Overlay */}
+      {isSold && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+          <Badge className="bg-destructive text-destructive-foreground text-lg px-4 py-2 font-display font-bold tracking-wider rotate-[-12deg] shadow-lg">
+            SOLD OUT
+          </Badge>
+        </div>
+      )}
+
       {/* Image Section */}
       <div className="relative aspect-video bg-muted overflow-hidden">
         {listing.image_url ? (
@@ -68,9 +78,9 @@ const ListingCard = ({ listing }: ListingCardProps) => {
         </p>
 
         <Link to={`/listing/${listing.id}`}>
-          <Button variant="gaming" className="w-full" size="sm">
+          <Button variant={isSold ? "secondary" : "gaming"} className="w-full" size="sm" disabled={isSold}>
             <Eye className="h-4 w-4" />
-            View Details
+            {isSold ? 'Sold Out' : 'View Details'}
           </Button>
         </Link>
       </div>

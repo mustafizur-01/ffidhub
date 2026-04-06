@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const Index = () => {
   const [listings, setListings] = useState<IdListing[]>([]);
+  const [soldListingIds, setSoldListingIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<ListingFilters>({
     search: '',
@@ -48,7 +49,22 @@ const Index = () => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setListings((data as IdListing[]) || []);
+      const fetchedListings = (data as IdListing[]) || [];
+      setListings(fetchedListings);
+
+      // Fetch sold listings (approved purchases)
+      if (fetchedListings.length > 0) {
+        const listingIds = fetchedListings.map(l => l.id);
+        const { data: soldData } = await supabase
+          .from('purchases')
+          .select('listing_id')
+          .in('listing_id', listingIds)
+          .eq('status', 'approved');
+        
+        if (soldData) {
+          setSoldListingIds(new Set(soldData.map(p => p.listing_id)));
+        }
+      }
     } catch (error) {
       console.error('Error fetching listings:', error);
     } finally {
@@ -125,7 +141,7 @@ const Index = () => {
           ) : listings.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {listings.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} />
+                <ListingCard key={listing.id} listing={listing} isSold={soldListingIds.has(listing.id)} />
               ))}
             </div>
           ) : (
