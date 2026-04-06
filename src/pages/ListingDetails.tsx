@@ -31,6 +31,10 @@ interface Purchase {
   status: 'pending' | 'approved' | 'rejected';
 }
 
+interface SoldStatus {
+  isSold: boolean;
+}
+
 const ListingDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { user, profile, refreshProfile } = useAuth();
