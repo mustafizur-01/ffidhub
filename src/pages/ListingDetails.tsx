@@ -91,6 +91,7 @@ const ListingDetails = () => {
     }
   };
 
+  const fetchPurchaseStatus = async () => {
     if (!user) return;
     
     try {
