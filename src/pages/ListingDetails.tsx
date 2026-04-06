@@ -377,6 +377,18 @@ const ListingDetails = () => {
                   </div>
                 )}
               </div>
+            ) : isSold ? (
+              <div className="card-gaming p-4">
+                <div className="flex items-center gap-3 text-destructive">
+                  <ShieldOff className="h-5 w-5" />
+                  <div>
+                    <p className="font-medium">Sold Out</p>
+                    <p className="text-sm text-muted-foreground">
+                      This ID has already been purchased by someone else.
+                    </p>
+                  </div>
+                </div>
+              </div>
             ) : (
               <div className="card-gaming p-6 space-y-3">
                 <div className="flex items-center justify-between text-sm">
