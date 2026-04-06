@@ -52,18 +52,16 @@ const Index = () => {
       const fetchedListings = (data as IdListing[]) || [];
       setListings(fetchedListings);
 
-      // Fetch sold listings (approved purchases)
+      // Check sold status for each listing using RPC
       if (fetchedListings.length > 0) {
-        const listingIds = fetchedListings.map(l => l.id);
-        const { data: soldData } = await supabase
-          .from('purchases')
-          .select('listing_id')
-          .in('listing_id', listingIds)
-          .eq('status', 'approved');
-        
-        if (soldData) {
-          setSoldListingIds(new Set(soldData.map(p => p.listing_id)));
-        }
+        const soldSet = new Set<string>();
+        await Promise.all(
+          fetchedListings.map(async (listing) => {
+            const { data: isSold } = await supabase.rpc('is_listing_sold', { _listing_id: listing.id });
+            if (isSold) soldSet.add(listing.id);
+          })
+        );
+        setSoldListingIds(soldSet);
       }
     } catch (error) {
       console.error('Error fetching listings:', error);

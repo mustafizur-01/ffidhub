@@ -74,14 +74,8 @@ const ListingDetails = () => {
 
   const checkSoldStatus = async () => {
     try {
-      const { data } = await supabase
-        .from('purchases')
-        .select('id')
-        .eq('listing_id', id)
-        .eq('status', 'approved')
-        .maybeSingle();
-      
-      setIsSold(!!data);
+      const { data: isSold } = await supabase.rpc('is_listing_sold', { _listing_id: id });
+      setIsSold(!!isSold);
     } catch (error) {
       console.error('Error checking sold status:', error);
     }
