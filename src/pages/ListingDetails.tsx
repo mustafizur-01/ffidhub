@@ -44,6 +44,7 @@ const ListingDetails = () => {
   const [purchasing, setPurchasing] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
+  const [isSold, setIsSold] = useState(false);
 
   useEffect(() => {
     if (id) {
