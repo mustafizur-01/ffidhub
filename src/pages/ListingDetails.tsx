@@ -76,7 +76,21 @@ const ListingDetails = () => {
     }
   };
 
-  const fetchPurchaseStatus = async () => {
+  const checkSoldStatus = async () => {
+    try {
+      const { data } = await supabase
+        .from('purchases')
+        .select('id')
+        .eq('listing_id', id)
+        .eq('status', 'approved')
+        .maybeSingle();
+      
+      setIsSold(!!data);
+    } catch (error) {
+      console.error('Error checking sold status:', error);
+    }
+  };
+
     if (!user) return;
     
     try {
