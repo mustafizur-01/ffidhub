@@ -49,7 +49,22 @@ const Index = () => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setListings((data as IdListing[]) || []);
+      const fetchedListings = (data as IdListing[]) || [];
+      setListings(fetchedListings);
+
+      // Fetch sold listings (approved purchases)
+      if (fetchedListings.length > 0) {
+        const listingIds = fetchedListings.map(l => l.id);
+        const { data: soldData } = await supabase
+          .from('purchases')
+          .select('listing_id')
+          .in('listing_id', listingIds)
+          .eq('status', 'approved');
+        
+        if (soldData) {
+          setSoldListingIds(new Set(soldData.map(p => p.listing_id)));
+        }
+      }
     } catch (error) {
       console.error('Error fetching listings:', error);
     } finally {
