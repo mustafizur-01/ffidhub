@@ -99,6 +99,17 @@ const AdminDashboard = () => {
   const [removeNote, setRemoveNote] = useState('');
   const [depositRequests, setDepositRequests] = useState<any[]>([]);
   const [depositsLoading, setDepositsLoading] = useState(true);
+  
+  // Tournament state
+  const [tournamentsList, setTournamentsList] = useState<any[]>([]);
+  const [tournamentsLoading, setTournamentsLoading] = useState(true);
+  const [showCreateTournament, setShowCreateTournament] = useState(false);
+  const [newTournament, setNewTournament] = useState({
+    title: '', description: '', game_mode: 'Battle Royale', max_players: '50',
+    entry_fee: '0', prize_pool: '0', start_time: '',
+  });
+  const [creatingTournament, setCreatingTournament] = useState(false);
+
   const [stats, setStats] = useState({
     totalMessages: 0,
     unreadMessages: 0,
