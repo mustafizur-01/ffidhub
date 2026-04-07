@@ -27,6 +27,7 @@ import {
 import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye, Trash2, Wallet, IndianRupee, Plus, Minus, History, ArrowUpCircle, ArrowDownCircle, CheckCircle, XCircle, Clock, Trophy, Gamepad2, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { Textarea } from '@/components/ui/textarea';
 import {
   AlertDialog,
   AlertDialogAction,
