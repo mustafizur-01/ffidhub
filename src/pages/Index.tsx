@@ -15,6 +15,7 @@ import { format } from 'date-fns';
 const Index = () => {
   const [listings, setListings] = useState<IdListing[]>([]);
   const [soldListingIds, setSoldListingIds] = useState<Set<string>>(new Set());
+  const [upcomingTournaments, setUpcomingTournaments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<ListingFilters>({
     search: '',
@@ -25,6 +26,7 @@ const Index = () => {
 
   useEffect(() => {
     fetchListings();
+    fetchUpcomingTournaments();
   }, [filters]);
 
   const fetchListings = async () => {
