@@ -456,6 +456,80 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchTournaments = async () => {
+    try {
+      setTournamentsLoading(true);
+      const { data, error } = await supabase
+        .from('tournaments')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+
+      const enriched = await Promise.all(
+        (data || []).map(async (t: any) => {
+          const { count } = await supabase
+            .from('tournament_participants')
+            .select('*', { count: 'exact', head: true })
+            .eq('tournament_id', t.id);
+          return { ...t, participant_count: count || 0 };
+        })
+      );
+      setTournamentsList(enriched);
+    } catch (error) {
+      console.error('Error fetching tournaments:', error);
+    } finally {
+      setTournamentsLoading(false);
+    }
+  };
+
+  const handleCreateTournament = async () => {
+    if (!newTournament.title || !newTournament.start_time || !user) return;
+    setCreatingTournament(true);
+    try {
+      const { error } = await supabase.from('tournaments').insert({
+        title: newTournament.title,
+        description: newTournament.description || null,
+        game_mode: newTournament.game_mode,
+        max_players: parseInt(newTournament.max_players),
+        entry_fee: parseFloat(newTournament.entry_fee),
+        prize_pool: parseFloat(newTournament.prize_pool),
+        start_time: newTournament.start_time,
+        created_by: user.id,
+      });
+      if (error) throw error;
+      toast.success('Tournament created!');
+      setShowCreateTournament(false);
+      setNewTournament({ title: '', description: '', game_mode: 'Battle Royale', max_players: '50', entry_fee: '0', prize_pool: '0', start_time: '' });
+      fetchTournaments();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to create tournament');
+    } finally {
+      setCreatingTournament(false);
+    }
+  };
+
+  const handleDeleteTournament = async (id: string) => {
+    try {
+      const { error } = await supabase.from('tournaments').delete().eq('id', id);
+      if (error) throw error;
+      toast.success('Tournament deleted');
+      fetchTournaments();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete tournament');
+    }
+  };
+
+  const handleUpdateTournamentStatus = async (id: string, status: string) => {
+    try {
+      const { error } = await supabase.from('tournaments').update({ status }).eq('id', id);
+      if (error) throw error;
+      toast.success(`Tournament status updated to ${status}`);
+      fetchTournaments();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update status');
+    }
+  };
+
   const filteredTransactions = transactions.filter(t =>
     t.user_email?.toLowerCase().includes(transactionSearchTerm.toLowerCase()) ||
     t.note?.toLowerCase().includes(transactionSearchTerm.toLowerCase())
