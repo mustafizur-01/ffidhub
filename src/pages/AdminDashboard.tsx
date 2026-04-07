@@ -137,6 +137,7 @@ const AdminDashboard = () => {
       fetchUsers();
       fetchTransactions();
       fetchDepositRequests();
+      fetchTournaments();
     }
   }, [isAdmin]);
 
