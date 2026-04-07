@@ -34,6 +34,7 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/add-money" element={<AddMoneyPage />} />
             <Route path="/my-purchases" element={<PurchaseHistory />} />
+            <Route path="/tournaments" element={<TournamentsPage />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
