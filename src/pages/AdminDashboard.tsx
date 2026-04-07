@@ -699,6 +699,96 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
+        {/* Tournament Management */}
+        <Card className="glass-card mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-yellow-500" />
+                Tournament Management
+              </span>
+              <Button size="sm" variant="gaming" onClick={() => setShowCreateTournament(!showCreateTournament)}>
+                <Plus className="h-4 w-4 mr-1" /> Create Tournament
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Create Form */}
+            {showCreateTournament && (
+              <div className="mb-6 p-4 border border-border rounded-lg space-y-3">
+                <h4 className="font-bold text-sm">New Tournament</h4>
+                <Input placeholder="Title *" value={newTournament.title} onChange={(e) => setNewTournament({...newTournament, title: e.target.value})} />
+                <Textarea placeholder="Description" value={newTournament.description} onChange={(e) => setNewTournament({...newTournament, description: e.target.value})} />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input placeholder="Game Mode" value={newTournament.game_mode} onChange={(e) => setNewTournament({...newTournament, game_mode: e.target.value})} />
+                  <Input type="number" placeholder="Max Players" value={newTournament.max_players} onChange={(e) => setNewTournament({...newTournament, max_players: e.target.value})} />
+                  <Input type="number" placeholder="Entry Fee (₹)" value={newTournament.entry_fee} onChange={(e) => setNewTournament({...newTournament, entry_fee: e.target.value})} />
+                  <Input type="number" placeholder="Prize Pool (₹)" value={newTournament.prize_pool} onChange={(e) => setNewTournament({...newTournament, prize_pool: e.target.value})} />
+                </div>
+                <Input type="datetime-local" value={newTournament.start_time} onChange={(e) => setNewTournament({...newTournament, start_time: e.target.value})} />
+                <div className="flex gap-2">
+                  <Button variant="gaming" onClick={handleCreateTournament} disabled={creatingTournament}>
+                    {creatingTournament ? 'Creating...' : 'Create'}
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowCreateTournament(false)}>Cancel</Button>
+                </div>
+              </div>
+            )}
+
+            {/* Tournaments List */}
+            {tournamentsLoading ? (
+              <Skeleton className="h-32" />
+            ) : tournamentsList.length === 0 ? (
+              <p className="text-center text-muted-foreground py-4">No tournaments created yet</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Mode</TableHead>
+                      <TableHead>Players</TableHead>
+                      <TableHead>Entry/Prize</TableHead>
+                      <TableHead>Start</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {tournamentsList.map((t: any) => (
+                      <TableRow key={t.id}>
+                        <TableCell className="font-medium">{t.title}</TableCell>
+                        <TableCell>{t.game_mode}</TableCell>
+                        <TableCell>{t.participant_count}/{t.max_players}</TableCell>
+                        <TableCell>₹{t.entry_fee} / ₹{t.prize_pool}</TableCell>
+                        <TableCell className="text-xs">{format(new Date(t.start_time), 'dd MMM yyyy, hh:mm a')}</TableCell>
+                        <TableCell>
+                          <Select value={t.status} onValueChange={(val) => handleUpdateTournamentStatus(t.id, val as any)}>
+                            <SelectTrigger className="w-[130px] h-8">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="upcoming">Upcoming</SelectItem>
+                              <SelectItem value="ongoing">Ongoing</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>
+                          <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleDeleteTournament(t.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Balance Management */}
         <Card className="glass-card mb-8">
           <CardHeader>
