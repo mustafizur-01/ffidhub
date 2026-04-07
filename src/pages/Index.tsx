@@ -77,6 +77,20 @@ const Index = () => {
     }
   };
 
+  const fetchUpcomingTournaments = async () => {
+    try {
+      const { data } = await supabase
+        .from('tournaments')
+        .select('*')
+        .eq('status', 'upcoming')
+        .order('start_time', { ascending: true })
+        .limit(3);
+      setUpcomingTournaments(data || []);
+    } catch (error) {
+      console.error('Error fetching tournaments:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
