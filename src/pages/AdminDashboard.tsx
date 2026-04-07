@@ -24,9 +24,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye, Trash2, Wallet, IndianRupee, Plus, Minus, History, ArrowUpCircle, ArrowDownCircle, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye, Trash2, Wallet, IndianRupee, Plus, Minus, History, ArrowUpCircle, ArrowDownCircle, CheckCircle, XCircle, Clock, Trophy } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { Textarea } from '@/components/ui/textarea';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -98,6 +99,17 @@ const AdminDashboard = () => {
   const [removeNote, setRemoveNote] = useState('');
   const [depositRequests, setDepositRequests] = useState<any[]>([]);
   const [depositsLoading, setDepositsLoading] = useState(true);
+  
+  // Tournament state
+  const [tournamentsList, setTournamentsList] = useState<any[]>([]);
+  const [tournamentsLoading, setTournamentsLoading] = useState(true);
+  const [showCreateTournament, setShowCreateTournament] = useState(false);
+  const [newTournament, setNewTournament] = useState({
+    title: '', description: '', game_mode: 'Battle Royale', max_players: '50',
+    entry_fee: '0', prize_pool: '0', start_time: '',
+  });
+  const [creatingTournament, setCreatingTournament] = useState(false);
+
   const [stats, setStats] = useState({
     totalMessages: 0,
     unreadMessages: 0,
@@ -125,6 +137,7 @@ const AdminDashboard = () => {
       fetchUsers();
       fetchTransactions();
       fetchDepositRequests();
+      fetchTournaments();
     }
   }, [isAdmin]);
 
@@ -443,6 +456,80 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchTournaments = async () => {
+    try {
+      setTournamentsLoading(true);
+      const { data, error } = await supabase
+        .from('tournaments')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+
+      const enriched = await Promise.all(
+        (data || []).map(async (t: any) => {
+          const { count } = await supabase
+            .from('tournament_participants')
+            .select('*', { count: 'exact', head: true })
+            .eq('tournament_id', t.id);
+          return { ...t, participant_count: count || 0 };
+        })
+      );
+      setTournamentsList(enriched);
+    } catch (error) {
+      console.error('Error fetching tournaments:', error);
+    } finally {
+      setTournamentsLoading(false);
+    }
+  };
+
+  const handleCreateTournament = async () => {
+    if (!newTournament.title || !newTournament.start_time || !user) return;
+    setCreatingTournament(true);
+    try {
+      const { error } = await supabase.from('tournaments').insert({
+        title: newTournament.title,
+        description: newTournament.description || null,
+        game_mode: newTournament.game_mode,
+        max_players: parseInt(newTournament.max_players),
+        entry_fee: parseFloat(newTournament.entry_fee),
+        prize_pool: parseFloat(newTournament.prize_pool),
+        start_time: newTournament.start_time,
+        created_by: user.id,
+      });
+      if (error) throw error;
+      toast.success('Tournament created!');
+      setShowCreateTournament(false);
+      setNewTournament({ title: '', description: '', game_mode: 'Battle Royale', max_players: '50', entry_fee: '0', prize_pool: '0', start_time: '' });
+      fetchTournaments();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to create tournament');
+    } finally {
+      setCreatingTournament(false);
+    }
+  };
+
+  const handleDeleteTournament = async (id: string) => {
+    try {
+      const { error } = await supabase.from('tournaments').delete().eq('id', id);
+      if (error) throw error;
+      toast.success('Tournament deleted');
+      fetchTournaments();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete tournament');
+    }
+  };
+
+  const handleUpdateTournamentStatus = async (id: string, status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled') => {
+    try {
+      const { error } = await supabase.from('tournaments').update({ status }).eq('id', id);
+      if (error) throw error;
+      toast.success(`Tournament status updated to ${status}`);
+      fetchTournaments();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update status');
+    }
+  };
+
   const filteredTransactions = transactions.filter(t =>
     t.user_email?.toLowerCase().includes(transactionSearchTerm.toLowerCase()) ||
     t.note?.toLowerCase().includes(transactionSearchTerm.toLowerCase())
@@ -602,6 +689,96 @@ const AdminDashboard = () => {
                               </Button>
                             </div>
                           )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Tournament Management */}
+        <Card className="glass-card mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-yellow-500" />
+                Tournament Management
+              </span>
+              <Button size="sm" variant="gaming" onClick={() => setShowCreateTournament(!showCreateTournament)}>
+                <Plus className="h-4 w-4 mr-1" /> Create Tournament
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Create Form */}
+            {showCreateTournament && (
+              <div className="mb-6 p-4 border border-border rounded-lg space-y-3">
+                <h4 className="font-bold text-sm">New Tournament</h4>
+                <Input placeholder="Title *" value={newTournament.title} onChange={(e) => setNewTournament({...newTournament, title: e.target.value})} />
+                <Textarea placeholder="Description" value={newTournament.description} onChange={(e) => setNewTournament({...newTournament, description: e.target.value})} />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input placeholder="Game Mode" value={newTournament.game_mode} onChange={(e) => setNewTournament({...newTournament, game_mode: e.target.value})} />
+                  <Input type="number" placeholder="Max Players" value={newTournament.max_players} onChange={(e) => setNewTournament({...newTournament, max_players: e.target.value})} />
+                  <Input type="number" placeholder="Entry Fee (₹)" value={newTournament.entry_fee} onChange={(e) => setNewTournament({...newTournament, entry_fee: e.target.value})} />
+                  <Input type="number" placeholder="Prize Pool (₹)" value={newTournament.prize_pool} onChange={(e) => setNewTournament({...newTournament, prize_pool: e.target.value})} />
+                </div>
+                <Input type="datetime-local" value={newTournament.start_time} onChange={(e) => setNewTournament({...newTournament, start_time: e.target.value})} />
+                <div className="flex gap-2">
+                  <Button variant="gaming" onClick={handleCreateTournament} disabled={creatingTournament}>
+                    {creatingTournament ? 'Creating...' : 'Create'}
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowCreateTournament(false)}>Cancel</Button>
+                </div>
+              </div>
+            )}
+
+            {/* Tournaments List */}
+            {tournamentsLoading ? (
+              <Skeleton className="h-32" />
+            ) : tournamentsList.length === 0 ? (
+              <p className="text-center text-muted-foreground py-4">No tournaments created yet</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Mode</TableHead>
+                      <TableHead>Players</TableHead>
+                      <TableHead>Entry/Prize</TableHead>
+                      <TableHead>Start</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {tournamentsList.map((t: any) => (
+                      <TableRow key={t.id}>
+                        <TableCell className="font-medium">{t.title}</TableCell>
+                        <TableCell>{t.game_mode}</TableCell>
+                        <TableCell>{t.participant_count}/{t.max_players}</TableCell>
+                        <TableCell>₹{t.entry_fee} / ₹{t.prize_pool}</TableCell>
+                        <TableCell className="text-xs">{format(new Date(t.start_time), 'dd MMM yyyy, hh:mm a')}</TableCell>
+                        <TableCell>
+                          <Select value={t.status} onValueChange={(val) => handleUpdateTournamentStatus(t.id, val as any)}>
+                            <SelectTrigger className="w-[130px] h-8">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="upcoming">Upcoming</SelectItem>
+                              <SelectItem value="ongoing">Ongoing</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>
+                          <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleDeleteTournament(t.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}

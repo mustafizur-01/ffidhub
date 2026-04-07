@@ -1,15 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Flame, TrendingUp, Shield, Zap } from 'lucide-react';
+import { Flame, TrendingUp, Shield, Zap, Trophy, Users, IndianRupee } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import ListingCard from '@/components/ListingCard';
 import SearchFilters from '@/components/SearchFilters';
 import { supabase } from '@/integrations/supabase/client';
 import { IdListing, ListingFilters } from '@/types/listing';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+
 
 const Index = () => {
   const [listings, setListings] = useState<IdListing[]>([]);
   const [soldListingIds, setSoldListingIds] = useState<Set<string>>(new Set());
+  const [upcomingTournaments, setUpcomingTournaments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<ListingFilters>({
     search: '',
@@ -20,6 +26,7 @@ const Index = () => {
 
   useEffect(() => {
     fetchListings();
+    fetchUpcomingTournaments();
   }, [filters]);
 
   const fetchListings = async () => {
@@ -70,6 +77,20 @@ const Index = () => {
     }
   };
 
+  const fetchUpcomingTournaments = async () => {
+    try {
+      const { data } = await supabase
+        .from('tournaments')
+        .select('*')
+        .eq('status', 'upcoming')
+        .order('start_time', { ascending: true })
+        .limit(3);
+      setUpcomingTournaments(data || []);
+    } catch (error) {
+      console.error('Error fetching tournaments:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -117,6 +138,39 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Upcoming Tournaments Banner */}
+      {upcomingTournaments.length > 0 && (
+        <section className="container py-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-xl font-bold flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-yellow-500" />
+              Upcoming Tournaments
+            </h2>
+            <Link to="/tournaments">
+              <Button variant="ghost" size="sm">View All →</Button>
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {upcomingTournaments.map((t: any) => (
+              <Link to="/tournaments" key={t.id}>
+                <Card className="card-gaming p-4 hover:border-primary/50 transition-colors cursor-pointer">
+                  <CardContent className="p-0 space-y-2">
+                    <h3 className="font-bold">{t.title}</h3>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {t.max_players} slots</span>
+                      <span className="flex items-center gap-1"><IndianRupee className="h-3 w-3" /> {t.entry_fee > 0 ? `₹${t.entry_fee}` : 'Free'}</span>
+                    </div>
+                    <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">
+                      <Trophy className="h-3 w-3 mr-1" /> Prize: ₹{t.prize_pool}
+                    </Badge>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Listings Section */}
       <section className="container py-10">

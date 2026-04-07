@@ -17,6 +17,7 @@ const Header = () => {
 
   const navLinks = [
     { path: '/', label: 'Home' },
+    { path: '/tournaments', label: 'Tournaments' },
     { path: '/sell', label: 'Sell ID', requiresAuth: true },
   ];
 

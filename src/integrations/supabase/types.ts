@@ -262,6 +262,83 @@ export type Database = {
           },
         ]
       }
+      tournament_participants: {
+        Row: {
+          id: string
+          joined_at: string
+          tournament_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          tournament_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          tournament_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_participants_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournaments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          entry_fee: number
+          game_mode: string
+          id: string
+          image_url: string | null
+          max_players: number
+          prize_pool: number
+          start_time: string
+          status: Database["public"]["Enums"]["tournament_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entry_fee?: number
+          game_mode?: string
+          id?: string
+          image_url?: string | null
+          max_players?: number
+          prize_pool?: number
+          start_time: string
+          status?: Database["public"]["Enums"]["tournament_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entry_fee?: number
+          game_mode?: string
+          id?: string
+          image_url?: string | null
+          max_players?: number
+          prize_pool?: number
+          start_time?: string
+          status?: Database["public"]["Enums"]["tournament_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -319,6 +396,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user"
       login_method: "FB" | "Google" | "VK"
+      tournament_status: "upcoming" | "ongoing" | "completed" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -448,6 +526,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "user"],
       login_method: ["FB", "Google", "VK"],
+      tournament_status: ["upcoming", "ongoing", "completed", "cancelled"],
     },
   },
 } as const
