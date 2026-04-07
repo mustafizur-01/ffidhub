@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Flame, TrendingUp, Shield, Zap } from 'lucide-react';
+import { Flame, TrendingUp, Shield, Zap, Trophy, Users, IndianRupee } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import ListingCard from '@/components/ListingCard';
 import SearchFilters from '@/components/SearchFilters';
 import { supabase } from '@/integrations/supabase/client';
 import { IdListing, ListingFilters } from '@/types/listing';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { format } from 'date-fns';
 
 const Index = () => {
   const [listings, setListings] = useState<IdListing[]>([]);
