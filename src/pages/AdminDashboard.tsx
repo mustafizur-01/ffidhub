@@ -519,7 +519,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleUpdateTournamentStatus = async (id: string, status: string) => {
+  const handleUpdateTournamentStatus = async (id: string, status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled') => {
     try {
       const { error } = await supabase.from('tournaments').update({ status }).eq('id', id);
       if (error) throw error;
