@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import AuthModal from '@/components/AuthModal';
-import { Trophy, Users, Calendar, IndianRupee, Gamepad2, Clock, CheckCircle, Plus, Crown } from 'lucide-react';
+import { Trophy, Users, Calendar, IndianRupee, Gamepad2, Clock, CheckCircle, Plus, Crown, Key, Copy } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -27,6 +27,8 @@ interface Tournament {
   created_at: string;
   created_by: string | null;
   winner_id: string | null;
+  room_id: string | null;
+  room_password: string | null;
   participant_count?: number;
   has_joined?: boolean;
   winner_email?: string;
@@ -336,6 +338,36 @@ const TournamentsPage = () => {
                     <div className="flex items-center gap-2 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
                       <Crown className="h-4 w-4 text-yellow-500" />
                       <span className="text-sm font-medium text-yellow-500">Winner: {t.winner_email}</span>
+                    </div>
+                  )}
+
+                  {/* Room ID & Password - visible only to joined participants */}
+                  {t.has_joined && t.room_id && (
+                    <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 space-y-2">
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        <Key className="h-4 w-4 text-primary" />
+                        <span>Room Details</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Room ID:</span>
+                        <button
+                          className="flex items-center gap-1 text-sm font-mono font-bold hover:text-primary transition-colors"
+                          onClick={() => { navigator.clipboard.writeText(t.room_id!); toast.success('Room ID copied!'); }}
+                        >
+                          {t.room_id} <Copy className="h-3 w-3" />
+                        </button>
+                      </div>
+                      {t.room_password && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">Password:</span>
+                          <button
+                            className="flex items-center gap-1 text-sm font-mono font-bold hover:text-primary transition-colors"
+                            onClick={() => { navigator.clipboard.writeText(t.room_password!); toast.success('Password copied!'); }}
+                          >
+                            {t.room_password} <Copy className="h-3 w-3" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
 

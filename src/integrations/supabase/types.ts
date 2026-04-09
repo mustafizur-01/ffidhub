@@ -302,6 +302,8 @@ export type Database = {
           image_url: string | null
           max_players: number
           prize_pool: number
+          room_id: string | null
+          room_password: string | null
           start_time: string
           status: Database["public"]["Enums"]["tournament_status"]
           title: string
@@ -318,6 +320,8 @@ export type Database = {
           image_url?: string | null
           max_players?: number
           prize_pool?: number
+          room_id?: string | null
+          room_password?: string | null
           start_time: string
           status?: Database["public"]["Enums"]["tournament_status"]
           title: string
@@ -334,6 +338,8 @@ export type Database = {
           image_url?: string | null
           max_players?: number
           prize_pool?: number
+          room_id?: string | null
+          room_password?: string | null
           start_time?: string
           status?: Database["public"]["Enums"]["tournament_status"]
           title?: string

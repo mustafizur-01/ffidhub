@@ -593,6 +593,16 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleUpdateRoomInfo = async (id: string, roomId: string | null, roomPassword: string | null) => {
+    try {
+      const { error } = await supabase.from('tournaments').update({ room_id: roomId || null, room_password: roomPassword || null }).eq('id', id);
+      if (error) throw error;
+      toast.success('Room info updated');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update room info');
+    }
+  };
+
   const filteredTransactions = transactions.filter(t =>
     t.user_email?.toLowerCase().includes(transactionSearchTerm.toLowerCase()) ||
     t.note?.toLowerCase().includes(transactionSearchTerm.toLowerCase())
@@ -809,11 +819,10 @@ const AdminDashboard = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Title</TableHead>
-                      <TableHead>Mode</TableHead>
                       <TableHead>Players</TableHead>
                       <TableHead>Entry/Prize</TableHead>
-                      <TableHead>Start</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Room ID / Pass</TableHead>
                       <TableHead>Winner</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
@@ -821,14 +830,15 @@ const AdminDashboard = () => {
                   <TableBody>
                     {tournamentsList.map((t: any) => (
                       <TableRow key={t.id}>
-                        <TableCell className="font-medium">{t.title}</TableCell>
-                        <TableCell>{t.game_mode}</TableCell>
+                        <TableCell className="font-medium">
+                          <div>{t.title}</div>
+                          <div className="text-xs text-muted-foreground">{t.game_mode}</div>
+                        </TableCell>
                         <TableCell>{t.participant_count}/{t.max_players}</TableCell>
                         <TableCell>₹{t.entry_fee} / ₹{t.prize_pool}</TableCell>
-                        <TableCell className="text-xs">{format(new Date(t.start_time), 'dd MMM yyyy, hh:mm a')}</TableCell>
                         <TableCell>
                           <Select value={t.status} onValueChange={(val) => handleUpdateTournamentStatus(t.id, val as any)}>
-                            <SelectTrigger className="w-[130px] h-8">
+                            <SelectTrigger className="w-[120px] h-8">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -840,6 +850,22 @@ const AdminDashboard = () => {
                           </Select>
                         </TableCell>
                         <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <Input
+                              placeholder="Room ID"
+                              defaultValue={t.room_id || ''}
+                              className="h-7 text-xs w-[120px]"
+                              onBlur={(e) => handleUpdateRoomInfo(t.id, e.target.value, t.room_password)}
+                            />
+                            <Input
+                              placeholder="Password"
+                              defaultValue={t.room_password || ''}
+                              className="h-7 text-xs w-[120px]"
+                              onBlur={(e) => handleUpdateRoomInfo(t.id, t.room_id, e.target.value)}
+                            />
+                          </div>
+                        </TableCell>
+                        <TableCell>
                           {t.winner_id ? (
                             <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
                               <Crown className="h-3 w-3 mr-1" />
@@ -847,7 +873,7 @@ const AdminDashboard = () => {
                             </Badge>
                           ) : t.participants && t.participants.length > 0 ? (
                             <Select onValueChange={(userId) => handleSelectWinner(t, userId)}>
-                              <SelectTrigger className="w-[160px] h-8">
+                              <SelectTrigger className="w-[140px] h-8">
                                 <SelectValue placeholder="Select Winner" />
                               </SelectTrigger>
                               <SelectContent>
