@@ -5,9 +5,11 @@ import Header from '@/components/Header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import AuthModal from '@/components/AuthModal';
-import { Trophy, Users, Calendar, IndianRupee, Gamepad2, Clock, CheckCircle } from 'lucide-react';
+import { Trophy, Users, Calendar, IndianRupee, Gamepad2, Clock, CheckCircle, Plus, Crown } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -23,8 +25,11 @@ interface Tournament {
   status: string;
   image_url: string | null;
   created_at: string;
+  created_by: string | null;
+  winner_id: string | null;
   participant_count?: number;
   has_joined?: boolean;
+  winner_email?: string;
 }
 
 const TournamentsPage = () => {
@@ -33,6 +38,12 @@ const TournamentsPage = () => {
   const [loading, setLoading] = useState(true);
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newTournament, setNewTournament] = useState({
+    title: '', description: '', game_mode: 'Battle Royale', max_players: '50',
+    entry_fee: '0', prize_pool: '0', start_time: '',
+  });
 
   useEffect(() => {
     fetchTournaments();
@@ -66,7 +77,18 @@ const TournamentsPage = () => {
             has_joined = !!participation;
           }
 
-          return { ...t, participant_count: count || 0, has_joined };
+          // Get winner email if exists
+          let winner_email: string | undefined;
+          if (t.winner_id) {
+            const { data: winnerProfile } = await supabase
+              .from('profiles')
+              .select('email')
+              .eq('user_id', t.winner_id)
+              .maybeSingle();
+            winner_email = winnerProfile?.email;
+          }
+
+          return { ...t, participant_count: count || 0, has_joined, winner_email };
         })
       );
 
@@ -75,6 +97,39 @@ const TournamentsPage = () => {
       console.error('Error fetching tournaments:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateTournament = async () => {
+    if (!user) {
+      setAuthModalOpen(true);
+      return;
+    }
+    if (!newTournament.title || !newTournament.start_time) {
+      toast.error('Please fill in title and start time');
+      return;
+    }
+    setCreating(true);
+    try {
+      const { error } = await supabase.from('tournaments').insert({
+        title: newTournament.title,
+        description: newTournament.description || null,
+        game_mode: newTournament.game_mode,
+        max_players: parseInt(newTournament.max_players),
+        entry_fee: parseFloat(newTournament.entry_fee),
+        prize_pool: parseFloat(newTournament.prize_pool),
+        start_time: newTournament.start_time,
+        created_by: user.id,
+      });
+      if (error) throw error;
+      toast.success('Tournament created!');
+      setShowCreateForm(false);
+      setNewTournament({ title: '', description: '', game_mode: 'Battle Royale', max_players: '50', entry_fee: '0', prize_pool: '0', start_time: '' });
+      fetchTournaments();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to create tournament');
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -93,7 +148,6 @@ const TournamentsPage = () => {
 
     setJoiningId(tournament.id);
     try {
-      // Deduct entry fee if applicable
       if (tournament.entry_fee > 0) {
         const newBalance = profile.balance - tournament.entry_fee;
         const { error: balanceError } = await supabase
@@ -131,7 +185,6 @@ const TournamentsPage = () => {
 
       if (error) throw error;
 
-      // Refund entry fee if applicable
       if (tournament.entry_fee > 0 && profile) {
         const newBalance = profile.balance + tournament.entry_fee;
         await supabase
@@ -186,8 +239,39 @@ const TournamentsPage = () => {
           <p className="text-muted-foreground max-w-lg mx-auto">
             Compete with other players, pay entry fees from your balance, and win exciting prizes!
           </p>
+          {user && (
+            <Button variant="gaming" onClick={() => setShowCreateForm(!showCreateForm)}>
+              <Plus className="h-4 w-4 mr-1" /> Create Tournament
+            </Button>
+          )}
         </div>
       </section>
+
+      {/* Create Tournament Form */}
+      {showCreateForm && (
+        <section className="container py-6">
+          <Card className="card-gaming max-w-2xl mx-auto">
+            <CardContent className="p-6 space-y-4">
+              <h3 className="font-display font-bold text-lg">Create New Tournament</h3>
+              <Input placeholder="Tournament Title *" value={newTournament.title} onChange={(e) => setNewTournament({...newTournament, title: e.target.value})} />
+              <Textarea placeholder="Description (optional)" value={newTournament.description} onChange={(e) => setNewTournament({...newTournament, description: e.target.value})} />
+              <div className="grid grid-cols-2 gap-3">
+                <Input placeholder="Game Mode" value={newTournament.game_mode} onChange={(e) => setNewTournament({...newTournament, game_mode: e.target.value})} />
+                <Input type="number" placeholder="Max Players" value={newTournament.max_players} onChange={(e) => setNewTournament({...newTournament, max_players: e.target.value})} />
+                <Input type="number" placeholder="Entry Fee (₹)" value={newTournament.entry_fee} onChange={(e) => setNewTournament({...newTournament, entry_fee: e.target.value})} />
+                <Input type="number" placeholder="Prize Pool (₹)" value={newTournament.prize_pool} onChange={(e) => setNewTournament({...newTournament, prize_pool: e.target.value})} />
+              </div>
+              <Input type="datetime-local" value={newTournament.start_time} onChange={(e) => setNewTournament({...newTournament, start_time: e.target.value})} />
+              <div className="flex gap-2">
+                <Button variant="gaming" onClick={handleCreateTournament} disabled={creating}>
+                  {creating ? 'Creating...' : 'Create Tournament'}
+                </Button>
+                <Button variant="outline" onClick={() => setShowCreateForm(false)}>Cancel</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      )}
 
       {/* Tournaments List */}
       <section className="container py-10">
@@ -247,6 +331,14 @@ const TournamentsPage = () => {
                     </div>
                   </div>
 
+                  {/* Winner Display */}
+                  {t.winner_id && t.winner_email && (
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                      <Crown className="h-4 w-4 text-yellow-500" />
+                      <span className="text-sm font-medium text-yellow-500">Winner: {t.winner_email}</span>
+                    </div>
+                  )}
+
                   {t.status === 'upcoming' && (
                     <>
                       {t.has_joined ? (
@@ -284,9 +376,15 @@ const TournamentsPage = () => {
                     </Badge>
                   )}
 
-                  {t.status === 'completed' && (
+                  {t.status === 'completed' && !t.winner_id && (
                     <Badge className="w-full justify-center py-2" variant="secondary">
                       Tournament Ended
+                    </Badge>
+                  )}
+
+                  {t.status === 'completed' && t.winner_id && !t.winner_email && (
+                    <Badge className="w-full justify-center py-2 bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                      <Crown className="h-4 w-4 mr-1" /> Prize Distributed
                     </Badge>
                   )}
                 </CardContent>
