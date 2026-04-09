@@ -593,6 +593,16 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleUpdateRoomInfo = async (id: string, roomId: string | null, roomPassword: string | null) => {
+    try {
+      const { error } = await supabase.from('tournaments').update({ room_id: roomId || null, room_password: roomPassword || null }).eq('id', id);
+      if (error) throw error;
+      toast.success('Room info updated');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update room info');
+    }
+  };
+
   const filteredTransactions = transactions.filter(t =>
     t.user_email?.toLowerCase().includes(transactionSearchTerm.toLowerCase()) ||
     t.note?.toLowerCase().includes(transactionSearchTerm.toLowerCase())
