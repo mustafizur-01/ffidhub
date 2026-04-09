@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye, Trash2, Wallet, IndianRupee, Plus, Minus, History, ArrowUpCircle, ArrowDownCircle, CheckCircle, XCircle, Clock, Trophy } from 'lucide-react';
+import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye, Trash2, Wallet, IndianRupee, Plus, Minus, History, ArrowUpCircle, ArrowDownCircle, CheckCircle, XCircle, Clock, Trophy, Crown } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
@@ -471,7 +471,24 @@ const AdminDashboard = () => {
             .from('tournament_participants')
             .select('*', { count: 'exact', head: true })
             .eq('tournament_id', t.id);
-          return { ...t, participant_count: count || 0 };
+
+          // Fetch participants with emails for winner selection
+          const { data: participants } = await supabase
+            .from('tournament_participants')
+            .select('user_id')
+            .eq('tournament_id', t.id);
+
+          let participantEmails: { user_id: string; email: string }[] = [];
+          if (participants && participants.length > 0) {
+            const userIds = participants.map(p => p.user_id);
+            const { data: profiles } = await supabase
+              .from('profiles')
+              .select('user_id, email')
+              .in('user_id', userIds);
+            participantEmails = profiles || [];
+          }
+
+          return { ...t, participant_count: count || 0, participants: participantEmails };
         })
       );
       setTournamentsList(enriched);
@@ -527,6 +544,52 @@ const AdminDashboard = () => {
       fetchTournaments();
     } catch (error: any) {
       toast.error(error.message || 'Failed to update status');
+    }
+  };
+
+  const handleSelectWinner = async (tournament: any, winnerUserId: string) => {
+    if (!user) return;
+    try {
+      // Get winner's profile
+      const { data: winnerProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, balance, email')
+        .eq('user_id', winnerUserId)
+        .single();
+      if (profileError || !winnerProfile) throw new Error('Winner profile not found');
+
+      // Add prize pool to winner's balance
+      const newBalance = winnerProfile.balance + tournament.prize_pool;
+      const { error: balanceError } = await supabase
+        .from('profiles')
+        .update({ balance: newBalance })
+        .eq('id', winnerProfile.id);
+      if (balanceError) throw balanceError;
+
+      // Log the transaction
+      await supabase.from('balance_transactions').insert({
+        profile_id: winnerProfile.id,
+        admin_id: user.id,
+        amount: tournament.prize_pool,
+        transaction_type: 'add',
+        previous_balance: winnerProfile.balance,
+        new_balance: newBalance,
+        note: `Tournament prize: ${tournament.title}`,
+      });
+
+      // Update tournament with winner and mark completed
+      const { error: updateError } = await supabase
+        .from('tournaments')
+        .update({ winner_id: winnerUserId, status: 'completed' })
+        .eq('id', tournament.id);
+      if (updateError) throw updateError;
+
+      toast.success(`🏆 ₹${tournament.prize_pool} prize sent to ${winnerProfile.email}!`);
+      fetchTournaments();
+      fetchUsers();
+      fetchTransactions();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to select winner');
     }
   };
 
@@ -751,6 +814,7 @@ const AdminDashboard = () => {
                       <TableHead>Entry/Prize</TableHead>
                       <TableHead>Start</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Winner</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -774,6 +838,29 @@ const AdminDashboard = () => {
                               <SelectItem value="cancelled">Cancelled</SelectItem>
                             </SelectContent>
                           </Select>
+                        </TableCell>
+                        <TableCell>
+                          {t.winner_id ? (
+                            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                              <Crown className="h-3 w-3 mr-1" />
+                              {t.participants?.find((p: any) => p.user_id === t.winner_id)?.email || 'Selected'}
+                            </Badge>
+                          ) : t.participants && t.participants.length > 0 ? (
+                            <Select onValueChange={(userId) => handleSelectWinner(t, userId)}>
+                              <SelectTrigger className="w-[160px] h-8">
+                                <SelectValue placeholder="Select Winner" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {t.participants.map((p: any) => (
+                                  <SelectItem key={p.user_id} value={p.user_id}>
+                                    {p.email}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">No participants</span>
+                          )}
                         </TableCell>
                         <TableCell>
                           <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleDeleteTournament(t.id)}>
