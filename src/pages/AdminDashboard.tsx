@@ -471,7 +471,24 @@ const AdminDashboard = () => {
             .from('tournament_participants')
             .select('*', { count: 'exact', head: true })
             .eq('tournament_id', t.id);
-          return { ...t, participant_count: count || 0 };
+
+          // Fetch participants with emails for winner selection
+          const { data: participants } = await supabase
+            .from('tournament_participants')
+            .select('user_id')
+            .eq('tournament_id', t.id);
+
+          let participantEmails: { user_id: string; email: string }[] = [];
+          if (participants && participants.length > 0) {
+            const userIds = participants.map(p => p.user_id);
+            const { data: profiles } = await supabase
+              .from('profiles')
+              .select('user_id, email')
+              .in('user_id', userIds);
+            participantEmails = profiles || [];
+          }
+
+          return { ...t, participant_count: count || 0, participants: participantEmails };
         })
       );
       setTournamentsList(enriched);
