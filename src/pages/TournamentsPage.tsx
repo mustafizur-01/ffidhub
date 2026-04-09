@@ -341,6 +341,36 @@ const TournamentsPage = () => {
                     </div>
                   )}
 
+                  {/* Room ID & Password - visible only to joined participants */}
+                  {t.has_joined && t.room_id && (
+                    <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 space-y-2">
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        <Key className="h-4 w-4 text-primary" />
+                        <span>Room Details</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Room ID:</span>
+                        <button
+                          className="flex items-center gap-1 text-sm font-mono font-bold hover:text-primary transition-colors"
+                          onClick={() => { navigator.clipboard.writeText(t.room_id!); toast.success('Room ID copied!'); }}
+                        >
+                          {t.room_id} <Copy className="h-3 w-3" />
+                        </button>
+                      </div>
+                      {t.room_password && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">Password:</span>
+                          <button
+                            className="flex items-center gap-1 text-sm font-mono font-bold hover:text-primary transition-colors"
+                            onClick={() => { navigator.clipboard.writeText(t.room_password!); toast.success('Password copied!'); }}
+                          >
+                            {t.room_password} <Copy className="h-3 w-3" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {t.status === 'upcoming' && (
                     <>
                       {t.has_joined ? (
