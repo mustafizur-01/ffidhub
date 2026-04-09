@@ -814,6 +814,7 @@ const AdminDashboard = () => {
                       <TableHead>Entry/Prize</TableHead>
                       <TableHead>Start</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Winner</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -837,6 +838,29 @@ const AdminDashboard = () => {
                               <SelectItem value="cancelled">Cancelled</SelectItem>
                             </SelectContent>
                           </Select>
+                        </TableCell>
+                        <TableCell>
+                          {t.winner_id ? (
+                            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                              <Crown className="h-3 w-3 mr-1" />
+                              {t.participants?.find((p: any) => p.user_id === t.winner_id)?.email || 'Selected'}
+                            </Badge>
+                          ) : t.participants && t.participants.length > 0 ? (
+                            <Select onValueChange={(userId) => handleSelectWinner(t, userId)}>
+                              <SelectTrigger className="w-[160px] h-8">
+                                <SelectValue placeholder="Select Winner" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {t.participants.map((p: any) => (
+                                  <SelectItem key={p.user_id} value={p.user_id}>
+                                    {p.email}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">No participants</span>
+                          )}
                         </TableCell>
                         <TableCell>
                           <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleDeleteTournament(t.id)}>
