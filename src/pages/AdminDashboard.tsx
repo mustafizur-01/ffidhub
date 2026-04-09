@@ -530,6 +530,52 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleSelectWinner = async (tournament: any, winnerUserId: string) => {
+    if (!user) return;
+    try {
+      // Get winner's profile
+      const { data: winnerProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, balance, email')
+        .eq('user_id', winnerUserId)
+        .single();
+      if (profileError || !winnerProfile) throw new Error('Winner profile not found');
+
+      // Add prize pool to winner's balance
+      const newBalance = winnerProfile.balance + tournament.prize_pool;
+      const { error: balanceError } = await supabase
+        .from('profiles')
+        .update({ balance: newBalance })
+        .eq('id', winnerProfile.id);
+      if (balanceError) throw balanceError;
+
+      // Log the transaction
+      await supabase.from('balance_transactions').insert({
+        profile_id: winnerProfile.id,
+        admin_id: user.id,
+        amount: tournament.prize_pool,
+        transaction_type: 'add',
+        previous_balance: winnerProfile.balance,
+        new_balance: newBalance,
+        note: `Tournament prize: ${tournament.title}`,
+      });
+
+      // Update tournament with winner and mark completed
+      const { error: updateError } = await supabase
+        .from('tournaments')
+        .update({ winner_id: winnerUserId, status: 'completed' })
+        .eq('id', tournament.id);
+      if (updateError) throw updateError;
+
+      toast.success(`🏆 ₹${tournament.prize_pool} prize sent to ${winnerProfile.email}!`);
+      fetchTournaments();
+      fetchUsers();
+      fetchTransactions();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to select winner');
+    }
+  };
+
   const filteredTransactions = transactions.filter(t =>
     t.user_email?.toLowerCase().includes(transactionSearchTerm.toLowerCase()) ||
     t.note?.toLowerCase().includes(transactionSearchTerm.toLowerCase())
