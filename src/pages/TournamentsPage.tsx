@@ -27,6 +27,8 @@ interface Tournament {
   created_at: string;
   created_by: string | null;
   winner_id: string | null;
+  room_id: string | null;
+  room_password: string | null;
   participant_count?: number;
   has_joined?: boolean;
   winner_email?: string;
