@@ -11,7 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import AuthModal from '@/components/AuthModal';
-import { Trophy, Users, Calendar, IndianRupee, Gamepad2, Clock, CheckCircle, Plus, Crown, Key, Copy, User } from 'lucide-react';
+import { Trophy, Users, Calendar, IndianRupee, Gamepad2, Clock, CheckCircle, Plus, Crown, Key, Copy } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
