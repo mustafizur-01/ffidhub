@@ -45,6 +45,10 @@ const TournamentsPage = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
+  const [joinTarget, setJoinTarget] = useState<Tournament | null>(null);
+  const [ffName, setFfName] = useState('');
+  const [ffUid, setFfUid] = useState('');
   const [newTournament, setNewTournament] = useState({
     title: '', description: '', game_name: 'Free Fire', game_mode: 'Battle Royale', max_players: '50',
     entry_fee: '0', prize_pool: '0', start_time: '',
