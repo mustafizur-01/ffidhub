@@ -308,7 +308,10 @@ const TournamentsPage = () => {
                 </div>
 
                 <CardContent className="p-4 space-y-3">
-                  <h3 className="font-display font-bold text-lg">{t.title}</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-display font-bold text-lg">{t.title}</h3>
+                    <Badge variant="outline" className="text-xs">{t.game_name}</Badge>
+                  </div>
                   {t.description && (
                     <p className="text-sm text-muted-foreground line-clamp-2">{t.description}</p>
                   )}
