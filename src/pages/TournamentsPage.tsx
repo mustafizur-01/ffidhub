@@ -464,6 +464,37 @@ const TournamentsPage = () => {
         )}
       </section>
 
+      {/* Join Dialog for FF Name & UID */}
+      <Dialog open={!!joinTarget} onOpenChange={(open) => { if (!open) setJoinTarget(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Enter Your Game Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-sm text-muted-foreground">
+              Tournament: <span className="font-semibold text-foreground">{joinTarget?.title}</span>
+            </p>
+            <div className="space-y-2">
+              <Label htmlFor="ff-name">Free Fire Name *</Label>
+              <Input id="ff-name" placeholder="Enter your in-game name" value={ffName} onChange={(e) => setFfName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ff-uid">Free Fire UID *</Label>
+              <Input id="ff-uid" placeholder="Enter your UID" value={ffUid} onChange={(e) => setFfUid(e.target.value)} />
+            </div>
+            {joinTarget && joinTarget.entry_fee > 0 && (
+              <p className="text-sm text-muted-foreground">Entry Fee: <span className="font-bold text-yellow-500">{formatPrice(joinTarget.entry_fee)}</span> will be deducted from your balance.</p>
+            )}
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setJoinTarget(null)}>Cancel</Button>
+              <Button variant="gaming" onClick={handleJoinConfirm} disabled={joiningId !== null}>
+                {joiningId !== null ? 'Joining...' : 'Join Now'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} defaultTab="login" />
     </div>
   );
