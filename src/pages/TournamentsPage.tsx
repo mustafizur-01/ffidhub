@@ -17,6 +17,7 @@ interface Tournament {
   id: string;
   title: string;
   description: string | null;
+  game_name: string;
   game_mode: string;
   max_players: number;
   entry_fee: number;
@@ -43,7 +44,7 @@ const TournamentsPage = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newTournament, setNewTournament] = useState({
-    title: '', description: '', game_mode: 'Battle Royale', max_players: '50',
+    title: '', description: '', game_name: 'Free Fire', game_mode: 'Battle Royale', max_players: '50',
     entry_fee: '0', prize_pool: '0', start_time: '',
   });
 
@@ -116,6 +117,7 @@ const TournamentsPage = () => {
       const { error } = await supabase.from('tournaments').insert({
         title: newTournament.title,
         description: newTournament.description || null,
+        game_name: newTournament.game_name,
         game_mode: newTournament.game_mode,
         max_players: parseInt(newTournament.max_players),
         entry_fee: parseFloat(newTournament.entry_fee),
@@ -126,7 +128,7 @@ const TournamentsPage = () => {
       if (error) throw error;
       toast.success('Tournament created!');
       setShowCreateForm(false);
-      setNewTournament({ title: '', description: '', game_mode: 'Battle Royale', max_players: '50', entry_fee: '0', prize_pool: '0', start_time: '' });
+      setNewTournament({ title: '', description: '', game_name: 'Free Fire', game_mode: 'Battle Royale', max_players: '50', entry_fee: '0', prize_pool: '0', start_time: '' });
       fetchTournaments();
     } catch (error: any) {
       toast.error(error.message || 'Failed to create tournament');
@@ -256,6 +258,7 @@ const TournamentsPage = () => {
             <CardContent className="p-6 space-y-4">
               <h3 className="font-display font-bold text-lg">Create New Tournament</h3>
               <Input placeholder="Tournament Title *" value={newTournament.title} onChange={(e) => setNewTournament({...newTournament, title: e.target.value})} />
+              <Input placeholder="Game Name (e.g. Free Fire, PUBG, COD) *" value={newTournament.game_name} onChange={(e) => setNewTournament({...newTournament, game_name: e.target.value})} />
               <Textarea placeholder="Description (optional)" value={newTournament.description} onChange={(e) => setNewTournament({...newTournament, description: e.target.value})} />
               <div className="grid grid-cols-2 gap-3">
                 <Input placeholder="Game Mode" value={newTournament.game_mode} onChange={(e) => setNewTournament({...newTournament, game_mode: e.target.value})} />
@@ -305,7 +308,10 @@ const TournamentsPage = () => {
                 </div>
 
                 <CardContent className="p-4 space-y-3">
-                  <h3 className="font-display font-bold text-lg">{t.title}</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-display font-bold text-lg">{t.title}</h3>
+                    <Badge variant="outline" className="text-xs">{t.game_name}</Badge>
+                  </div>
                   {t.description && (
                     <p className="text-sm text-muted-foreground line-clamp-2">{t.description}</p>
                   )}

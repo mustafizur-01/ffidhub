@@ -10,6 +10,8 @@ interface Profile {
   referral_code: string;
   referred_by: string | null;
   referral_reward_claimed: boolean;
+  display_name: string | null;
+  avatar_url: string | null;
   created_at: string;
   updated_at: string;
 }
