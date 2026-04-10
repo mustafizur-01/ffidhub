@@ -423,7 +423,7 @@ const TournamentsPage = () => {
                         <Button
                           variant="gaming"
                           className="w-full"
-                          onClick={() => handleJoin(t)}
+                          onClick={() => openJoinDialog(t)}
                           disabled={joiningId === t.id}
                         >
                           {joiningId === t.id ? 'Joining...' : `Join Tournament${t.entry_fee > 0 ? ` (${formatPrice(t.entry_fee)})` : ''}`}
