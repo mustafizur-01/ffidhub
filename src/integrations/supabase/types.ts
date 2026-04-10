@@ -185,8 +185,10 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           balance: number
           created_at: string
+          display_name: string | null
           email: string
           id: string
           referral_code: string
@@ -196,8 +198,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          avatar_url?: string | null
           balance?: number
           created_at?: string
+          display_name?: string | null
           email: string
           id?: string
           referral_code: string
@@ -207,8 +211,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          avatar_url?: string | null
           balance?: number
           created_at?: string
+          display_name?: string | null
           email?: string
           id?: string
           referral_code?: string
@@ -298,6 +304,7 @@ export type Database = {
           description: string | null
           entry_fee: number
           game_mode: string
+          game_name: string
           id: string
           image_url: string | null
           max_players: number
@@ -316,6 +323,7 @@ export type Database = {
           description?: string | null
           entry_fee?: number
           game_mode?: string
+          game_name?: string
           id?: string
           image_url?: string | null
           max_players?: number
@@ -334,6 +342,7 @@ export type Database = {
           description?: string | null
           entry_fee?: number
           game_mode?: string
+          game_name?: string
           id?: string
           image_url?: string | null
           max_players?: number
