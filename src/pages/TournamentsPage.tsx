@@ -156,7 +156,7 @@ const TournamentsPage = () => {
     setJoinTarget(tournament);
     setFfName('');
     setFfUid('');
-    setJoinDialogOpen(true);
+    
   };
 
   const handleJoinConfirm = async () => {
@@ -168,7 +168,7 @@ const TournamentsPage = () => {
     }
 
     setJoiningId(joinTarget.id);
-    setJoinDialogOpen(false);
+    
     try {
       if (joinTarget.entry_fee > 0) {
         const newBalance = profile.balance - joinTarget.entry_fee;
