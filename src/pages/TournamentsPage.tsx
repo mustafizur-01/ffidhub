@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import AuthModal from '@/components/AuthModal';
 import { Trophy, Users, Calendar, IndianRupee, Gamepad2, Clock, CheckCircle, Plus, Crown, Key, Copy } from 'lucide-react';
 import { format } from 'date-fns';
@@ -43,6 +45,10 @@ const TournamentsPage = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [creating, setCreating] = useState(false);
+  
+  const [joinTarget, setJoinTarget] = useState<Tournament | null>(null);
+  const [ffName, setFfName] = useState('');
+  const [ffUid, setFfUid] = useState('');
   const [newTournament, setNewTournament] = useState({
     title: '', description: '', game_name: 'Free Fire', game_mode: 'Battle Royale', max_players: '50',
     entry_fee: '0', prize_pool: '0', start_time: '',
@@ -137,23 +143,35 @@ const TournamentsPage = () => {
     }
   };
 
-  const handleJoin = async (tournament: Tournament) => {
+  const openJoinDialog = (tournament: Tournament) => {
     if (!user) {
       setAuthModalOpen(true);
       return;
     }
-
     if (!profile) return;
-
     if (tournament.entry_fee > 0 && profile.balance < tournament.entry_fee) {
       toast.error('Insufficient balance! Please add money first.');
       return;
     }
+    setJoinTarget(tournament);
+    setFfName('');
+    setFfUid('');
+    
+  };
 
-    setJoiningId(tournament.id);
+  const handleJoinConfirm = async () => {
+    if (!user || !profile || !joinTarget) return;
+
+    if (!ffName.trim() || !ffUid.trim()) {
+      toast.error('Please enter your Free Fire Name and UID');
+      return;
+    }
+
+    setJoiningId(joinTarget.id);
+    
     try {
-      if (tournament.entry_fee > 0) {
-        const newBalance = profile.balance - tournament.entry_fee;
+      if (joinTarget.entry_fee > 0) {
+        const newBalance = profile.balance - joinTarget.entry_fee;
         const { error: balanceError } = await supabase
           .from('profiles')
           .update({ balance: newBalance })
@@ -163,7 +181,12 @@ const TournamentsPage = () => {
 
       const { error } = await supabase
         .from('tournament_participants')
-        .insert({ tournament_id: tournament.id, user_id: user.id });
+        .insert({
+          tournament_id: joinTarget.id,
+          user_id: user.id,
+          ff_name: ffName.trim(),
+          ff_uid: ffUid.trim(),
+        });
 
       if (error) throw error;
 
@@ -174,6 +197,7 @@ const TournamentsPage = () => {
       toast.error(error.message || 'Failed to join tournament');
     } finally {
       setJoiningId(null);
+      setJoinTarget(null);
     }
   };
 
@@ -399,7 +423,7 @@ const TournamentsPage = () => {
                         <Button
                           variant="gaming"
                           className="w-full"
-                          onClick={() => handleJoin(t)}
+                          onClick={() => openJoinDialog(t)}
                           disabled={joiningId === t.id}
                         >
                           {joiningId === t.id ? 'Joining...' : `Join Tournament${t.entry_fee > 0 ? ` (${formatPrice(t.entry_fee)})` : ''}`}
@@ -439,6 +463,37 @@ const TournamentsPage = () => {
           </div>
         )}
       </section>
+
+      {/* Join Dialog for FF Name & UID */}
+      <Dialog open={!!joinTarget} onOpenChange={(open) => { if (!open) setJoinTarget(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Enter Your Game Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-sm text-muted-foreground">
+              Tournament: <span className="font-semibold text-foreground">{joinTarget?.title}</span>
+            </p>
+            <div className="space-y-2">
+              <Label htmlFor="ff-name">Free Fire Name *</Label>
+              <Input id="ff-name" placeholder="Enter your in-game name" value={ffName} onChange={(e) => setFfName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ff-uid">Free Fire UID *</Label>
+              <Input id="ff-uid" placeholder="Enter your UID" value={ffUid} onChange={(e) => setFfUid(e.target.value)} />
+            </div>
+            {joinTarget && joinTarget.entry_fee > 0 && (
+              <p className="text-sm text-muted-foreground">Entry Fee: <span className="font-bold text-yellow-500">{formatPrice(joinTarget.entry_fee)}</span> will be deducted from your balance.</p>
+            )}
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setJoinTarget(null)}>Cancel</Button>
+              <Button variant="gaming" onClick={handleJoinConfirm} disabled={joiningId !== null}>
+                {joiningId !== null ? 'Joining...' : 'Join Now'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} defaultTab="login" />
     </div>

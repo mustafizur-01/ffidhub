@@ -270,18 +270,24 @@ export type Database = {
       }
       tournament_participants: {
         Row: {
+          ff_name: string | null
+          ff_uid: string | null
           id: string
           joined_at: string
           tournament_id: string
           user_id: string
         }
         Insert: {
+          ff_name?: string | null
+          ff_uid?: string | null
           id?: string
           joined_at?: string
           tournament_id: string
           user_id: string
         }
         Update: {
+          ff_name?: string | null
+          ff_uid?: string | null
           id?: string
           joined_at?: string
           tournament_id?: string
