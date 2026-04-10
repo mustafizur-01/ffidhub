@@ -17,6 +17,7 @@ interface Tournament {
   id: string;
   title: string;
   description: string | null;
+  game_name: string;
   game_mode: string;
   max_players: number;
   entry_fee: number;
@@ -43,7 +44,7 @@ const TournamentsPage = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newTournament, setNewTournament] = useState({
-    title: '', description: '', game_mode: 'Battle Royale', max_players: '50',
+    title: '', description: '', game_name: 'Free Fire', game_mode: 'Battle Royale', max_players: '50',
     entry_fee: '0', prize_pool: '0', start_time: '',
   });
 
@@ -116,6 +117,7 @@ const TournamentsPage = () => {
       const { error } = await supabase.from('tournaments').insert({
         title: newTournament.title,
         description: newTournament.description || null,
+        game_name: newTournament.game_name,
         game_mode: newTournament.game_mode,
         max_players: parseInt(newTournament.max_players),
         entry_fee: parseFloat(newTournament.entry_fee),
@@ -126,7 +128,7 @@ const TournamentsPage = () => {
       if (error) throw error;
       toast.success('Tournament created!');
       setShowCreateForm(false);
-      setNewTournament({ title: '', description: '', game_mode: 'Battle Royale', max_players: '50', entry_fee: '0', prize_pool: '0', start_time: '' });
+      setNewTournament({ title: '', description: '', game_name: 'Free Fire', game_mode: 'Battle Royale', max_players: '50', entry_fee: '0', prize_pool: '0', start_time: '' });
       fetchTournaments();
     } catch (error: any) {
       toast.error(error.message || 'Failed to create tournament');
