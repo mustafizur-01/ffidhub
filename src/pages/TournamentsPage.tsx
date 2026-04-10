@@ -258,6 +258,7 @@ const TournamentsPage = () => {
             <CardContent className="p-6 space-y-4">
               <h3 className="font-display font-bold text-lg">Create New Tournament</h3>
               <Input placeholder="Tournament Title *" value={newTournament.title} onChange={(e) => setNewTournament({...newTournament, title: e.target.value})} />
+              <Input placeholder="Game Name (e.g. Free Fire, PUBG, COD) *" value={newTournament.game_name} onChange={(e) => setNewTournament({...newTournament, game_name: e.target.value})} />
               <Textarea placeholder="Description (optional)" value={newTournament.description} onChange={(e) => setNewTournament({...newTournament, description: e.target.value})} />
               <div className="grid grid-cols-2 gap-3">
                 <Input placeholder="Game Mode" value={newTournament.game_mode} onChange={(e) => setNewTournament({...newTournament, game_mode: e.target.value})} />
