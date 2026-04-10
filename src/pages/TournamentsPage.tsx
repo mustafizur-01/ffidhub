@@ -143,23 +143,35 @@ const TournamentsPage = () => {
     }
   };
 
-  const handleJoin = async (tournament: Tournament) => {
+  const openJoinDialog = (tournament: Tournament) => {
     if (!user) {
       setAuthModalOpen(true);
       return;
     }
-
     if (!profile) return;
-
     if (tournament.entry_fee > 0 && profile.balance < tournament.entry_fee) {
       toast.error('Insufficient balance! Please add money first.');
       return;
     }
+    setJoinTarget(tournament);
+    setFfName('');
+    setFfUid('');
+    setJoinDialogOpen(true);
+  };
 
-    setJoiningId(tournament.id);
+  const handleJoinConfirm = async () => {
+    if (!user || !profile || !joinTarget) return;
+
+    if (!ffName.trim() || !ffUid.trim()) {
+      toast.error('Please enter your Free Fire Name and UID');
+      return;
+    }
+
+    setJoiningId(joinTarget.id);
+    setJoinDialogOpen(false);
     try {
-      if (tournament.entry_fee > 0) {
-        const newBalance = profile.balance - tournament.entry_fee;
+      if (joinTarget.entry_fee > 0) {
+        const newBalance = profile.balance - joinTarget.entry_fee;
         const { error: balanceError } = await supabase
           .from('profiles')
           .update({ balance: newBalance })
@@ -169,7 +181,12 @@ const TournamentsPage = () => {
 
       const { error } = await supabase
         .from('tournament_participants')
-        .insert({ tournament_id: tournament.id, user_id: user.id });
+        .insert({
+          tournament_id: joinTarget.id,
+          user_id: user.id,
+          ff_name: ffName.trim(),
+          ff_uid: ffUid.trim(),
+        });
 
       if (error) throw error;
 
@@ -180,6 +197,7 @@ const TournamentsPage = () => {
       toast.error(error.message || 'Failed to join tournament');
     } finally {
       setJoiningId(null);
+      setJoinTarget(null);
     }
   };
 
