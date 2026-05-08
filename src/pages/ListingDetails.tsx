@@ -177,13 +177,15 @@ const ListingDetails = () => {
   };
 
   const handleWhatsAppContact = () => {
-    if (listing) {
+    if (listing && credentials?.contact_number) {
       const message = `Hi! I'm interested in your Free Fire MAX ID (Level ${listing.id_level}) listed at ${formatPrice(listing.price)}`;
       const encodedMessage = encodeURIComponent(message);
       window.open(
-        `https://wa.me/91${listing.contact_number}?text=${encodedMessage}`,
+        `https://wa.me/91${credentials.contact_number}?text=${encodedMessage}`,
         '_blank'
       );
+    } else {
+      toast.error('Contact number is only visible after a purchase is approved.');
     }
   };
 
