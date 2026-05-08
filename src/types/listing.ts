@@ -6,13 +6,13 @@ export interface IdListing {
   login_method: LoginMethod;
   key_items: string;
   price: number;
-  contact_number: string;
+  contact_number?: string | null;
   image_url: string | null;
   is_email_binded: boolean;
-  binded_email: string | null;
-  security_code: string | null;
-  account_login_id: string | null;
-  account_password: string | null;
+  binded_email?: string | null;
+  security_code?: string | null;
+  account_login_id?: string | null;
+  account_password?: string | null;
   seller_id: string | null;
   created_at: string;
   updated_at: string;
