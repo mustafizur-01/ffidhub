@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 
 // 👉 Update these with your real contact details
 const SUPPORT_WHATSAPP = '918101230080'; // include country code, no +
-const SUPPORT_EMAIL = 'support@ffmaxidmarket.com';
+const SUPPORT_EMAIL = 'ffmaxidmarket@gmail.com';
 const SUPPORT_INSTAGRAM = 'ff_id_.market'; // handle without @
 
 const SupportSection = () => {
