@@ -151,6 +151,7 @@ const ListingDetails = () => {
       
       setPurchase({ id: data.purchase.id, status: 'approved' as const });
       await refreshProfile();
+      await fetchCredentials();
       toast.success('Purchase successful! Account details are now visible.');
     } catch (error: any) {
       toast.error(error.message || 'Failed to purchase');
