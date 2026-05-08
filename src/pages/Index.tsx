@@ -34,7 +34,7 @@ const Index = () => {
     try {
       let query = supabase
         .from('id_listings')
-        .select('*')
+        .select('id, id_level, login_method, key_items, price, image_url, is_email_binded, seller_id, created_at, updated_at')
         .order('created_at', { ascending: false });
 
       if (filters.search) {
