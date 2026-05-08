@@ -181,13 +181,6 @@ export type Database = {
             referencedRelation: "id_listings"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "messages_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "id_listings_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       profiles: {
@@ -271,13 +264,6 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "id_listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "purchases_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "id_listings_public"
             referencedColumns: ["id"]
           },
         ]
@@ -418,45 +404,7 @@ export type Database = {
       }
     }
     Views: {
-      id_listings_public: {
-        Row: {
-          created_at: string | null
-          id: string | null
-          id_level: number | null
-          image_url: string | null
-          is_email_binded: boolean | null
-          key_items: string | null
-          login_method: Database["public"]["Enums"]["login_method"] | null
-          price: number | null
-          seller_id: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string | null
-          id_level?: number | null
-          image_url?: string | null
-          is_email_binded?: boolean | null
-          key_items?: string | null
-          login_method?: Database["public"]["Enums"]["login_method"] | null
-          price?: number | null
-          seller_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string | null
-          id_level?: number | null
-          image_url?: string | null
-          is_email_binded?: boolean | null
-          key_items?: string | null
-          login_method?: Database["public"]["Enums"]["login_method"] | null
-          price?: number | null
-          seller_id?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       generate_referral_code: { Args: never; Returns: string }
