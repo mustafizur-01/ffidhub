@@ -311,10 +311,10 @@ const ListingDetails = () => {
                 <div className="space-y-3 bg-secondary/30 rounded-lg p-4">
                   <p className="text-xs font-medium text-green-400 mb-3">🔓 Details Unlocked — Copy and save these!</p>
                   {[
-                    { label: 'Login ID', value: listing.account_login_id },
-                    { label: 'Password', value: listing.account_password },
-                    { label: 'Bound Email', value: listing.binded_email },
-                    { label: 'Security Code', value: listing.security_code },
+                    { label: 'Login ID', value: credentials?.account_login_id },
+                    { label: 'Password', value: credentials?.account_password },
+                    { label: 'Bound Email', value: credentials?.binded_email },
+                    { label: 'Security Code', value: credentials?.security_code },
                   ].filter(item => item.value).map((item) => (
                     <div key={item.label} className="flex items-center justify-between bg-background/50 rounded-md p-3">
                       <div>
