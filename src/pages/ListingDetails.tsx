@@ -66,7 +66,7 @@ const ListingDetails = () => {
     try {
       const { data, error } = await supabase
         .from('id_listings')
-        .select('*')
+        .select('id, id_level, login_method, key_items, price, image_url, is_email_binded, seller_id, created_at, updated_at')
         .eq('id', id)
         .maybeSingle();
 
@@ -76,6 +76,23 @@ const ListingDetails = () => {
       console.error('Error fetching listing:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCredentials = async () => {
+    if (!user || !id) return;
+    try {
+      const { data, error } = await supabase.rpc('get_listing_credentials', {
+        _listing_id: id,
+      });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setCredentials(data[0]);
+      } else {
+        setCredentials(null);
+      }
+    } catch (error) {
+      console.error('Error fetching credentials:', error);
     }
   };
 
