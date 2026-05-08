@@ -408,6 +408,16 @@ export type Database = {
     }
     Functions: {
       generate_referral_code: { Args: never; Returns: string }
+      get_listing_credentials: {
+        Args: { _listing_id: string }
+        Returns: {
+          account_login_id: string
+          account_password: string
+          binded_email: string
+          contact_number: string
+          security_code: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
