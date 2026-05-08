@@ -2,9 +2,9 @@ import { MessageCircle, Mail, Instagram, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // 👉 Update these with your real contact details
-const SUPPORT_WHATSAPP = '919999999999'; // include country code, no +
-const SUPPORT_EMAIL = 'support@ffidhub.com';
-const SUPPORT_INSTAGRAM = 'ffidhub'; // handle without @
+const SUPPORT_WHATSAPP = '918101230080'; // include country code, no +
+const SUPPORT_EMAIL = 'support@ffmaxidmarket.com';
+const SUPPORT_INSTAGRAM = 'ff_id_.market'; // handle without @
 
 const SupportSection = () => {
   const whatsappUrl = `https://wa.me/${SUPPORT_WHATSAPP}?text=${encodeURIComponent(
