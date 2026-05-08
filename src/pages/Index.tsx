@@ -209,8 +209,6 @@ const Index = () => {
           )}
         </div>
       </section>
-
-      <SupportSection />
     </div>
   );
 };
