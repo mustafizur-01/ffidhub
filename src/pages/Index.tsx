@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import ListingCard from '@/components/ListingCard';
 import SearchFilters from '@/components/SearchFilters';
-import SupportSection from '@/components/SupportSection';
 import { supabase } from '@/integrations/supabase/client';
 import { IdListing, ListingFilters } from '@/types/listing';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -210,8 +209,6 @@ const Index = () => {
           )}
         </div>
       </section>
-
-      <SupportSection />
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import SupportSection from "@/components/SupportSection";
 import Index from "./pages/Index";
 import SellPage from "./pages/SellPage";
 import ListingDetails from "./pages/ListingDetails";
@@ -39,6 +40,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <SupportSection />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
