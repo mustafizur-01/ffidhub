@@ -72,22 +72,35 @@ const EditListingModal = ({ listing, open, onClose, onSuccess }: EditListingModa
     },
   });
 
-  // Reset form when listing changes
+  // Reset form when listing changes; fetch sensitive credentials via secure RPC
   useEffect(() => {
-    if (listing) {
+    if (!listing) return;
+
+    let cancelled = false;
+    (async () => {
+      const { data: creds } = await supabase.rpc('get_listing_credentials', {
+        _listing_id: listing.id,
+      });
+      const c = creds && creds.length > 0 ? creds[0] : null;
+      if (cancelled) return;
+
       form.reset({
         id_level: listing.id_level,
         login_method: listing.login_method,
         key_items: listing.key_items,
         price: Number(listing.price),
-        contact_number: listing.contact_number,
+        contact_number: c?.contact_number || listing.contact_number || '',
         is_email_binded: listing.is_email_binded,
-        binded_email: listing.binded_email || '',
-        security_code: listing.security_code || '',
+        binded_email: c?.binded_email || listing.binded_email || '',
+        security_code: c?.security_code || listing.security_code || '',
       });
       setImagePreview(listing.image_url);
       setImageFile(null);
-    }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [listing, form]);
 
   const isEmailBinded = form.watch('is_email_binded');
