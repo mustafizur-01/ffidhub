@@ -59,6 +59,7 @@ const ListingDetails = () => {
   useEffect(() => {
     if (id && user) {
       fetchPurchaseStatus();
+      fetchCredentials();
     }
   }, [id, user]);
 
