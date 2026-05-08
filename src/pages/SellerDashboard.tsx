@@ -55,7 +55,7 @@ const SellerDashboard = () => {
       // Fetch listings
       const { data: listingsData, error: listingsError } = await supabase
         .from('id_listings')
-        .select('*')
+        .select('id, id_level, login_method, key_items, price, image_url, is_email_binded, seller_id, created_at, updated_at')
         .eq('seller_id', user.id)
         .order('created_at', { ascending: false });
 
