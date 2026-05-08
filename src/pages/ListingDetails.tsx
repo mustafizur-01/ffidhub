@@ -35,6 +35,13 @@ const ListingDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { user, profile, refreshProfile } = useAuth();
   const [listing, setListing] = useState<IdListing | null>(null);
+  const [credentials, setCredentials] = useState<{
+    contact_number: string | null;
+    account_login_id: string | null;
+    account_password: string | null;
+    binded_email: string | null;
+    security_code: string | null;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchase, setPurchase] = useState<Purchase | null>(null);
   const [purchasing, setPurchasing] = useState(false);
