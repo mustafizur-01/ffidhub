@@ -63,10 +63,12 @@ const SupportSection = () => {
     }
 
     setSubmitting(true);
-    const { error } = await supabase.from('support_reports').insert({
-      ...parsed.data,
-      user_id: user?.id ?? null,
-    });
+    const { error } = await supabase.from('support_reports').insert([
+      {
+        ...parsed.data,
+        user_id: user?.id ?? null,
+      },
+    ]);
     setSubmitting(false);
 
     if (error) {
