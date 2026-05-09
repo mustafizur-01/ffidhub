@@ -144,8 +144,38 @@ const AdminDashboard = () => {
       fetchTransactions();
       fetchDepositRequests();
       fetchTournaments();
+      fetchReports();
     }
   }, [isAdmin]);
+
+  const fetchReports = async () => {
+    try {
+      setReportsLoading(true);
+      const { data, error } = await supabase
+        .from('support_reports')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setReports(data || []);
+    } catch (e: any) {
+      toast.error('Failed to load reports');
+    } finally {
+      setReportsLoading(false);
+    }
+  };
+
+  const handleUpdateReportStatus = async (id: string, status: string) => {
+    const { error } = await supabase.from('support_reports').update({ status }).eq('id', id);
+    if (error) return toast.error('Update failed');
+    toast.success(`Marked as ${status}`);
+    fetchReports();
+  };
+
+  const handleDeleteReport = async (id: string) => {
+    const { error } = await supabase.from('support_reports').delete().eq('id', id);
+    if (error) return toast.error('Delete failed');
+    toast.success('Report deleted');
+    fetchReports();
 
   const fetchStats = async () => {
     try {
