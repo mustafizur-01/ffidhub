@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AuthModal from '@/components/AuthModal';
 import { Trophy, Users, Calendar, IndianRupee, Gamepad2, Clock, CheckCircle, Plus, Crown, Key, Copy } from 'lucide-react';
 import { format } from 'date-fns';
@@ -285,7 +286,20 @@ const TournamentsPage = () => {
               <Input placeholder="Game Name (e.g. Free Fire, PUBG, COD) *" value={newTournament.game_name} onChange={(e) => setNewTournament({...newTournament, game_name: e.target.value})} />
               <Textarea placeholder="Description (optional)" value={newTournament.description} onChange={(e) => setNewTournament({...newTournament, description: e.target.value})} />
               <div className="grid grid-cols-2 gap-3">
-                <Input placeholder="Game Mode" value={newTournament.game_mode} onChange={(e) => setNewTournament({...newTournament, game_mode: e.target.value})} />
+                <Select value={newTournament.game_mode} onValueChange={(v) => setNewTournament({...newTournament, game_mode: v})}>
+                  <SelectTrigger><SelectValue placeholder="Game Mode" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Battle Royale">Battle Royale</SelectItem>
+                    <SelectItem value="Clash Squad">Clash Squad</SelectItem>
+                    <SelectItem value="CS Custom">CS Custom</SelectItem>
+                    <SelectItem value="Lone Wolf">Lone Wolf</SelectItem>
+                    <SelectItem value="Craftland 1v1">Craftland 1v1</SelectItem>
+                    <SelectItem value="Craftland 2v2">Craftland 2v2</SelectItem>
+                    <SelectItem value="Craftland 4v4">Craftland 4v4</SelectItem>
+                    <SelectItem value="Free For All">Free For All</SelectItem>
+                    <SelectItem value="Custom Room">Custom Room</SelectItem>
+                  </SelectContent>
+                </Select>
                 <Input type="number" placeholder="Max Players" value={newTournament.max_players} onChange={(e) => setNewTournament({...newTournament, max_players: e.target.value})} />
                 <Input type="number" placeholder="Entry Fee (₹)" value={newTournament.entry_fee} onChange={(e) => setNewTournament({...newTournament, entry_fee: e.target.value})} />
                 <Input type="number" placeholder="Prize Pool (₹)" value={newTournament.prize_pool} onChange={(e) => setNewTournament({...newTournament, prize_pool: e.target.value})} />

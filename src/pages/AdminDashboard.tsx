@@ -793,7 +793,20 @@ const AdminDashboard = () => {
                 <Input placeholder="Title *" value={newTournament.title} onChange={(e) => setNewTournament({...newTournament, title: e.target.value})} />
                 <Textarea placeholder="Description" value={newTournament.description} onChange={(e) => setNewTournament({...newTournament, description: e.target.value})} />
                 <div className="grid grid-cols-2 gap-3">
-                  <Input placeholder="Game Mode" value={newTournament.game_mode} onChange={(e) => setNewTournament({...newTournament, game_mode: e.target.value})} />
+                  <Select value={newTournament.game_mode} onValueChange={(v) => setNewTournament({...newTournament, game_mode: v})}>
+                    <SelectTrigger><SelectValue placeholder="Game Mode" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Battle Royale">Battle Royale</SelectItem>
+                      <SelectItem value="Clash Squad">Clash Squad</SelectItem>
+                      <SelectItem value="CS Custom">CS Custom</SelectItem>
+                      <SelectItem value="Lone Wolf">Lone Wolf</SelectItem>
+                      <SelectItem value="Craftland 1v1">Craftland 1v1</SelectItem>
+                      <SelectItem value="Craftland 2v2">Craftland 2v2</SelectItem>
+                      <SelectItem value="Craftland 4v4">Craftland 4v4</SelectItem>
+                      <SelectItem value="Free For All">Free For All</SelectItem>
+                      <SelectItem value="Custom Room">Custom Room</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <Input type="number" placeholder="Max Players" value={newTournament.max_players} onChange={(e) => setNewTournament({...newTournament, max_players: e.target.value})} />
                   <Input type="number" placeholder="Entry Fee (₹)" value={newTournament.entry_fee} onChange={(e) => setNewTournament({...newTournament, entry_fee: e.target.value})} />
                   <Input type="number" placeholder="Prize Pool (₹)" value={newTournament.prize_pool} onChange={(e) => setNewTournament({...newTournament, prize_pool: e.target.value})} />
