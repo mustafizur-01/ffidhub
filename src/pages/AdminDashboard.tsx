@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye, Trash2, Wallet, IndianRupee, Plus, Minus, History, ArrowUpCircle, ArrowDownCircle, CheckCircle, XCircle, Clock, Trophy, Crown } from 'lucide-react';
+import { MessageSquare, Shield, Search, Users, ShoppingBag, Eye, Trash2, Wallet, IndianRupee, Plus, Minus, History, ArrowUpCircle, ArrowDownCircle, CheckCircle, XCircle, Clock, Trophy, Crown, LifeBuoy, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
@@ -37,6 +37,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
 interface Message {
@@ -110,6 +111,12 @@ const AdminDashboard = () => {
   });
   const [creatingTournament, setCreatingTournament] = useState(false);
 
+  // Support reports state
+  const [reports, setReports] = useState<any[]>([]);
+  const [reportsLoading, setReportsLoading] = useState(true);
+  const [reportFilter, setReportFilter] = useState<'all' | 'open' | 'in_progress' | 'resolved' | 'closed'>('all');
+  const [reportSearch, setReportSearch] = useState('');
+
   const [stats, setStats] = useState({
     totalMessages: 0,
     unreadMessages: 0,
@@ -138,8 +145,39 @@ const AdminDashboard = () => {
       fetchTransactions();
       fetchDepositRequests();
       fetchTournaments();
+      fetchReports();
     }
   }, [isAdmin]);
+
+  const fetchReports = async () => {
+    try {
+      setReportsLoading(true);
+      const { data, error } = await supabase
+        .from('support_reports')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setReports(data || []);
+    } catch (e: any) {
+      toast.error('Failed to load reports');
+    } finally {
+      setReportsLoading(false);
+    }
+  };
+
+  const handleUpdateReportStatus = async (id: string, status: string) => {
+    const { error } = await supabase.from('support_reports').update({ status }).eq('id', id);
+    if (error) return toast.error('Update failed');
+    toast.success(`Marked as ${status}`);
+    fetchReports();
+  };
+
+  const handleDeleteReport = async (id: string) => {
+    const { error } = await supabase.from('support_reports').delete().eq('id', id);
+    if (error) return toast.error('Delete failed');
+    toast.success('Report deleted');
+    fetchReports();
+  };
 
   const fetchStats = async () => {
     try {
@@ -911,6 +949,181 @@ const AdminDashboard = () => {
                   </TableBody>
                 </Table>
               </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Support Reports */}
+        <Card className="glass-card mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between gap-2">
+              <span className="flex items-center gap-2">
+                <LifeBuoy className="h-5 w-5 text-primary" />
+                Support Reports
+                <Badge variant="secondary" className="ml-2">
+                  {reports.filter((r) => r.status === 'open').length} open
+                </Badge>
+              </span>
+              <Button size="sm" variant="outline" onClick={fetchReports}>
+                Refresh
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-3 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search subject, email, or message..."
+                  value={reportSearch}
+                  onChange={(e) => setReportSearch(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <Select value={reportFilter} onValueChange={(v: any) => setReportFilter(v)}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="resolved">Resolved</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {reportsLoading ? (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-24 w-full" />
+                ))}
+              </div>
+            ) : (
+              (() => {
+                const filtered = reports.filter((r) => {
+                  if (reportFilter !== 'all' && r.status !== reportFilter) return false;
+                  if (reportSearch) {
+                    const q = reportSearch.toLowerCase();
+                    return (
+                      r.subject?.toLowerCase().includes(q) ||
+                      r.contact_email?.toLowerCase().includes(q) ||
+                      r.message?.toLowerCase().includes(q)
+                    );
+                  }
+                  return true;
+                });
+                if (filtered.length === 0) {
+                  return (
+                    <div className="text-center py-10 text-muted-foreground">
+                      <LifeBuoy className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                      No reports found
+                    </div>
+                  );
+                }
+                return (
+                  <div className="space-y-3">
+                    {filtered.map((r) => {
+                      const statusColors: Record<string, string> = {
+                        open: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+                        in_progress: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+                        resolved: 'bg-green-500/20 text-green-400 border-green-500/30',
+                        closed: 'bg-muted text-muted-foreground border-border',
+                      };
+                      return (
+                        <div
+                          key={r.id}
+                          className="p-4 border border-border rounded-lg bg-card/50 space-y-3"
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-2">
+                            <div className="space-y-1 min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h4 className="font-semibold truncate">{r.subject}</h4>
+                                <Badge variant="outline" className="text-xs capitalize">
+                                  {r.category}
+                                </Badge>
+                                <Badge className={`text-xs capitalize ${statusColors[r.status] || ''}`}>
+                                  {r.status?.replace('_', ' ')}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                                <span className="flex items-center gap-1">
+                                  <Mail className="h-3 w-3" />
+                                  <a
+                                    href={`mailto:${r.contact_email}?subject=Re:%20${encodeURIComponent(r.subject)}`}
+                                    className="hover:text-primary underline-offset-2 hover:underline"
+                                  >
+                                    {r.contact_email}
+                                  </a>
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {format(new Date(r.created_at), 'PP p')}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <p className="text-sm whitespace-pre-wrap text-foreground/90 bg-muted/30 p-3 rounded-md">
+                            {r.message}
+                          </p>
+
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Select
+                              value={r.status}
+                              onValueChange={(v) => handleUpdateReportStatus(r.id, v)}
+                            >
+                              <SelectTrigger className="w-[160px] h-8 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="open">Open</SelectItem>
+                                <SelectItem value="in_progress">In Progress</SelectItem>
+                                <SelectItem value="resolved">Resolved</SelectItem>
+                                <SelectItem value="closed">Closed</SelectItem>
+                              </SelectContent>
+                            </Select>
+
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              asChild
+                              className="h-8"
+                            >
+                              <a href={`mailto:${r.contact_email}?subject=Re:%20${encodeURIComponent(r.subject)}`}>
+                                <Mail className="h-3 w-3" /> Reply
+                              </a>
+                            </Button>
+
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="sm" variant="ghost" className="h-8 text-destructive">
+                                  <Trash2 className="h-3 w-3" /> Delete
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete this report?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDeleteReport(r.id)}>
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()
             )}
           </CardContent>
         </Card>
