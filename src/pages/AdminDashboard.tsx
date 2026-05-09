@@ -110,6 +110,12 @@ const AdminDashboard = () => {
   });
   const [creatingTournament, setCreatingTournament] = useState(false);
 
+  // Support reports state
+  const [reports, setReports] = useState<any[]>([]);
+  const [reportsLoading, setReportsLoading] = useState(true);
+  const [reportFilter, setReportFilter] = useState<'all' | 'open' | 'in_progress' | 'resolved' | 'closed'>('all');
+  const [reportSearch, setReportSearch] = useState('');
+
   const [stats, setStats] = useState({
     totalMessages: 0,
     unreadMessages: 0,
