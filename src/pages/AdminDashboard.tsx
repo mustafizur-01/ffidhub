@@ -176,6 +176,7 @@ const AdminDashboard = () => {
     if (error) return toast.error('Delete failed');
     toast.success('Report deleted');
     fetchReports();
+  };
 
   const fetchStats = async () => {
     try {
