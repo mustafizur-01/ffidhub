@@ -63,9 +63,13 @@ const SupportSection = () => {
     }
 
     setSubmitting(true);
+    const { contact_email, category, subject, message } = parsed.data;
     const { error } = await supabase.from('support_reports').insert([
       {
-        ...parsed.data,
+        contact_email,
+        category,
+        subject,
+        message,
         user_id: user?.id ?? null,
       },
     ]);
