@@ -268,6 +268,45 @@ export type Database = {
           },
         ]
       }
+      support_reports: {
+        Row: {
+          admin_note: string | null
+          category: string
+          contact_email: string
+          created_at: string
+          id: string
+          message: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_note?: string | null
+          category?: string
+          contact_email: string
+          created_at?: string
+          id?: string
+          message: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_note?: string | null
+          category?: string
+          contact_email?: string
+          created_at?: string
+          id?: string
+          message?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       tournament_participants: {
         Row: {
           ff_name: string | null
