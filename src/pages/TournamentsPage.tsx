@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AuthModal from '@/components/AuthModal';
-import { Trophy, Users, Calendar, IndianRupee, Gamepad2, Clock, CheckCircle, Plus, Crown, Key, Copy } from 'lucide-react';
+import { Trophy, Users, Calendar, IndianRupee, Gamepad2, Clock, CheckCircle, Plus, Crown, Key, Copy, ImagePlus, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -52,8 +52,10 @@ const TournamentsPage = () => {
   const [ffUid, setFfUid] = useState('');
   const [newTournament, setNewTournament] = useState({
     title: '', description: '', game_name: 'Free Fire', game_mode: 'Battle Royale', max_players: '50',
-    entry_fee: '0', prize_pool: '0', start_time: '',
+    entry_fee: '0', prize_pool: '0', start_time: '', image_url: '',
   });
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTournaments();
@@ -121,6 +123,21 @@ const TournamentsPage = () => {
     }
     setCreating(true);
     try {
+      let uploadedImageUrl: string | null = null;
+
+      if (coverFile) {
+        const fileExt = coverFile.name.split('.').pop();
+        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+        const { error: uploadError, data: uploadData } = await supabase.storage
+          .from('tournament-covers')
+          .upload(fileName, coverFile, { cacheControl: '3600', upsert: false });
+        if (uploadError) throw uploadError;
+        const { data: publicUrlData } = supabase.storage
+          .from('tournament-covers')
+          .getPublicUrl(fileName);
+        uploadedImageUrl = publicUrlData.publicUrl;
+      }
+
       const { error } = await supabase.from('tournaments').insert({
         title: newTournament.title,
         description: newTournament.description || null,
@@ -131,11 +148,14 @@ const TournamentsPage = () => {
         prize_pool: parseFloat(newTournament.prize_pool),
         start_time: newTournament.start_time,
         created_by: user.id,
+        image_url: uploadedImageUrl,
       });
       if (error) throw error;
       toast.success('Tournament created!');
       setShowCreateForm(false);
-      setNewTournament({ title: '', description: '', game_name: 'Free Fire', game_mode: 'Battle Royale', max_players: '50', entry_fee: '0', prize_pool: '0', start_time: '' });
+      setNewTournament({ title: '', description: '', game_name: 'Free Fire', game_mode: 'Battle Royale', max_players: '50', entry_fee: '0', prize_pool: '0', start_time: '', image_url: '' });
+      setCoverFile(null);
+      setCoverPreview(null);
       fetchTournaments();
     } catch (error: any) {
       toast.error(error.message || 'Failed to create tournament');
@@ -285,6 +305,41 @@ const TournamentsPage = () => {
               <Input placeholder="Tournament Title *" value={newTournament.title} onChange={(e) => setNewTournament({...newTournament, title: e.target.value})} />
               <Input placeholder="Game Name (e.g. Free Fire, PUBG, COD) *" value={newTournament.game_name} onChange={(e) => setNewTournament({...newTournament, game_name: e.target.value})} />
               <Textarea placeholder="Description (optional)" value={newTournament.description} onChange={(e) => setNewTournament({...newTournament, description: e.target.value})} />
+
+              {/* Cover Image Upload */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Cover Image</Label>
+                {coverPreview ? (
+                  <div className="relative rounded-lg overflow-hidden border border-border aspect-video">
+                    <img src={coverPreview} alt="Cover preview" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => { setCoverFile(null); setCoverPreview(null); }}
+                      className="absolute top-2 right-2 p-1 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center gap-2 w-full h-32 rounded-lg border-2 border-dashed border-border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors">
+                    <ImagePlus className="h-8 w-8 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Click to upload cover image</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setCoverFile(file);
+                          setCoverPreview(URL.createObjectURL(file));
+                        }
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <Select value={newTournament.game_mode} onValueChange={(v) => setNewTournament({...newTournament, game_mode: v})}>
                   <SelectTrigger><SelectValue placeholder="Game Mode" /></SelectTrigger>
