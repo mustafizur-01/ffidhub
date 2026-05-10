@@ -137,7 +137,7 @@ const TournamentsPage = () => {
       if (error) throw error;
       toast.success('Tournament created!');
       setShowCreateForm(false);
-      setNewTournament({ title: '', description: '', game_name: 'Free Fire', game_mode: 'Battle Royale', max_players: '50', entry_fee: '0', prize_pool: '0', start_time: '' });
+      setNewTournament({ title: '', description: '', game_name: 'Free Fire', game_mode: 'Battle Royale', max_players: '50', entry_fee: '0', prize_pool: '0', start_time: '', image_url: '' });
       fetchTournaments();
     } catch (error: any) {
       toast.error(error.message || 'Failed to create tournament');
