@@ -52,8 +52,10 @@ const TournamentsPage = () => {
   const [ffUid, setFfUid] = useState('');
   const [newTournament, setNewTournament] = useState({
     title: '', description: '', game_name: 'Free Fire', game_mode: 'Battle Royale', max_players: '50',
-    entry_fee: '0', prize_pool: '0', start_time: '',
+    entry_fee: '0', prize_pool: '0', start_time: '', image_url: '',
   });
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTournaments();
