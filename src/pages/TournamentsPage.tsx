@@ -305,6 +305,41 @@ const TournamentsPage = () => {
               <Input placeholder="Tournament Title *" value={newTournament.title} onChange={(e) => setNewTournament({...newTournament, title: e.target.value})} />
               <Input placeholder="Game Name (e.g. Free Fire, PUBG, COD) *" value={newTournament.game_name} onChange={(e) => setNewTournament({...newTournament, game_name: e.target.value})} />
               <Textarea placeholder="Description (optional)" value={newTournament.description} onChange={(e) => setNewTournament({...newTournament, description: e.target.value})} />
+
+              {/* Cover Image Upload */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Cover Image</Label>
+                {coverPreview ? (
+                  <div className="relative rounded-lg overflow-hidden border border-border aspect-video">
+                    <img src={coverPreview} alt="Cover preview" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => { setCoverFile(null); setCoverPreview(null); }}
+                      className="absolute top-2 right-2 p-1 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center gap-2 w-full h-32 rounded-lg border-2 border-dashed border-border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors">
+                    <ImagePlus className="h-8 w-8 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Click to upload cover image</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setCoverFile(file);
+                          setCoverPreview(URL.createObjectURL(file));
+                        }
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <Select value={newTournament.game_mode} onValueChange={(v) => setNewTournament({...newTournament, game_mode: v})}>
                   <SelectTrigger><SelectValue placeholder="Game Mode" /></SelectTrigger>
