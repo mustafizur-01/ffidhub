@@ -123,6 +123,21 @@ const TournamentsPage = () => {
     }
     setCreating(true);
     try {
+      let uploadedImageUrl: string | null = null;
+
+      if (coverFile) {
+        const fileExt = coverFile.name.split('.').pop();
+        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+        const { error: uploadError, data: uploadData } = await supabase.storage
+          .from('tournament-covers')
+          .upload(fileName, coverFile, { cacheControl: '3600', upsert: false });
+        if (uploadError) throw uploadError;
+        const { data: publicUrlData } = supabase.storage
+          .from('tournament-covers')
+          .getPublicUrl(fileName);
+        uploadedImageUrl = publicUrlData.publicUrl;
+      }
+
       const { error } = await supabase.from('tournaments').insert({
         title: newTournament.title,
         description: newTournament.description || null,
@@ -133,11 +148,14 @@ const TournamentsPage = () => {
         prize_pool: parseFloat(newTournament.prize_pool),
         start_time: newTournament.start_time,
         created_by: user.id,
+        image_url: uploadedImageUrl,
       });
       if (error) throw error;
       toast.success('Tournament created!');
       setShowCreateForm(false);
       setNewTournament({ title: '', description: '', game_name: 'Free Fire', game_mode: 'Battle Royale', max_players: '50', entry_fee: '0', prize_pool: '0', start_time: '', image_url: '' });
+      setCoverFile(null);
+      setCoverPreview(null);
       fetchTournaments();
     } catch (error: any) {
       toast.error(error.message || 'Failed to create tournament');
