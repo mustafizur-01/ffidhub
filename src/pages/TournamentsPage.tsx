@@ -607,15 +607,8 @@ const TournamentsPage = () => {
               </Card>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-16">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-              <Trophy className="h-10 w-10 text-muted-foreground" />
-            </div>
-            <h3 className="font-display text-xl font-bold mb-2">No Tournaments Yet</h3>
-            <p className="text-muted-foreground">Check back later for upcoming tournaments!</p>
-          </div>
-        )}
+          );
+        })()}
       </section>
 
       {/* Join Dialog for FF Name & UID */}
