@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AuthModal from '@/components/AuthModal';
-import { Trophy, Users, Calendar, IndianRupee, Gamepad2, Clock, CheckCircle, Plus, Crown, Key, Copy, ImagePlus, X } from 'lucide-react';
+import { Trophy, Users, Calendar, IndianRupee, Gamepad2, Clock, CheckCircle, Plus, Crown, Key, Copy, ImagePlus, X, Timer } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -45,6 +46,26 @@ const TournamentsPage = () => {
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [filter, setFilter] = useState<'all' | 'mine'>('all');
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const formatCountdown = (target: string) => {
+    const diff = new Date(target).getTime() - now;
+    if (diff <= 0) return 'Started';
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    if (d > 0) return `${d}d ${h}h ${m}m`;
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    return `${m}m ${s}s`;
+  };
+
   const [creating, setCreating] = useState(false);
   
   const [joinTarget, setJoinTarget] = useState<Tournament | null>(null);
@@ -373,164 +394,199 @@ const TournamentsPage = () => {
 
       {/* Tournaments List */}
       <section className="container py-10">
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="card-gaming overflow-hidden">
-                <Skeleton className="h-40 w-full" />
-                <div className="p-4 space-y-3">
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                </div>
+        {user && (
+          <Tabs value={filter} onValueChange={(v) => setFilter(v as 'all' | 'mine')} className="mb-6">
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+              <TabsTrigger value="all">All Tournaments</TabsTrigger>
+              <TabsTrigger value="mine">
+                My Tournaments ({tournaments.filter(t => t.has_joined).length})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
+
+        {(() => {
+          const visible = filter === 'mine' ? tournaments.filter(t => t.has_joined) : tournaments;
+          if (loading) {
+            return (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="card-gaming overflow-hidden">
+                    <Skeleton className="h-40 w-full" />
+                    <div className="p-4 space-y-3">
+                      <Skeleton className="h-6 w-3/4" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        ) : tournaments.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tournaments.map((t) => (
-              <Card key={t.id} className="card-gaming overflow-hidden group">
-                {/* Image */}
-                <div className="relative h-40 bg-gradient-to-br from-primary/20 to-yellow-500/20 flex items-center justify-center">
-                  {t.image_url ? (
-                    <img src={t.image_url} alt={t.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <Trophy className="h-16 w-16 text-yellow-500/50" />
-                  )}
-                  <div className="absolute top-3 right-3">{getStatusBadge(t.status)}</div>
+            );
+          }
+          if (visible.length === 0) {
+            return (
+              <div className="text-center py-16">
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                  <Trophy className="h-10 w-10 text-muted-foreground" />
                 </div>
-
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-display font-bold text-lg">{t.title}</h3>
-                    <Badge variant="outline" className="text-xs">{t.game_name}</Badge>
-                  </div>
-                  {t.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">{t.description}</p>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                      <Gamepad2 className="h-4 w-4" />
-                      <span>{t.game_mode}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                      <Users className="h-4 w-4" />
-                      <span>{t.participant_count}/{t.max_players}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                      <IndianRupee className="h-4 w-4" />
-                      <span>Entry: {t.entry_fee > 0 ? formatPrice(t.entry_fee) : 'Free'}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-yellow-500">
-                      <Trophy className="h-4 w-4" />
-                      <span>Prize: {formatPrice(t.prize_pool)}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-muted-foreground col-span-2">
-                      <Calendar className="h-4 w-4" />
-                      <span>{format(new Date(t.start_time), 'MMM dd, yyyy hh:mm a')}</span>
-                    </div>
+                <h3 className="font-display text-xl font-bold mb-2">
+                  {filter === 'mine' ? "You haven't joined any tournaments yet" : 'No Tournaments Yet'}
+                </h3>
+                <p className="text-muted-foreground">
+                  {filter === 'mine' ? 'Browse all tournaments and join one to see it here!' : 'Check back later for upcoming tournaments!'}
+                </p>
+              </div>
+            );
+          }
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {visible.map((t) => (
+                <Card key={t.id} className="card-gaming overflow-hidden group">
+                  <div className="relative h-40 bg-gradient-to-br from-primary/20 to-yellow-500/20 flex items-center justify-center">
+                    {t.image_url ? (
+                      <img src={t.image_url} alt={t.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <Trophy className="h-16 w-16 text-yellow-500/50" />
+                    )}
+                    <div className="absolute top-3 right-3">{getStatusBadge(t.status)}</div>
                   </div>
 
-                  {/* Winner Display */}
-                  {t.winner_id && t.winner_email && (
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                      <Crown className="h-4 w-4 text-yellow-500" />
-                      <span className="text-sm font-medium text-yellow-500">Winner: {t.winner_email}</span>
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-display font-bold text-lg">{t.title}</h3>
+                      <Badge variant="outline" className="text-xs">{t.game_name}</Badge>
                     </div>
-                  )}
 
-                  {/* Room ID & Password - visible only to joined participants */}
-                  {t.has_joined && t.room_id && (
-                    <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 space-y-2">
-                      <div className="flex items-center gap-2 text-sm font-medium">
-                        <Key className="h-4 w-4 text-primary" />
-                        <span>Room Details</span>
+                    {t.has_joined && t.status === 'upcoming' && (
+                      <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                        <div className="flex items-center gap-2 text-sm font-medium text-yellow-500">
+                          <Timer className="h-4 w-4" />
+                          <span>Starts in</span>
+                        </div>
+                        <span className="font-mono font-bold text-yellow-500 text-sm">
+                          {formatCountdown(t.start_time)}
+                        </span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">Room ID:</span>
-                        <button
-                          className="flex items-center gap-1 text-sm font-mono font-bold hover:text-primary transition-colors"
-                          onClick={() => { navigator.clipboard.writeText(t.room_id!); toast.success('Room ID copied!'); }}
-                        >
-                          {t.room_id} <Copy className="h-3 w-3" />
-                        </button>
+                    )}
+
+                    {t.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">{t.description}</p>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Gamepad2 className="h-4 w-4" />
+                        <span>{t.game_mode}</span>
                       </div>
-                      {t.room_password && (
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Users className="h-4 w-4" />
+                        <span>{t.participant_count}/{t.max_players}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <IndianRupee className="h-4 w-4" />
+                        <span>Entry: {t.entry_fee > 0 ? formatPrice(t.entry_fee) : 'Free'}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-yellow-500">
+                        <Trophy className="h-4 w-4" />
+                        <span>Prize: {formatPrice(t.prize_pool)}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-muted-foreground col-span-2">
+                        <Calendar className="h-4 w-4" />
+                        <span>{format(new Date(t.start_time), 'MMM dd, yyyy hh:mm a')}</span>
+                      </div>
+                    </div>
+
+                    {t.winner_id && t.winner_email && (
+                      <div className="flex items-center gap-2 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                        <Crown className="h-4 w-4 text-yellow-500" />
+                        <span className="text-sm font-medium text-yellow-500">Winner: {t.winner_email}</span>
+                      </div>
+                    )}
+
+                    {t.has_joined && t.room_id && (
+                      <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 space-y-2">
+                        <div className="flex items-center gap-2 text-sm font-medium">
+                          <Key className="h-4 w-4 text-primary" />
+                          <span>Room Details</span>
+                        </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">Password:</span>
+                          <span className="text-xs text-muted-foreground">Room ID:</span>
                           <button
                             className="flex items-center gap-1 text-sm font-mono font-bold hover:text-primary transition-colors"
-                            onClick={() => { navigator.clipboard.writeText(t.room_password!); toast.success('Password copied!'); }}
+                            onClick={() => { navigator.clipboard.writeText(t.room_id!); toast.success('Room ID copied!'); }}
                           >
-                            {t.room_password} <Copy className="h-3 w-3" />
+                            {t.room_id} <Copy className="h-3 w-3" />
                           </button>
                         </div>
-                      )}
-                    </div>
-                  )}
+                        {t.room_password && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Password:</span>
+                            <button
+                              className="flex items-center gap-1 text-sm font-mono font-bold hover:text-primary transition-colors"
+                              onClick={() => { navigator.clipboard.writeText(t.room_password!); toast.success('Password copied!'); }}
+                            >
+                              {t.room_password} <Copy className="h-3 w-3" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
-                  {t.status === 'upcoming' && (
-                    <>
-                      {t.has_joined ? (
-                        <div className="flex gap-2">
-                          <Badge className="flex-1 justify-center py-2 bg-green-500/20 text-green-400 border-green-500/30">
-                            <CheckCircle className="h-4 w-4 mr-1" /> Joined
-                          </Badge>
+                    {t.status === 'upcoming' && (
+                      <>
+                        {t.has_joined ? (
+                          <div className="flex gap-2">
+                            <Badge className="flex-1 justify-center py-2 bg-green-500/20 text-green-400 border-green-500/30">
+                              <CheckCircle className="h-4 w-4 mr-1" /> Joined
+                            </Badge>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleLeave(t)}
+                              disabled={joiningId === t.id}
+                            >
+                              Leave
+                            </Button>
+                          </div>
+                        ) : t.participant_count! >= t.max_players ? (
+                          <Badge className="w-full justify-center py-2" variant="destructive">Full</Badge>
+                        ) : (
                           <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleLeave(t)}
+                            variant="gaming"
+                            className="w-full"
+                            onClick={() => openJoinDialog(t)}
                             disabled={joiningId === t.id}
                           >
-                            Leave
+                            {joiningId === t.id ? 'Joining...' : `Join Tournament${t.entry_fee > 0 ? ` (${formatPrice(t.entry_fee)})` : ''}`}
                           </Button>
-                        </div>
-                      ) : t.participant_count! >= t.max_players ? (
-                        <Badge className="w-full justify-center py-2" variant="destructive">Full</Badge>
-                      ) : (
-                        <Button
-                          variant="gaming"
-                          className="w-full"
-                          onClick={() => openJoinDialog(t)}
-                          disabled={joiningId === t.id}
-                        >
-                          {joiningId === t.id ? 'Joining...' : `Join Tournament${t.entry_fee > 0 ? ` (${formatPrice(t.entry_fee)})` : ''}`}
-                        </Button>
-                      )}
-                    </>
-                  )}
+                        )}
+                      </>
+                    )}
 
-                  {t.status === 'ongoing' && (
-                    <Badge className="w-full justify-center py-2 bg-green-500/20 text-green-400 border-green-500/30">
-                      Match In Progress
-                    </Badge>
-                  )}
+                    {t.status === 'ongoing' && (
+                      <Badge className="w-full justify-center py-2 bg-green-500/20 text-green-400 border-green-500/30">
+                        Match In Progress
+                      </Badge>
+                    )}
 
-                  {t.status === 'completed' && !t.winner_id && (
-                    <Badge className="w-full justify-center py-2" variant="secondary">
-                      Tournament Ended
-                    </Badge>
-                  )}
+                    {t.status === 'completed' && !t.winner_id && (
+                      <Badge className="w-full justify-center py-2" variant="secondary">
+                        Tournament Ended
+                      </Badge>
+                    )}
 
-                  {t.status === 'completed' && t.winner_id && !t.winner_email && (
-                    <Badge className="w-full justify-center py-2 bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-                      <Crown className="h-4 w-4 mr-1" /> Prize Distributed
-                    </Badge>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-              <Trophy className="h-10 w-10 text-muted-foreground" />
+                    {t.status === 'completed' && t.winner_id && !t.winner_email && (
+                      <Badge className="w-full justify-center py-2 bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                        <Crown className="h-4 w-4 mr-1" /> Prize Distributed
+                      </Badge>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-            <h3 className="font-display text-xl font-bold mb-2">No Tournaments Yet</h3>
-            <p className="text-muted-foreground">Check back later for upcoming tournaments!</p>
-          </div>
-        )}
+          );
+        })()}
+
       </section>
 
       {/* Join Dialog for FF Name & UID */}
