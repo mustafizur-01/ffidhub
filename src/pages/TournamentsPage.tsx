@@ -46,6 +46,26 @@ const TournamentsPage = () => {
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [filter, setFilter] = useState<'all' | 'mine'>('all');
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const formatCountdown = (target: string) => {
+    const diff = new Date(target).getTime() - now;
+    if (diff <= 0) return 'Started';
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    if (d > 0) return `${d}d ${h}h ${m}m`;
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    return `${m}m ${s}s`;
+  };
+
   const [creating, setCreating] = useState(false);
   
   const [joinTarget, setJoinTarget] = useState<Tournament | null>(null);
