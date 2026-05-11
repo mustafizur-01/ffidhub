@@ -394,22 +394,86 @@ const TournamentsPage = () => {
 
       {/* Tournaments List */}
       <section className="container py-10">
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="card-gaming overflow-hidden">
-                <Skeleton className="h-40 w-full" />
-                <div className="p-4 space-y-3">
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                </div>
+        {user && (
+          <Tabs value={filter} onValueChange={(v) => setFilter(v as 'all' | 'mine')} className="mb-6">
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+              <TabsTrigger value="all">All Tournaments</TabsTrigger>
+              <TabsTrigger value="mine">
+                My Tournaments ({tournaments.filter(t => t.has_joined).length})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
+
+        {(() => {
+          const visible = filter === 'mine' ? tournaments.filter(t => t.has_joined) : tournaments;
+          if (loading) {
+            return (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="card-gaming overflow-hidden">
+                    <Skeleton className="h-40 w-full" />
+                    <div className="p-4 space-y-3">
+                      <Skeleton className="h-6 w-3/4" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        ) : tournaments.length > 0 ? (
+            );
+          }
+          if (visible.length === 0) {
+            return (
+              <div className="text-center py-16">
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                  <Trophy className="h-10 w-10 text-muted-foreground" />
+                </div>
+                <h3 className="font-display text-xl font-bold mb-2">
+                  {filter === 'mine' ? "You haven't joined any tournaments yet" : 'No Tournaments Yet'}
+                </h3>
+                <p className="text-muted-foreground">
+                  {filter === 'mine' ? 'Browse all tournaments and join one to see it here!' : 'Check back later for upcoming tournaments!'}
+                </p>
+              </div>
+            );
+          }
+          return (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tournaments.map((t) => (
+            {visible.map((t) => (
+              <Card key={t.id} className="card-gaming overflow-hidden group">
+                {/* Image */}
+                <div className="relative h-40 bg-gradient-to-br from-primary/20 to-yellow-500/20 flex items-center justify-center">
+                  {t.image_url ? (
+                    <img src={t.image_url} alt={t.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <Trophy className="h-16 w-16 text-yellow-500/50" />
+                  )}
+                  <div className="absolute top-3 right-3">{getStatusBadge(t.status)}</div>
+                </div>
+
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-display font-bold text-lg">{t.title}</h3>
+                    <Badge variant="outline" className="text-xs">{t.game_name}</Badge>
+                  </div>
+
+                  {/* Countdown for joined upcoming tournaments */}
+                  {t.has_joined && t.status === 'upcoming' && (
+                    <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                      <div className="flex items-center gap-2 text-sm font-medium text-yellow-500">
+                        <Timer className="h-4 w-4" />
+                        <span>Starts in</span>
+                      </div>
+                      <span className="font-mono font-bold text-yellow-500 text-sm">
+                        {formatCountdown(t.start_time)}
+                      </span>
+                    </div>
+                  )}
+
+                  {t.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-2">{t.description}</p>
+                  )}
               <Card key={t.id} className="card-gaming overflow-hidden group">
                 {/* Image */}
                 <div className="relative h-40 bg-gradient-to-br from-primary/20 to-yellow-500/20 flex items-center justify-center">
