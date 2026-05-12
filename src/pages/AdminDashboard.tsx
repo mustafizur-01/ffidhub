@@ -61,6 +61,7 @@ interface UserProfile {
   user_id: string;
   email: string;
   balance: number;
+  is_verified_seller: boolean;
 }
 
 interface BalanceTransaction {
@@ -207,7 +208,7 @@ const AdminDashboard = () => {
       setUsersLoading(true);
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, user_id, email, balance')
+        .select('id, user_id, email, balance, is_verified_seller')
         .order('email', { ascending: true });
 
       if (error) throw error;
@@ -441,6 +442,25 @@ const AdminDashboard = () => {
       fetchTransactions();
     } catch (error: any) {
       toast.error(error.message || 'Failed to remove balance');
+    }
+  };
+
+  const handleToggleVerifiedSeller = async (target: UserProfile) => {
+    try {
+      const next = !target.is_verified_seller;
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_verified_seller: next })
+        .eq('id', target.id);
+      if (error) throw error;
+      toast.success(
+        next
+          ? `${target.email} marked as Verified Seller`
+          : `${target.email} verification removed`
+      );
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update verification');
     }
   };
 
@@ -1169,8 +1189,9 @@ const AdminDashboard = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Email</TableHead>
+                      <TableHead>Verification</TableHead>
                       <TableHead>Current Balance</TableHead>
-                      <TableHead className="w-[120px]">Actions</TableHead>
+                      <TableHead className="w-[260px]">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1178,13 +1199,26 @@ const AdminDashboard = () => {
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">{user.email}</TableCell>
                         <TableCell>
+                          {user.is_verified_seller ? (
+                            <Badge className="bg-blue-500/15 text-blue-400 border border-blue-500/30 gap-1">
+                              <CheckCircle className="h-3 w-3" />
+                              Verified Seller
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary" className="gap-1">
+                              <XCircle className="h-3 w-3" />
+                              Not Verified
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
                           <Badge variant="outline" className="font-mono">
                             <IndianRupee className="h-3 w-3 mr-1" />
                             {user.balance.toFixed(2)}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap">
                             <Button
                               variant="default"
                               size="sm"
@@ -1202,6 +1236,15 @@ const AdminDashboard = () => {
                             >
                               <Minus className="h-4 w-4" />
                               Remove
+                            </Button>
+                            <Button
+                              variant={user.is_verified_seller ? 'outline' : 'gaming'}
+                              size="sm"
+                              className="gap-1"
+                              onClick={() => handleToggleVerifiedSeller(user)}
+                            >
+                              <Shield className="h-4 w-4" />
+                              {user.is_verified_seller ? 'Unverify' : 'Verify'}
                             </Button>
                           </div>
                         </TableCell>

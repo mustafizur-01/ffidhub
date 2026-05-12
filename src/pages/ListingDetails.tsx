@@ -24,6 +24,7 @@ import { IdListing } from '@/types/listing';
 import { useAuth } from '@/hooks/useAuth';
 import AuthModal from '@/components/AuthModal';
 import MessageModal from '@/components/MessageModal';
+import VerifiedSellerBadge from '@/components/VerifiedSellerBadge';
 import { toast } from 'sonner';
 
 interface Purchase {
@@ -48,6 +49,7 @@ const ListingDetails = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [isSold, setIsSold] = useState(false);
+  const [isVerifiedSeller, setIsVerifiedSeller] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -72,7 +74,14 @@ const ListingDetails = () => {
         .maybeSingle();
 
       if (error) throw error;
-      setListing(data as IdListing);
+      const fetched = data as IdListing | null;
+      setListing(fetched);
+      if (fetched?.seller_id) {
+        const { data: verified } = await supabase.rpc('is_verified_seller', {
+          _user_id: fetched.seller_id,
+        });
+        setIsVerifiedSeller(!!verified);
+      }
     } catch (error) {
       console.error('Error fetching listing:', error);
     } finally {
@@ -274,6 +283,11 @@ const ListingDetails = () => {
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
                 Listed on {formatDate(listing.created_at)}
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-border flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Seller status:</span>
+                <VerifiedSellerBadge verified={isVerifiedSeller} size="md" />
               </div>
             </div>
 

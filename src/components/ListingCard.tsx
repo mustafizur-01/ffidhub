@@ -3,13 +3,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Shield, ShieldOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import VerifiedSellerBadge from '@/components/VerifiedSellerBadge';
 
 interface ListingCardProps {
   listing: IdListing;
   isSold?: boolean;
+  isVerifiedSeller?: boolean;
 }
 
-const ListingCard = ({ listing, isSold = false }: ListingCardProps) => {
+const ListingCard = ({ listing, isSold = false, isVerifiedSeller = false }: ListingCardProps) => {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -66,8 +68,12 @@ const ListingCard = ({ listing, isSold = false }: ListingCardProps) => {
 
       {/* Content Section */}
       <div className="p-4 space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <span className="badge-method">{listing.login_method}</span>
+          <VerifiedSellerBadge verified={isVerifiedSeller} />
+        </div>
+
+        <div className="flex items-center justify-end">
           <span className="font-display text-xl font-bold text-primary">
             {formatPrice(listing.price)}
           </span>
