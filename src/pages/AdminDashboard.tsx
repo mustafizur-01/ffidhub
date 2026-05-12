@@ -445,7 +445,25 @@ const AdminDashboard = () => {
     }
   };
 
-  const fetchDepositRequests = async () => {
+  const handleToggleVerifiedSeller = async (target: UserProfile) => {
+    try {
+      const next = !target.is_verified_seller;
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_verified_seller: next })
+        .eq('id', target.id);
+      if (error) throw error;
+      toast.success(
+        next
+          ? `${target.email} marked as Verified Seller`
+          : `${target.email} verification removed`
+      );
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update verification');
+    }
+  };
+
     try {
       setDepositsLoading(true);
       const { data, error } = await supabase
