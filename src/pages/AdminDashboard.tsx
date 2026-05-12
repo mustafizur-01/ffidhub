@@ -61,6 +61,7 @@ interface UserProfile {
   user_id: string;
   email: string;
   balance: number;
+  is_verified_seller: boolean;
 }
 
 interface BalanceTransaction {
