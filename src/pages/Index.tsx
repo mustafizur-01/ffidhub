@@ -187,6 +187,33 @@ const Index = () => {
         <div className="space-y-8">
           <SearchFilters filters={filters} onFiltersChange={setFilters} />
 
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-2">
+              <Button
+                variant={verifiedOnly ? 'gaming' : 'outline'}
+                size="sm"
+                onClick={() => setVerifiedOnly((v) => !v)}
+                className="gap-2"
+              >
+                <BadgeCheck className="h-4 w-4" />
+                {verifiedOnly ? 'Showing Verified Only' : 'Verified Sellers Only'}
+              </Button>
+              {verifiedOnly && (
+                <Button variant="ghost" size="sm" onClick={() => setVerifiedOnly(false)}>
+                  Clear
+                </Button>
+              )}
+            </div>
+            <span className="text-sm text-muted-foreground">
+              {(() => {
+                const count = verifiedOnly
+                  ? listings.filter(l => l.seller_id && verifiedSellerIds.has(l.seller_id)).length
+                  : listings.length;
+                return `${count} ${count === 1 ? 'listing' : 'listings'}`;
+              })()}
+            </span>
+          </div>
+
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[...Array(8)].map((_, i) => (
@@ -200,18 +227,23 @@ const Index = () => {
                 </div>
               ))}
             </div>
-          ) : listings.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {listings.map((listing) => (
-                <ListingCard
-                  key={listing.id}
-                  listing={listing}
-                  isSold={soldListingIds.has(listing.id)}
-                  isVerifiedSeller={!!listing.seller_id && verifiedSellerIds.has(listing.seller_id)}
-                />
-              ))}
-            </div>
-          ) : (
+          ) : (() => {
+            const visible = verifiedOnly
+              ? listings.filter(l => l.seller_id && verifiedSellerIds.has(l.seller_id))
+              : listings;
+            return visible.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {visible.map((listing) => (
+                  <ListingCard
+                    key={listing.id}
+                    listing={listing}
+                    isSold={soldListingIds.has(listing.id)}
+                    isVerifiedSeller={!!listing.seller_id && verifiedSellerIds.has(listing.seller_id)}
+                  />
+                ))}
+              </div>
+            ) : null;
+          })()}
             <div className="text-center py-16">
               <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
                 <Flame className="h-10 w-10 text-muted-foreground" />
