@@ -284,7 +284,6 @@ const ListingDetails = () => {
                 <Calendar className="h-4 w-4" />
                 Listed on {formatDate(listing.created_at)}
               </div>
-            </div>
 
               <div className="mt-4 pt-4 border-t border-border flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Seller status:</span>
