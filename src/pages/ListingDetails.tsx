@@ -24,6 +24,7 @@ import { IdListing } from '@/types/listing';
 import { useAuth } from '@/hooks/useAuth';
 import AuthModal from '@/components/AuthModal';
 import MessageModal from '@/components/MessageModal';
+import VerifiedSellerBadge from '@/components/VerifiedSellerBadge';
 import { toast } from 'sonner';
 
 interface Purchase {
