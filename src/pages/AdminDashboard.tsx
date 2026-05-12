@@ -208,7 +208,7 @@ const AdminDashboard = () => {
       setUsersLoading(true);
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, user_id, email, balance')
+        .select('id, user_id, email, balance, is_verified_seller')
         .order('email', { ascending: true });
 
       if (error) throw error;
