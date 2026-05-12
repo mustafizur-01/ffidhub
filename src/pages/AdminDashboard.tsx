@@ -464,6 +464,7 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchDepositRequests = async () => {
     try {
       setDepositsLoading(true);
       const { data, error } = await supabase
