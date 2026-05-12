@@ -17,6 +17,7 @@ const Index = () => {
   const [soldListingIds, setSoldListingIds] = useState<Set<string>>(new Set());
   const [verifiedSellerIds, setVerifiedSellerIds] = useState<Set<string>>(new Set());
   const [upcomingTournaments, setUpcomingTournaments] = useState<any[]>([]);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<ListingFilters>({
     search: '',
