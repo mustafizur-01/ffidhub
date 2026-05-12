@@ -60,16 +60,24 @@ const Index = () => {
       const fetchedListings = (data as IdListing[]) || [];
       setListings(fetchedListings);
 
-      // Check sold status for each listing using RPC
+      // Check sold + verified seller status for each listing
       if (fetchedListings.length > 0) {
         const soldSet = new Set<string>();
+        const verifiedSet = new Set<string>();
         await Promise.all(
           fetchedListings.map(async (listing) => {
-            const { data: isSold } = await supabase.rpc('is_listing_sold', { _listing_id: listing.id });
+            const [{ data: isSold }, { data: isVerified }] = await Promise.all([
+              supabase.rpc('is_listing_sold', { _listing_id: listing.id }),
+              listing.seller_id
+                ? supabase.rpc('is_verified_seller', { _user_id: listing.seller_id })
+                : Promise.resolve({ data: false }),
+            ]);
             if (isSold) soldSet.add(listing.id);
+            if (isVerified && listing.seller_id) verifiedSet.add(listing.seller_id);
           })
         );
         setSoldListingIds(soldSet);
+        setVerifiedSellerIds(verifiedSet);
       }
     } catch (error) {
       console.error('Error fetching listings:', error);
