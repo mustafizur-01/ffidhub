@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Flame, TrendingUp, Shield, Zap, Trophy, Users, IndianRupee } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Flame, TrendingUp, Shield, Zap, Trophy, Users, IndianRupee, BadgeCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import ListingCard from '@/components/ListingCard';
