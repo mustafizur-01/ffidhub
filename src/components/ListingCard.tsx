@@ -3,13 +3,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Shield, ShieldOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import VerifiedSellerBadge from '@/components/VerifiedSellerBadge';
 
 interface ListingCardProps {
   listing: IdListing;
   isSold?: boolean;
+  isVerifiedSeller?: boolean;
 }
 
-const ListingCard = ({ listing, isSold = false }: ListingCardProps) => {
+const ListingCard = ({ listing, isSold = false, isVerifiedSeller = false }: ListingCardProps) => {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
