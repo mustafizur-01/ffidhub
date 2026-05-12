@@ -74,7 +74,14 @@ const ListingDetails = () => {
         .maybeSingle();
 
       if (error) throw error;
-      setListing(data as IdListing);
+      const fetched = data as IdListing | null;
+      setListing(fetched);
+      if (fetched?.seller_id) {
+        const { data: verified } = await supabase.rpc('is_verified_seller', {
+          _user_id: fetched.seller_id,
+        });
+        setIsVerifiedSeller(!!verified);
+      }
     } catch (error) {
       console.error('Error fetching listing:', error);
     } finally {
