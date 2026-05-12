@@ -191,6 +191,7 @@ export type Database = {
           display_name: string | null
           email: string
           id: string
+          is_verified_seller: boolean
           referral_code: string
           referral_reward_claimed: boolean
           referred_by: string | null
@@ -204,6 +205,7 @@ export type Database = {
           display_name?: string | null
           email: string
           id?: string
+          is_verified_seller?: boolean
           referral_code: string
           referral_reward_claimed?: boolean
           referred_by?: string | null
@@ -217,6 +219,7 @@ export type Database = {
           display_name?: string | null
           email?: string
           id?: string
+          is_verified_seller?: boolean
           referral_code?: string
           referral_reward_claimed?: boolean
           referred_by?: string | null
