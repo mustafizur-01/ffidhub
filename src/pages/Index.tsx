@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 const Index = () => {
   const [listings, setListings] = useState<IdListing[]>([]);
   const [soldListingIds, setSoldListingIds] = useState<Set<string>>(new Set());
+  const [verifiedSellerIds, setVerifiedSellerIds] = useState<Set<string>>(new Set());
   const [upcomingTournaments, setUpcomingTournaments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<ListingFilters>({
