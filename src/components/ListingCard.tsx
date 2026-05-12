@@ -68,8 +68,12 @@ const ListingCard = ({ listing, isSold = false, isVerifiedSeller = false }: List
 
       {/* Content Section */}
       <div className="p-4 space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <span className="badge-method">{listing.login_method}</span>
+          <VerifiedSellerBadge verified={isVerifiedSeller} />
+        </div>
+
+        <div className="flex items-center justify-end">
           <span className="font-display text-xl font-bold text-primary">
             {formatPrice(listing.price)}
           </span>
