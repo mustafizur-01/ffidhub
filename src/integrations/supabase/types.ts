@@ -449,6 +449,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_referral_reward: { Args: never; Returns: Json }
       generate_referral_code: { Args: never; Returns: string }
       get_listing_credentials: {
         Args: { _listing_id: string }
