@@ -323,6 +323,8 @@ const ProfilePage = () => {
 
             <p className="text-xs text-muted-foreground text-center">
               Earn ₹10 for every friend who signs up with your code!
+              <br />
+              <span className="text-primary">Bonus is credited 24 hours after your friend signs up and signs in again.</span>
             </p>
           </div>
         </div>
