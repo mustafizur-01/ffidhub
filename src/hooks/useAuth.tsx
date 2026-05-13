@@ -65,7 +65,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         if (session?.user) {
           // Use setTimeout to avoid Supabase auth deadlock
-          setTimeout(() => fetchProfile(session.user.id), 0);
+          setTimeout(async () => {
+            // Try to claim the referral reward (only succeeds after 24h)
+            try {
+              await supabase.rpc('claim_referral_reward' as any);
+            } catch (e) {
+              console.warn('claim_referral_reward failed', e);
+            }
+            fetchProfile(session.user.id);
+          }, 0);
         } else {
           setProfile(null);
         }
