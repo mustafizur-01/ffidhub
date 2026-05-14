@@ -19,6 +19,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import DailyRewardCard from '@/components/DailyRewardCard';
 
 interface ReferralStats {
   totalReferrals: number;
@@ -327,6 +328,9 @@ const ProfilePage = () => {
               <span className="text-primary">Bonus is credited 24 hours after your friend signs up and signs in again.</span>
             </p>
           </div>
+
+          {/* Daily Bonus Card */}
+          <DailyRewardCard />
         </div>
       </div>
     </div>

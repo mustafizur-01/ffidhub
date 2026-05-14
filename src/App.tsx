@@ -16,6 +16,7 @@ import AddMoneyPage from "./pages/AddMoneyPage";
 import PurchaseHistory from "./pages/PurchaseHistory";
 import TournamentsPage from "./pages/TournamentsPage";
 import MiniGamesPage from "./pages/MiniGamesPage";
+import FavoritesPage from "./pages/FavoritesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/my-purchases" element={<PurchaseHistory />} />
             <Route path="/tournaments" element={<TournamentsPage />} />
             <Route path="/games" element={<MiniGamesPage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

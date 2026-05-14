@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Eye, Shield, ShieldOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import VerifiedSellerBadge from '@/components/VerifiedSellerBadge';
+import FavoriteButton from '@/components/FavoriteButton';
 
 interface ListingCardProps {
   listing: IdListing;
@@ -51,7 +52,7 @@ const ListingCard = ({ listing, isSold = false, isVerifiedSeller = false }: List
         </div>
 
         {/* Email Bind Status */}
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-3 right-3 flex items-center gap-2">
           {listing.is_email_binded ? (
             <Badge className="bg-gaming-success/90 text-white border-0 flex items-center gap-1">
               <Shield className="h-3 w-3" />
@@ -64,6 +65,13 @@ const ListingCard = ({ listing, isSold = false, isVerifiedSeller = false }: List
             </Badge>
           )}
         </div>
+
+        {/* Favorite Heart */}
+        {!isSold && (
+          <div className="absolute bottom-3 right-3 z-20">
+            <FavoriteButton listingId={listing.id} />
+          </div>
+        )}
       </div>
 
       {/* Content Section */}
