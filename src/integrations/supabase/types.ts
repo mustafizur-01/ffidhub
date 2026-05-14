@@ -91,6 +91,27 @@ export type Database = {
         }
         Relationships: []
       }
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          listing_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listing_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listing_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       id_listings: {
         Row: {
           account_login_id: string | null
@@ -192,6 +213,7 @@ export type Database = {
           email: string
           id: string
           is_verified_seller: boolean
+          last_daily_claim_at: string | null
           referral_code: string
           referral_reward_claimed: boolean
           referred_by: string | null
@@ -206,6 +228,7 @@ export type Database = {
           email: string
           id?: string
           is_verified_seller?: boolean
+          last_daily_claim_at?: string | null
           referral_code: string
           referral_reward_claimed?: boolean
           referred_by?: string | null
@@ -220,6 +243,7 @@ export type Database = {
           email?: string
           id?: string
           is_verified_seller?: boolean
+          last_daily_claim_at?: string | null
           referral_code?: string
           referral_reward_claimed?: boolean
           referred_by?: string | null
@@ -449,6 +473,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_daily_reward: { Args: never; Returns: Json }
       claim_referral_reward: { Args: never; Returns: Json }
       generate_referral_code: { Args: never; Returns: string }
       get_listing_credentials: {
