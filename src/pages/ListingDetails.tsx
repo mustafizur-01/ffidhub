@@ -25,6 +25,7 @@ import { useAuth } from '@/hooks/useAuth';
 import AuthModal from '@/components/AuthModal';
 import MessageModal from '@/components/MessageModal';
 import VerifiedSellerBadge from '@/components/VerifiedSellerBadge';
+import SellerReviews from '@/components/SellerReviews';
 import { toast } from 'sonner';
 
 interface Purchase {
@@ -492,6 +493,14 @@ const ListingDetails = () => {
               <MessageCircle className="h-5 w-5" />
               Contact Seller on WhatsApp
             </Button>
+
+            {listing.seller_id && (
+              <SellerReviews
+                sellerId={listing.seller_id}
+                listingId={listing.id}
+                canReview={purchase?.status === 'approved' && listing.seller_id !== user?.id}
+              />
+            )}
           </div>
         </div>
       </div>
