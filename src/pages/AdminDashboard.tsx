@@ -101,6 +101,8 @@ const AdminDashboard = () => {
   const [removeNote, setRemoveNote] = useState('');
   const [depositRequests, setDepositRequests] = useState<any[]>([]);
   const [depositsLoading, setDepositsLoading] = useState(true);
+  const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
+  const [withdrawalsLoading, setWithdrawalsLoading] = useState(true);
   
   // Tournament state
   const [tournamentsList, setTournamentsList] = useState<any[]>([]);
@@ -145,6 +147,7 @@ const AdminDashboard = () => {
       fetchUsers();
       fetchTransactions();
       fetchDepositRequests();
+      fetchWithdrawalRequests();
       fetchTournaments();
       fetchReports();
     }
@@ -511,6 +514,77 @@ const AdminDashboard = () => {
       fetchDepositRequests(); fetchStats();
     } catch (error: any) {
       toast.error(error.message || 'Failed to reject deposit');
+    }
+  };
+
+  const fetchWithdrawalRequests = async () => {
+    try {
+      setWithdrawalsLoading(true);
+      const { data, error } = await supabase
+        .from('withdrawal_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      const enriched = await Promise.all((data || []).map(async (w: any) => {
+        const { data: profile } = await supabase.from('profiles').select('email').eq('user_id', w.user_id).maybeSingle();
+        return { ...w, user_email: profile?.email || 'Unknown' };
+      }));
+      setWithdrawalRequests(enriched);
+    } catch (error) {
+      console.error('Error fetching withdrawal requests:', error);
+    } finally {
+      setWithdrawalsLoading(false);
+    }
+  };
+
+  const handleApproveWithdrawal = async (w: any) => {
+    try {
+      // Balance was already deducted on request. Just mark approved and log txn.
+      const { data: profile } = await supabase.from('profiles').select('id, balance').eq('user_id', w.user_id).maybeSingle();
+      if (profile) {
+        await supabase.from('balance_transactions').insert({
+          profile_id: profile.id,
+          admin_id: user!.id,
+          amount: 0,
+          transaction_type: 'withdrawal_paid',
+          previous_balance: profile.balance,
+          new_balance: profile.balance,
+          note: `Withdrawal ₹${w.amount} paid to ${w.upi_id}`,
+        });
+      }
+      await supabase.from('withdrawal_requests').update({ status: 'approved' }).eq('id', w.id);
+      toast.success(`Withdrawal marked paid for ${w.user_email}`);
+      fetchWithdrawalRequests();
+      fetchTransactions();
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to approve');
+    }
+  };
+
+  const handleRejectWithdrawal = async (w: any) => {
+    try {
+      // Refund the held balance
+      const { data: profile } = await supabase.from('profiles').select('id, balance').eq('user_id', w.user_id).maybeSingle();
+      if (profile) {
+        const newBalance = Number(profile.balance) + Number(w.amount);
+        await supabase.from('profiles').update({ balance: newBalance }).eq('id', profile.id);
+        await supabase.from('balance_transactions').insert({
+          profile_id: profile.id,
+          admin_id: user!.id,
+          amount: Number(w.amount),
+          transaction_type: 'withdrawal_refund',
+          previous_balance: Number(profile.balance),
+          new_balance: newBalance,
+          note: `Withdrawal rejected, ₹${w.amount} refunded`,
+        });
+      }
+      await supabase.from('withdrawal_requests').update({ status: 'rejected', admin_note: 'Rejected by admin' }).eq('id', w.id);
+      toast.success('Withdrawal rejected & refunded');
+      fetchWithdrawalRequests();
+      fetchUsers();
+      fetchTransactions();
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to reject');
     }
   };
 
