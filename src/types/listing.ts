@@ -25,9 +25,14 @@ export interface VerifiedMember {
   created_at: string;
 }
 
+export type ListingSort = 'newest' | 'price_asc' | 'price_desc' | 'level_desc';
+
 export interface ListingFilters {
   search: string;
   minPrice: number | null;
   maxPrice: number | null;
   loginMethod: LoginMethod | null;
+  minLevel?: number | null;
+  emailBinded?: 'any' | 'yes' | 'no';
+  sort?: ListingSort;
 }
