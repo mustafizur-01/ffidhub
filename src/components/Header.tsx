@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import UserMenu from './UserMenu';
 import AuthModal from './AuthModal';
+import NotificationBell from './NotificationBell';
 
 const Header = () => {
   const location = useLocation();
@@ -76,6 +77,7 @@ const Header = () => {
               <div className="w-24 h-9 bg-muted animate-pulse rounded-md" />
             ) : user ? (
               <>
+                <NotificationBell />
                 <Link to="/my-listings" className="relative">
                   <Button variant="ghost" size="icon">
                     <MessageCircle className="h-5 w-5" />

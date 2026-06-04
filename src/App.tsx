@@ -17,6 +17,7 @@ import PurchaseHistory from "./pages/PurchaseHistory";
 import TournamentsPage from "./pages/TournamentsPage";
 import MiniGamesPage from "./pages/MiniGamesPage";
 import FavoritesPage from "./pages/FavoritesPage";
+import WithdrawPage from "./pages/WithdrawPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/tournaments" element={<TournamentsPage />} />
             <Route path="/games" element={<MiniGamesPage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/withdraw" element={<WithdrawPage />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
