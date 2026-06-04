@@ -101,6 +101,8 @@ const AdminDashboard = () => {
   const [removeNote, setRemoveNote] = useState('');
   const [depositRequests, setDepositRequests] = useState<any[]>([]);
   const [depositsLoading, setDepositsLoading] = useState(true);
+  const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
+  const [withdrawalsLoading, setWithdrawalsLoading] = useState(true);
   
   // Tournament state
   const [tournamentsList, setTournamentsList] = useState<any[]>([]);
@@ -145,6 +147,7 @@ const AdminDashboard = () => {
       fetchUsers();
       fetchTransactions();
       fetchDepositRequests();
+      fetchWithdrawalRequests();
       fetchTournaments();
       fetchReports();
     }
@@ -514,6 +517,77 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchWithdrawalRequests = async () => {
+    try {
+      setWithdrawalsLoading(true);
+      const { data, error } = await supabase
+        .from('withdrawal_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      const enriched = await Promise.all((data || []).map(async (w: any) => {
+        const { data: profile } = await supabase.from('profiles').select('email').eq('user_id', w.user_id).maybeSingle();
+        return { ...w, user_email: profile?.email || 'Unknown' };
+      }));
+      setWithdrawalRequests(enriched);
+    } catch (error) {
+      console.error('Error fetching withdrawal requests:', error);
+    } finally {
+      setWithdrawalsLoading(false);
+    }
+  };
+
+  const handleApproveWithdrawal = async (w: any) => {
+    try {
+      // Balance was already deducted on request. Just mark approved and log txn.
+      const { data: profile } = await supabase.from('profiles').select('id, balance').eq('user_id', w.user_id).maybeSingle();
+      if (profile) {
+        await supabase.from('balance_transactions').insert({
+          profile_id: profile.id,
+          admin_id: user!.id,
+          amount: 0,
+          transaction_type: 'withdrawal_paid',
+          previous_balance: profile.balance,
+          new_balance: profile.balance,
+          note: `Withdrawal ₹${w.amount} paid to ${w.upi_id}`,
+        });
+      }
+      await supabase.from('withdrawal_requests').update({ status: 'approved' }).eq('id', w.id);
+      toast.success(`Withdrawal marked paid for ${w.user_email}`);
+      fetchWithdrawalRequests();
+      fetchTransactions();
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to approve');
+    }
+  };
+
+  const handleRejectWithdrawal = async (w: any) => {
+    try {
+      // Refund the held balance
+      const { data: profile } = await supabase.from('profiles').select('id, balance').eq('user_id', w.user_id).maybeSingle();
+      if (profile) {
+        const newBalance = Number(profile.balance) + Number(w.amount);
+        await supabase.from('profiles').update({ balance: newBalance }).eq('id', profile.id);
+        await supabase.from('balance_transactions').insert({
+          profile_id: profile.id,
+          admin_id: user!.id,
+          amount: Number(w.amount),
+          transaction_type: 'withdrawal_refund',
+          previous_balance: Number(profile.balance),
+          new_balance: newBalance,
+          note: `Withdrawal rejected, ₹${w.amount} refunded`,
+        });
+      }
+      await supabase.from('withdrawal_requests').update({ status: 'rejected', admin_note: 'Rejected by admin' }).eq('id', w.id);
+      toast.success('Withdrawal rejected & refunded');
+      fetchWithdrawalRequests();
+      fetchUsers();
+      fetchTransactions();
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to reject');
+    }
+  };
+
   const fetchTournaments = async () => {
     try {
       setTournamentsLoading(true);
@@ -816,6 +890,72 @@ const AdminDashboard = () => {
                                 <CheckCircle className="h-3 w-3 mr-1" /> Approve
                               </Button>
                               <Button size="sm" variant="destructive" onClick={() => handleRejectDeposit(d)}>
+                                <XCircle className="h-3 w-3 mr-1" /> Reject
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Withdrawal Requests */}
+        <Card className="glass-card mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ArrowUpCircle className="h-5 w-5 text-blue-400" />
+              Withdrawal Requests
+              {withdrawalRequests.filter((w) => w.status === 'pending').length > 0 && (
+                <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                  {withdrawalRequests.filter((w) => w.status === 'pending').length} pending
+                </Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {withdrawalsLoading ? (
+              <Skeleton className="h-32" />
+            ) : withdrawalRequests.length === 0 ? (
+              <p className="text-center text-muted-foreground py-4">No withdrawal requests</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>UPI ID</TableHead>
+                      <TableHead>Holder</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {withdrawalRequests.map((w: any) => (
+                      <TableRow key={w.id}>
+                        <TableCell className="text-sm">{w.user_email}</TableCell>
+                        <TableCell className="font-bold">₹{w.amount}</TableCell>
+                        <TableCell className="font-mono text-xs">{w.upi_id}</TableCell>
+                        <TableCell className="text-sm">{w.account_holder}</TableCell>
+                        <TableCell>
+                          {w.status === 'approved' && <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Paid</Badge>}
+                          {w.status === 'rejected' && <Badge variant="destructive">Rejected</Badge>}
+                          {w.status === 'pending' && <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Pending</Badge>}
+                        </TableCell>
+                        <TableCell className="text-xs">{format(new Date(w.created_at), 'dd MMM yyyy, hh:mm a')}</TableCell>
+                        <TableCell>
+                          {w.status === 'pending' && (
+                            <div className="flex gap-2">
+                              <Button size="sm" onClick={() => handleApproveWithdrawal(w)} className="bg-green-600 hover:bg-green-700 text-white">
+                                <CheckCircle className="h-3 w-3 mr-1" /> Mark Paid
+                              </Button>
+                              <Button size="sm" variant="destructive" onClick={() => handleRejectWithdrawal(w)}>
                                 <XCircle className="h-3 w-3 mr-1" /> Reject
                               </Button>
                             </div>

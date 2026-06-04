@@ -204,6 +204,39 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read?: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -294,6 +327,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      seller_reviews: {
+        Row: {
+          buyer_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          listing_id: string
+          rating: number
+          seller_id: string
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          listing_id: string
+          rating: number
+          seller_id: string
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string
+          rating?: number
+          seller_id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       support_reports: {
         Row: {
@@ -468,6 +534,42 @@ export type Database = {
         }
         Relationships: []
       }
+      withdrawal_requests: {
+        Row: {
+          account_holder: string
+          admin_note: string | null
+          amount: number
+          created_at: string
+          id: string
+          status: string
+          updated_at: string
+          upi_id: string
+          user_id: string
+        }
+        Insert: {
+          account_holder: string
+          admin_note?: string | null
+          amount: number
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          upi_id: string
+          user_id: string
+        }
+        Update: {
+          account_holder?: string
+          admin_note?: string | null
+          amount?: number
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          upi_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -502,6 +604,10 @@ export type Database = {
       }
       is_listing_sold: { Args: { _listing_id: string }; Returns: boolean }
       is_verified_seller: { Args: { _user_id: string }; Returns: boolean }
+      request_withdrawal: {
+        Args: { _account_holder: string; _amount: number; _upi_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "user"

@@ -11,6 +11,7 @@ import {
   PlusCircle,
   ShoppingBag,
   Heart,
+  Banknote,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -90,6 +91,13 @@ const UserMenu = () => {
           <DropdownMenuItem className="cursor-pointer text-green-400">
             <PlusCircle className="h-4 w-4 mr-2" />
             Add Money
+          </DropdownMenuItem>
+        </Link>
+
+        <Link to="/withdraw">
+          <DropdownMenuItem className="cursor-pointer">
+            <Banknote className="h-4 w-4 mr-2" />
+            Withdraw
           </DropdownMenuItem>
         </Link>
 

@@ -24,6 +24,9 @@ const Index = () => {
     minPrice: null,
     maxPrice: null,
     loginMethod: null,
+    minLevel: null,
+    emailBinded: 'any',
+    sort: 'newest',
   });
 
   useEffect(() => {
@@ -36,8 +39,21 @@ const Index = () => {
     try {
       let query = supabase
         .from('id_listings')
-        .select('id, id_level, login_method, key_items, price, image_url, is_email_binded, seller_id, created_at, updated_at')
-        .order('created_at', { ascending: false });
+        .select('id, id_level, login_method, key_items, price, image_url, is_email_binded, seller_id, created_at, updated_at');
+
+      switch (filters.sort) {
+        case 'price_asc':
+          query = query.order('price', { ascending: true });
+          break;
+        case 'price_desc':
+          query = query.order('price', { ascending: false });
+          break;
+        case 'level_desc':
+          query = query.order('id_level', { ascending: false });
+          break;
+        default:
+          query = query.order('created_at', { ascending: false });
+      }
 
       if (filters.search) {
         query = query.ilike('key_items', `%${filters.search}%`);
@@ -53,6 +69,16 @@ const Index = () => {
 
       if (filters.loginMethod) {
         query = query.eq('login_method', filters.loginMethod);
+      }
+
+      if (filters.minLevel != null) {
+        query = query.gte('id_level', filters.minLevel);
+      }
+
+      if (filters.emailBinded === 'yes') {
+        query = query.eq('is_email_binded', true);
+      } else if (filters.emailBinded === 'no') {
+        query = query.eq('is_email_binded', false);
       }
 
       const { data, error } = await query;
