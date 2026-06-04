@@ -486,6 +486,13 @@ export type Database = {
           security_code: string
         }[]
       }
+      get_tournament_credentials: {
+        Args: { _tournament_id: string }
+        Returns: {
+          room_id: string
+          room_password: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
