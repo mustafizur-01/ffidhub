@@ -904,6 +904,72 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
+        {/* Withdrawal Requests */}
+        <Card className="glass-card mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ArrowUpCircle className="h-5 w-5 text-blue-400" />
+              Withdrawal Requests
+              {withdrawalRequests.filter((w) => w.status === 'pending').length > 0 && (
+                <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                  {withdrawalRequests.filter((w) => w.status === 'pending').length} pending
+                </Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {withdrawalsLoading ? (
+              <Skeleton className="h-32" />
+            ) : withdrawalRequests.length === 0 ? (
+              <p className="text-center text-muted-foreground py-4">No withdrawal requests</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>UPI ID</TableHead>
+                      <TableHead>Holder</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {withdrawalRequests.map((w: any) => (
+                      <TableRow key={w.id}>
+                        <TableCell className="text-sm">{w.user_email}</TableCell>
+                        <TableCell className="font-bold">₹{w.amount}</TableCell>
+                        <TableCell className="font-mono text-xs">{w.upi_id}</TableCell>
+                        <TableCell className="text-sm">{w.account_holder}</TableCell>
+                        <TableCell>
+                          {w.status === 'approved' && <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Paid</Badge>}
+                          {w.status === 'rejected' && <Badge variant="destructive">Rejected</Badge>}
+                          {w.status === 'pending' && <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Pending</Badge>}
+                        </TableCell>
+                        <TableCell className="text-xs">{format(new Date(w.created_at), 'dd MMM yyyy, hh:mm a')}</TableCell>
+                        <TableCell>
+                          {w.status === 'pending' && (
+                            <div className="flex gap-2">
+                              <Button size="sm" onClick={() => handleApproveWithdrawal(w)} className="bg-green-600 hover:bg-green-700 text-white">
+                                <CheckCircle className="h-3 w-3 mr-1" /> Mark Paid
+                              </Button>
+                              <Button size="sm" variant="destructive" onClick={() => handleRejectWithdrawal(w)}>
+                                <XCircle className="h-3 w-3 mr-1" /> Reject
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Tournament Management */}
         <Card className="glass-card mb-8">
           <CardHeader>
