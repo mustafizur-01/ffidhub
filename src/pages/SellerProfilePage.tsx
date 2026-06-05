@@ -68,7 +68,8 @@ const SellerProfilePage = () => {
           .order('created_at', { ascending: false }),
       ]);
 
-      setProfile((prof as SellerProfile) || null);
+      const profArr = (prof as SellerProfile[] | null) || [];
+      setProfile(profArr[0] || null);
       setReviews((rev as Review[]) || []);
 
       const listingsData = (list as IdListing[]) || [];
