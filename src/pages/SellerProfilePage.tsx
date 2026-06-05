@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Loader2, Star, ArrowLeft, Package, ShieldCheck } from 'lucide-react';
+import { Loader2, Star, ArrowLeft, Package, ShieldCheck, MessageCircle, TrendingUp, ThumbsUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { IdListing } from '@/types/listing';
 import ListingCard from '@/components/ListingCard';
@@ -41,12 +41,20 @@ const Stars = ({ value, size = 'h-4 w-4' }: { value: number; size?: string }) =>
   </div>
 );
 
+interface SellerStats {
+  total_sales: number;
+  positive_reviews: number;
+  total_reviews: number;
+  avg_rating: number;
+}
+
 const SellerProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const [profile, setProfile] = useState<SellerProfile | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [listings, setListings] = useState<IdListing[]>([]);
   const [soldIds, setSoldIds] = useState<Set<string>>(new Set());
+  const [stats, setStats] = useState<SellerStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,7 +62,7 @@ const SellerProfilePage = () => {
     const load = async () => {
       setLoading(true);
 
-      const [{ data: prof }, { data: rev }, { data: list }] = await Promise.all([
+      const [{ data: prof }, { data: rev }, { data: list }, { data: st }] = await Promise.all([
         supabase.rpc('get_seller_public_profile', { _user_id: id }),
         supabase
           .from('seller_reviews')
@@ -66,11 +74,13 @@ const SellerProfilePage = () => {
           .select('*')
           .eq('seller_id', id)
           .order('created_at', { ascending: false }),
+        supabase.rpc('get_seller_stats', { _user_id: id }),
       ]);
 
       const profArr = (prof as SellerProfile[] | null) || [];
       setProfile(profArr[0] || null);
       setReviews((rev as Review[]) || []);
+      setStats((st as unknown as SellerStats) || null);
 
       const listingsData = (list as IdListing[]) || [];
       const listingIds = listingsData.map((l) => l.id);
