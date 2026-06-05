@@ -495,11 +495,16 @@ const ListingDetails = () => {
             </Button>
 
             {listing.seller_id && (
-              <SellerReviews
-                sellerId={listing.seller_id}
-                listingId={listing.id}
-                canReview={purchase?.status === 'approved' && listing.seller_id !== user?.id}
-              />
+              <>
+                <Button asChild variant="outline" className="w-full">
+                  <Link to={`/seller/${listing.seller_id}`}>View Seller Profile</Link>
+                </Button>
+                <SellerReviews
+                  sellerId={listing.seller_id}
+                  listingId={listing.id}
+                  canReview={purchase?.status === 'approved' && listing.seller_id !== user?.id}
+                />
+              </>
             )}
           </div>
         </div>
