@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Loader2, Star, ArrowLeft, Package, ShieldCheck } from 'lucide-react';
+import { Loader2, Star, ArrowLeft, Package, ShieldCheck, MessageCircle, TrendingUp, ThumbsUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { IdListing } from '@/types/listing';
 import ListingCard from '@/components/ListingCard';
@@ -41,12 +41,20 @@ const Stars = ({ value, size = 'h-4 w-4' }: { value: number; size?: string }) =>
   </div>
 );
 
+interface SellerStats {
+  total_sales: number;
+  positive_reviews: number;
+  total_reviews: number;
+  avg_rating: number;
+}
+
 const SellerProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const [profile, setProfile] = useState<SellerProfile | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [listings, setListings] = useState<IdListing[]>([]);
   const [soldIds, setSoldIds] = useState<Set<string>>(new Set());
+  const [stats, setStats] = useState<SellerStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,7 +62,7 @@ const SellerProfilePage = () => {
     const load = async () => {
       setLoading(true);
 
-      const [{ data: prof }, { data: rev }, { data: list }] = await Promise.all([
+      const [{ data: prof }, { data: rev }, { data: list }, { data: st }] = await Promise.all([
         supabase.rpc('get_seller_public_profile', { _user_id: id }),
         supabase
           .from('seller_reviews')
@@ -66,11 +74,13 @@ const SellerProfilePage = () => {
           .select('*')
           .eq('seller_id', id)
           .order('created_at', { ascending: false }),
+        supabase.rpc('get_seller_stats', { _user_id: id }),
       ]);
 
       const profArr = (prof as SellerProfile[] | null) || [];
       setProfile(profArr[0] || null);
       setReviews((rev as Review[]) || []);
+      setStats((st as unknown as SellerStats) || null);
 
       const listingsData = (list as IdListing[]) || [];
       const listingIds = listingsData.map((l) => l.id);
@@ -165,15 +175,50 @@ const SellerProfilePage = () => {
                 Member since {new Date(profile.created_at).toLocaleDateString()}
               </p>
             </div>
-            <div className="text-right">
-              <p className="text-3xl font-display font-bold text-primary">
-                {activeListings.length}
+          </div>
+
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+            <div className="bg-muted/30 rounded-xl p-3 text-center">
+              <Package className="h-4 w-4 mx-auto text-primary mb-1" />
+              <p className="text-xl font-display font-bold">{activeListings.length}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Active</p>
+            </div>
+            <div className="bg-muted/30 rounded-xl p-3 text-center">
+              <TrendingUp className="h-4 w-4 mx-auto text-green-400 mb-1" />
+              <p className="text-xl font-display font-bold">{stats?.total_sales ?? 0}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total Sales</p>
+            </div>
+            <div className="bg-muted/30 rounded-xl p-3 text-center">
+              <ThumbsUp className="h-4 w-4 mx-auto text-blue-400 mb-1" />
+              <p className="text-xl font-display font-bold">{stats?.positive_reviews ?? 0}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Positive</p>
+            </div>
+            <div className="bg-muted/30 rounded-xl p-3 text-center">
+              <Star className="h-4 w-4 mx-auto text-yellow-400 mb-1" />
+              <p className="text-xl font-display font-bold">
+                {reviews.length > 0 ? avg.toFixed(1) : '—'}
               </p>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                Active Listings
-              </p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Rating</p>
             </div>
           </div>
+
+          {/* Contact button — uses first active listing's contact number */}
+          {activeListings[0]?.contact_number && (
+            <a
+              href={`https://wa.me/91${activeListings[0].contact_number}?text=${encodeURIComponent(
+                `Hi ${displayName}, I found your Free Fire ID listing on FF ID Hub and would like to chat.`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex"
+            >
+              <Button variant="gaming" size="lg" className="gap-2">
+                <MessageCircle className="h-4 w-4" />
+                Contact Seller on WhatsApp
+              </Button>
+            </a>
+          )}
         </div>
 
         {/* Active Listings */}

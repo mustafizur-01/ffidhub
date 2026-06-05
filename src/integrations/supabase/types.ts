@@ -578,6 +578,18 @@ export type Database = {
       claim_daily_reward: { Args: never; Returns: Json }
       claim_referral_reward: { Args: never; Returns: Json }
       generate_referral_code: { Args: never; Returns: string }
+      get_featured_sellers: {
+        Args: { _limit?: number }
+        Returns: {
+          active_listings: number
+          avatar_url: string
+          avg_rating: number
+          display_name: string
+          email: string
+          total_sales: number
+          user_id: string
+        }[]
+      }
       get_listing_credentials: {
         Args: { _listing_id: string }
         Returns: {
@@ -586,6 +598,21 @@ export type Database = {
           binded_email: string
           contact_number: string
           security_code: string
+        }[]
+      }
+      get_marketplace_stats: { Args: never; Returns: Json }
+      get_recently_sold_listings: {
+        Args: { _limit?: number }
+        Returns: {
+          id: string
+          id_level: number
+          image_url: string
+          is_email_binded: boolean
+          key_items: string
+          login_method: string
+          price: number
+          seller_id: string
+          sold_at: string
         }[]
       }
       get_seller_public_profile: {
@@ -599,6 +626,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_seller_stats: { Args: { _user_id: string }; Returns: Json }
       get_tournament_credentials: {
         Args: { _tournament_id: string }
         Returns: {

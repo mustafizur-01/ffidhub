@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import ListingCard from '@/components/ListingCard';
 import SearchFilters from '@/components/SearchFilters';
+import HomeStats from '@/components/HomeStats';
+import RecentlySoldStrip from '@/components/RecentlySoldStrip';
+import FeaturedSellersStrip from '@/components/FeaturedSellersStrip';
 import { supabase } from '@/integrations/supabase/client';
 import { IdListing, ListingFilters } from '@/types/listing';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -174,6 +177,12 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      <HomeStats />
+
+      <RecentlySoldStrip />
+
+      <FeaturedSellersStrip />
 
       {/* Upcoming Tournaments Banner */}
       {upcomingTournaments.length > 0 && (
