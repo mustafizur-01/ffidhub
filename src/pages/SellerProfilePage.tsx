@@ -55,11 +55,7 @@ const SellerProfilePage = () => {
       setLoading(true);
 
       const [{ data: prof }, { data: rev }, { data: list }] = await Promise.all([
-        supabase
-          .from('profiles')
-          .select('user_id, display_name, email, avatar_url, is_verified_seller, created_at')
-          .eq('user_id', id)
-          .maybeSingle(),
+        supabase.rpc('get_seller_public_profile', { _user_id: id }),
         supabase
           .from('seller_reviews')
           .select('id, buyer_id, listing_id, rating, comment, created_at')
