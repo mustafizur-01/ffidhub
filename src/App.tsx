@@ -43,6 +43,7 @@ const App = () => (
             <Route path="/games" element={<MiniGamesPage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/withdraw" element={<WithdrawPage />} />
+            <Route path="/seller/:id" element={<SellerProfilePage />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
