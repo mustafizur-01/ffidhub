@@ -588,6 +588,17 @@ export type Database = {
           security_code: string
         }[]
       }
+      get_seller_public_profile: {
+        Args: { _user_id: string }
+        Returns: {
+          avatar_url: string
+          created_at: string
+          display_name: string
+          email: string
+          is_verified_seller: boolean
+          user_id: string
+        }[]
+      }
       get_tournament_credentials: {
         Args: { _tournament_id: string }
         Returns: {
