@@ -18,6 +18,7 @@ import TournamentsPage from "./pages/TournamentsPage";
 import MiniGamesPage from "./pages/MiniGamesPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import WithdrawPage from "./pages/WithdrawPage";
+import SellerProfilePage from "./pages/SellerProfilePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
