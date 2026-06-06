@@ -9,6 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
+import ReportDialog from '@/components/ReportDialog';
+import BlockUserButton from '@/components/BlockUserButton';
+import ReputationCard from '@/components/ReputationCard';
 
 interface Review {
   id: string;
@@ -203,22 +206,30 @@ const SellerProfilePage = () => {
             </div>
           </div>
 
-          {/* Contact button — uses first active listing's contact number */}
-          {activeListings[0]?.contact_number && (
-            <a
-              href={`https://wa.me/91${activeListings[0].contact_number}?text=${encodeURIComponent(
-                `Hi ${displayName}, I found your Free Fire ID listing on FF ID Hub and would like to chat.`
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-flex"
-            >
-              <Button variant="gaming" size="lg" className="gap-2">
-                <MessageCircle className="h-4 w-4" />
-                Contact Seller on WhatsApp
-              </Button>
-            </a>
-          )}
+          {/* Action row */}
+          <div className="mt-4 flex flex-wrap gap-2 items-center">
+            {activeListings[0]?.contact_number && (
+              <a
+                href={`https://wa.me/91${activeListings[0].contact_number}?text=${encodeURIComponent(
+                  `Hi ${displayName}, I found your Free Fire ID listing on FF ID Hub and would like to chat.`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button variant="gaming" size="lg" className="gap-2">
+                  <MessageCircle className="h-4 w-4" />
+                  Contact on WhatsApp
+                </Button>
+              </a>
+            )}
+            <BlockUserButton targetUserId={profile.user_id} />
+            <ReportDialog targetType="user" targetId={profile.user_id} />
+          </div>
+        </div>
+
+        {/* Reputation */}
+        <div className="mb-6">
+          <ReputationCard userId={profile.user_id} />
         </div>
 
         {/* Active Listings */}
