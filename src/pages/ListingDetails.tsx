@@ -25,6 +25,7 @@ import { IdListing } from '@/types/listing';
 import { useAuth } from '@/hooks/useAuth';
 import AuthModal from '@/components/AuthModal';
 import ReportDialog from '@/components/ReportDialog';
+import EscrowActions, { EscrowStatusBadge, EscrowStatus } from '@/components/EscrowActions';
 import MessageModal from '@/components/MessageModal';
 import VerifiedSellerBadge from '@/components/VerifiedSellerBadge';
 import SellerReviews from '@/components/SellerReviews';
@@ -32,7 +33,7 @@ import { toast } from 'sonner';
 
 interface Purchase {
   id: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'pending_delivery' | 'delivered' | 'disputed' | 'approved' | 'rejected';
 }
 
 const ListingDetails = () => {
@@ -161,10 +162,10 @@ const ListingDetails = () => {
       if (error) throw error;
       if (data.error) throw new Error(data.error);
       
-      setPurchase({ id: data.purchase.id, status: 'approved' as const });
+      setPurchase({ id: data.purchase.id, status: 'pending_delivery' as const });
       await refreshProfile();
       await fetchCredentials();
-      toast.success('Purchase successful! Account details are now visible.');
+      toast.success('Payment held in escrow! Account details are visible. Confirm receipt to release funds to seller.');
     } catch (error: any) {
       toast.error(error.message || 'Failed to purchase');
     } finally {
@@ -201,9 +202,10 @@ const ListingDetails = () => {
     }
   };
 
-  const isPurchaseApproved = purchase?.status === 'approved';
+  const heldStatuses = ['pending_delivery', 'delivered', 'disputed', 'approved'] as const;
+  const isPurchaseActive = purchase && (heldStatuses as readonly string[]).includes(purchase.status);
   const isOwner = user && listing?.seller_id === user.id;
-  const canViewSensitiveData = isPurchaseApproved || isOwner;
+  const canViewSensitiveData = isPurchaseActive || isOwner;
 
   if (loading) {
     return (
@@ -495,6 +497,32 @@ const ListingDetails = () => {
               <MessageCircle className="h-5 w-5" />
               Contact Seller on WhatsApp
             </Button>
+
+            {/* Escrow status & buyer actions */}
+            {purchase && purchase.status !== 'pending' && (
+              <div className="card-gaming p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Order Status</span>
+                  <EscrowStatusBadge status={purchase.status as EscrowStatus} />
+                </div>
+                {(purchase.status === 'pending_delivery' || purchase.status === 'delivered') && (
+                  <p className="text-xs text-muted-foreground">
+                    Your payment is safely held in escrow. Release it once you've received and tested the account.
+                  </p>
+                )}
+                {purchase.status === 'disputed' && (
+                  <p className="text-xs text-muted-foreground">
+                    Dispute opened. An admin will review and resolve shortly.
+                  </p>
+                )}
+                <EscrowActions
+                  purchaseId={purchase.id}
+                  status={purchase.status as EscrowStatus}
+                  role="buyer"
+                  onChanged={() => window.location.reload()}
+                />
+              </div>
+            )}
 
             {listing.seller_id && (
               <>

@@ -12,6 +12,7 @@ import {
   ShoppingBag,
   Heart,
   Banknote,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -135,6 +136,13 @@ const UserMenu = () => {
           <DropdownMenuItem className="cursor-pointer">
             <ShoppingBag className="h-4 w-4 mr-2" />
             My Purchases
+          </DropdownMenuItem>
+        </Link>
+
+        <Link to="/escrow">
+          <DropdownMenuItem className="cursor-pointer">
+            <ShieldCheck className="h-4 w-4 mr-2 text-primary" />
+            Escrow Center
           </DropdownMenuItem>
         </Link>
 

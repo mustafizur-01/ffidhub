@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
       sellerProfile = data;
     }
 
-    // Deduct from buyer
+    // ESCROW: Deduct from buyer and hold; do NOT credit seller yet.
     const newBuyerBalance = buyerProfile.balance - price;
     const { error: deductError } = await adminClient
       .from("profiles")
@@ -132,22 +132,23 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Credit seller
-    if (sellerProfile) {
-      const newSellerBalance = Number(sellerProfile.balance) + price;
-      await adminClient
-        .from("profiles")
-        .update({ balance: newSellerBalance })
-        .eq("id", sellerProfile.id);
-    }
+    await adminClient.from("balance_transactions").insert({
+      profile_id: buyerProfile.id,
+      admin_id: user.id,
+      amount: -price,
+      previous_balance: buyerProfile.balance,
+      new_balance: newBuyerBalance,
+      transaction_type: "escrow_hold",
+      note: `Escrow hold for listing ${listing_id}`,
+    });
 
-    // Create approved purchase
+    // Create escrow-held purchase (funds held until buyer confirms / admin resolves)
     const { data: purchase, error: purchaseError } = await adminClient
       .from("purchases")
       .insert({
         listing_id,
         buyer_id: user.id,
-        status: "approved",
+        status: "pending_delivery",
       })
       .select()
       .single();
@@ -158,13 +159,6 @@ Deno.serve(async (req) => {
         .from("profiles")
         .update({ balance: buyerProfile.balance })
         .eq("id", buyerProfile.id);
-      
-      if (sellerProfile) {
-        await adminClient
-          .from("profiles")
-          .update({ balance: sellerProfile.balance })
-          .eq("id", sellerProfile.id);
-      }
 
       return new Response(JSON.stringify({ error: "Failed to create purchase" }), {
         status: 500,

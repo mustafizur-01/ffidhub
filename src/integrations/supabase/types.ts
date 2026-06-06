@@ -350,7 +350,11 @@ export type Database = {
       purchases: {
         Row: {
           buyer_id: string
+          confirmed_at: string | null
           created_at: string
+          delivered_at: string | null
+          dispute_reason: string | null
+          disputed_at: string | null
           id: string
           listing_id: string
           status: string
@@ -358,7 +362,11 @@ export type Database = {
         }
         Insert: {
           buyer_id: string
+          confirmed_at?: string | null
           created_at?: string
+          delivered_at?: string | null
+          dispute_reason?: string | null
+          disputed_at?: string | null
           id?: string
           listing_id: string
           status?: string
@@ -366,7 +374,11 @@ export type Database = {
         }
         Update: {
           buyer_id?: string
+          confirmed_at?: string | null
           created_at?: string
+          delivered_at?: string | null
+          dispute_reason?: string | null
+          disputed_at?: string | null
           id?: string
           listing_id?: string
           status?: string
@@ -668,8 +680,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_resolve_dispute: {
+        Args: { _action: string; _note?: string; _purchase_id: string }
+        Returns: Json
+      }
       claim_daily_reward: { Args: never; Returns: Json }
       claim_referral_reward: { Args: never; Returns: Json }
+      confirm_purchase: { Args: { _purchase_id: string }; Returns: Json }
+      dispute_purchase: {
+        Args: { _purchase_id: string; _reason: string }
+        Returns: Json
+      }
       generate_referral_code: { Args: never; Returns: string }
       get_featured_sellers: {
         Args: { _limit?: number }
@@ -737,6 +758,7 @@ export type Database = {
       }
       is_listing_sold: { Args: { _listing_id: string }; Returns: boolean }
       is_verified_seller: { Args: { _user_id: string }; Returns: boolean }
+      mark_purchase_delivered: { Args: { _purchase_id: string }; Returns: Json }
       request_withdrawal: {
         Args: { _account_holder: string; _amount: number; _upi_id: string }
         Returns: Json
