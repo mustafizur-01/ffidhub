@@ -161,10 +161,10 @@ const ListingDetails = () => {
       if (error) throw error;
       if (data.error) throw new Error(data.error);
       
-      setPurchase({ id: data.purchase.id, status: 'approved' as const });
+      setPurchase({ id: data.purchase.id, status: 'pending_delivery' as const });
       await refreshProfile();
       await fetchCredentials();
-      toast.success('Purchase successful! Account details are now visible.');
+      toast.success('Payment held in escrow! Account details are visible. Confirm receipt to release funds to seller.');
     } catch (error: any) {
       toast.error(error.message || 'Failed to purchase');
     } finally {
@@ -201,9 +201,10 @@ const ListingDetails = () => {
     }
   };
 
-  const isPurchaseApproved = purchase?.status === 'approved';
+  const heldStatuses = ['pending_delivery', 'delivered', 'disputed', 'approved'] as const;
+  const isPurchaseActive = purchase && (heldStatuses as readonly string[]).includes(purchase.status);
   const isOwner = user && listing?.seller_id === user.id;
-  const canViewSensitiveData = isPurchaseApproved || isOwner;
+  const canViewSensitiveData = isPurchaseActive || isOwner;
 
   if (loading) {
     return (
