@@ -32,7 +32,7 @@ import { toast } from 'sonner';
 
 interface Purchase {
   id: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'pending_delivery' | 'delivered' | 'disputed' | 'approved' | 'rejected';
 }
 
 const ListingDetails = () => {
