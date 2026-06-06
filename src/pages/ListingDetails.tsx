@@ -15,6 +15,7 @@ import {
   Clock,
   Send,
   Wallet,
+  Flag,
 } from 'lucide-react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { IdListing } from '@/types/listing';
 import { useAuth } from '@/hooks/useAuth';
 import AuthModal from '@/components/AuthModal';
+import ReportDialog from '@/components/ReportDialog';
 import MessageModal from '@/components/MessageModal';
 import VerifiedSellerBadge from '@/components/VerifiedSellerBadge';
 import SellerReviews from '@/components/SellerReviews';
