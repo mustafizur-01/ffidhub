@@ -8,6 +8,7 @@ import HomeStats from '@/components/HomeStats';
 import RecentlySoldStrip from '@/components/RecentlySoldStrip';
 import FeaturedSellersStrip from '@/components/FeaturedSellersStrip';
 import { supabase } from '@/integrations/supabase/client';
+import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import { IdListing, ListingFilters } from '@/types/listing';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,6 +17,7 @@ import { Button } from '@/components/ui/button';
 
 
 const Index = () => {
+  const blockedUsers = useBlockedUsers();
   const [listings, setListings] = useState<IdListing[]>([]);
   const [soldListingIds, setSoldListingIds] = useState<Set<string>>(new Set());
   const [verifiedSellerIds, setVerifiedSellerIds] = useState<Set<string>>(new Set());
@@ -263,9 +265,10 @@ const Index = () => {
               ))}
             </div>
           ) : (() => {
+            const base = listings.filter(l => !l.seller_id || !blockedUsers.has(l.seller_id));
             const visible = verifiedOnly
-              ? listings.filter(l => l.seller_id && verifiedSellerIds.has(l.seller_id))
-              : listings;
+              ? base.filter(l => l.seller_id && verifiedSellerIds.has(l.seller_id))
+              : base;
             return visible.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {visible.map((listing) => (

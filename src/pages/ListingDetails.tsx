@@ -15,6 +15,7 @@ import {
   Clock,
   Send,
   Wallet,
+  Flag,
 } from 'lucide-react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { IdListing } from '@/types/listing';
 import { useAuth } from '@/hooks/useAuth';
 import AuthModal from '@/components/AuthModal';
+import ReportDialog from '@/components/ReportDialog';
 import MessageModal from '@/components/MessageModal';
 import VerifiedSellerBadge from '@/components/VerifiedSellerBadge';
 import SellerReviews from '@/components/SellerReviews';
@@ -499,6 +501,18 @@ const ListingDetails = () => {
                 <Button asChild variant="outline" className="w-full">
                   <Link to={`/seller/${listing.seller_id}`}>View Seller Profile</Link>
                 </Button>
+                {listing.seller_id !== user?.id && (
+                  <ReportDialog
+                    targetType="listing"
+                    targetId={listing.id}
+                    trigger={
+                      <Button variant="outline" className="w-full gap-2 text-destructive border-destructive/40 hover:bg-destructive/10">
+                        <Flag className="h-4 w-4" />
+                        Report this listing
+                      </Button>
+                    }
+                  />
+                )}
                 <SellerReviews
                   sellerId={listing.seller_id}
                   listingId={listing.id}
