@@ -19,6 +19,7 @@ import MiniGamesPage from "./pages/MiniGamesPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import WithdrawPage from "./pages/WithdrawPage";
 import SellerProfilePage from "./pages/SellerProfilePage";
+import EscrowPage from "./pages/EscrowPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/withdraw" element={<WithdrawPage />} />
             <Route path="/seller/:id" element={<SellerProfilePage />} />
+            <Route path="/escrow" element={<EscrowPage />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
