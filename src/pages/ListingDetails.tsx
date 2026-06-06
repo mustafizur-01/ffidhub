@@ -498,6 +498,32 @@ const ListingDetails = () => {
               Contact Seller on WhatsApp
             </Button>
 
+            {/* Escrow status & buyer actions */}
+            {purchase && purchase.status !== 'pending' && (
+              <div className="card-gaming p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Order Status</span>
+                  <EscrowStatusBadge status={purchase.status as EscrowStatus} />
+                </div>
+                {(purchase.status === 'pending_delivery' || purchase.status === 'delivered') && (
+                  <p className="text-xs text-muted-foreground">
+                    Your payment is safely held in escrow. Release it once you've received and tested the account.
+                  </p>
+                )}
+                {purchase.status === 'disputed' && (
+                  <p className="text-xs text-muted-foreground">
+                    Dispute opened. An admin will review and resolve shortly.
+                  </p>
+                )}
+                <EscrowActions
+                  purchaseId={purchase.id}
+                  status={purchase.status as EscrowStatus}
+                  role="buyer"
+                  onChanged={() => window.location.reload()}
+                />
+              </div>
+            )}
+
             {listing.seller_id && (
               <>
                 <Button asChild variant="outline" className="w-full">
