@@ -156,8 +156,64 @@ const AdminDashboard = () => {
       fetchWithdrawalRequests();
       fetchTournaments();
       fetchReports();
+      fetchListings();
     }
   }, [isAdmin]);
+
+  const fetchListings = async () => {
+    try {
+      setListingsLoading(true);
+      const { data, error } = await supabase
+        .from('id_listings')
+        .select('id, id_level, login_method, price, seller_id, created_at, image_url')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+
+      const sellerIds = [...new Set((data || []).map((l: any) => l.seller_id).filter(Boolean))];
+      const listingIds = (data || []).map((l: any) => l.id);
+
+      const [{ data: sellers }, { data: soldRows }] = await Promise.all([
+        sellerIds.length
+          ? supabase.from('profiles').select('user_id, email').in('user_id', sellerIds)
+          : Promise.resolve({ data: [] as any[] }),
+        listingIds.length
+          ? supabase
+              .from('purchases')
+              .select('listing_id, status')
+              .in('listing_id', listingIds)
+              .in('status', ['pending_delivery', 'delivered', 'disputed', 'approved'])
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
+
+      const sellerMap = new Map((sellers || []).map((s: any) => [s.user_id, s.email]));
+      const soldSet = new Set((soldRows || []).map((p: any) => p.listing_id));
+
+      setListings(
+        (data || []).map((l: any) => ({
+          ...l,
+          seller_email: sellerMap.get(l.seller_id) || 'Unknown',
+          is_sold: soldSet.has(l.id),
+        }))
+      );
+    } catch (e) {
+      console.error('Error fetching listings:', e);
+    } finally {
+      setListingsLoading(false);
+    }
+  };
+
+  const handleDeleteListing = async (id: string) => {
+    try {
+      const { error } = await supabase.from('id_listings').delete().eq('id', id);
+      if (error) throw error;
+      toast.success('Listing deleted');
+      fetchListings();
+      fetchStats();
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to delete listing');
+    }
+  };
+
 
   const fetchReports = async () => {
     try {
