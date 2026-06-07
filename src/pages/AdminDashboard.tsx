@@ -103,6 +103,12 @@ const AdminDashboard = () => {
   const [depositsLoading, setDepositsLoading] = useState(true);
   const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
   const [withdrawalsLoading, setWithdrawalsLoading] = useState(true);
+
+  // Listings management
+  const [listings, setListings] = useState<any[]>([]);
+  const [listingsLoading, setListingsLoading] = useState(true);
+  const [listingSearch, setListingSearch] = useState('');
+
   
   // Tournament state
   const [tournamentsList, setTournamentsList] = useState<any[]>([]);
@@ -150,8 +156,64 @@ const AdminDashboard = () => {
       fetchWithdrawalRequests();
       fetchTournaments();
       fetchReports();
+      fetchListings();
     }
   }, [isAdmin]);
+
+  const fetchListings = async () => {
+    try {
+      setListingsLoading(true);
+      const { data, error } = await supabase
+        .from('id_listings')
+        .select('id, id_level, login_method, price, seller_id, created_at, image_url')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+
+      const sellerIds = [...new Set((data || []).map((l: any) => l.seller_id).filter(Boolean))];
+      const listingIds = (data || []).map((l: any) => l.id);
+
+      const [{ data: sellers }, { data: soldRows }] = await Promise.all([
+        sellerIds.length
+          ? supabase.from('profiles').select('user_id, email').in('user_id', sellerIds)
+          : Promise.resolve({ data: [] as any[] }),
+        listingIds.length
+          ? supabase
+              .from('purchases')
+              .select('listing_id, status')
+              .in('listing_id', listingIds)
+              .in('status', ['pending_delivery', 'delivered', 'disputed', 'approved'])
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
+
+      const sellerMap = new Map((sellers || []).map((s: any) => [s.user_id, s.email]));
+      const soldSet = new Set((soldRows || []).map((p: any) => p.listing_id));
+
+      setListings(
+        (data || []).map((l: any) => ({
+          ...l,
+          seller_email: sellerMap.get(l.seller_id) || 'Unknown',
+          is_sold: soldSet.has(l.id),
+        }))
+      );
+    } catch (e) {
+      console.error('Error fetching listings:', e);
+    } finally {
+      setListingsLoading(false);
+    }
+  };
+
+  const handleDeleteListing = async (id: string) => {
+    try {
+      const { error } = await supabase.from('id_listings').delete().eq('id', id);
+      if (error) throw error;
+      toast.success('Listing deleted');
+      fetchListings();
+      fetchStats();
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to delete listing');
+    }
+  };
+
 
   const fetchReports = async () => {
     try {
@@ -1113,7 +1175,126 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
+        {/* Listings Management */}
+        <Card className="glass-card mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between gap-2">
+              <span className="flex items-center gap-2">
+                <ShoppingBag className="h-5 w-5 text-primary" />
+                Listings Management
+                <Badge variant="secondary" className="ml-2">{listings.length} total</Badge>
+              </span>
+              <Button size="sm" variant="outline" onClick={fetchListings}>
+                Refresh
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by seller email or login method..."
+                value={listingSearch}
+                onChange={(e) => setListingSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            {listingsLoading ? (
+              <Skeleton className="h-32" />
+            ) : (
+              (() => {
+                const q = listingSearch.toLowerCase();
+                const filtered = listings.filter(
+                  (l: any) =>
+                    !q ||
+                    l.seller_email?.toLowerCase().includes(q) ||
+                    String(l.login_method || '').toLowerCase().includes(q) ||
+                    String(l.id_level).includes(q)
+                );
+                if (filtered.length === 0) {
+                  return (
+                    <p className="text-center text-muted-foreground py-6">No listings found</p>
+                  );
+                }
+                return (
+                  <div className="overflow-x-auto rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Level</TableHead>
+                          <TableHead>Login</TableHead>
+                          <TableHead>Price</TableHead>
+                          <TableHead>Seller</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Created</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filtered.map((l: any) => (
+                          <TableRow key={l.id}>
+                            <TableCell className="font-semibold">Lvl {l.id_level}</TableCell>
+                            <TableCell className="capitalize text-sm">{l.login_method}</TableCell>
+                            <TableCell className="font-mono">₹{Number(l.price).toFixed(0)}</TableCell>
+                            <TableCell className="text-sm">{l.seller_email}</TableCell>
+                            <TableCell>
+                              {l.is_sold ? (
+                                <Badge className="bg-red-500/20 text-red-400 border-red-500/30">Sold</Badge>
+                              ) : (
+                                <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Active</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground">
+                              {format(new Date(l.created_at), 'dd MMM yy')}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => navigate(`/listing/${l.id}`)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="ghost" className="text-destructive">
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete this listing?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This permanently removes Lvl {l.id_level} listing by {l.seller_email}. This cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => handleDeleteListing(l.id)}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      >
+                                        Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                );
+              })()
+            )}
+          </CardContent>
+        </Card>
+
         {/* Support Reports */}
+
         <Card className="glass-card mb-8">
           <CardHeader>
             <CardTitle className="flex items-center justify-between gap-2">
