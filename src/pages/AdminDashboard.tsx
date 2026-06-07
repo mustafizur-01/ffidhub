@@ -103,6 +103,12 @@ const AdminDashboard = () => {
   const [depositsLoading, setDepositsLoading] = useState(true);
   const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
   const [withdrawalsLoading, setWithdrawalsLoading] = useState(true);
+
+  // Listings management
+  const [listings, setListings] = useState<any[]>([]);
+  const [listingsLoading, setListingsLoading] = useState(true);
+  const [listingSearch, setListingSearch] = useState('');
+
   
   // Tournament state
   const [tournamentsList, setTournamentsList] = useState<any[]>([]);
