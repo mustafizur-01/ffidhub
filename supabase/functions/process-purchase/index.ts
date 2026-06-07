@@ -126,7 +126,11 @@ Deno.serve(async (req) => {
       .eq("id", buyerProfile.id);
 
     if (deductError) {
-      return new Response(JSON.stringify({ error: "Failed to deduct balance" }), {
+      return new Response(JSON.stringify({ 
+        error: "Failed to deduct balance",
+        details: deductError.message,
+        code: deductError.code,
+      }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
