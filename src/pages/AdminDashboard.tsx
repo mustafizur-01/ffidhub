@@ -1175,7 +1175,126 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
+        {/* Listings Management */}
+        <Card className="glass-card mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between gap-2">
+              <span className="flex items-center gap-2">
+                <ShoppingBag className="h-5 w-5 text-primary" />
+                Listings Management
+                <Badge variant="secondary" className="ml-2">{listings.length} total</Badge>
+              </span>
+              <Button size="sm" variant="outline" onClick={fetchListings}>
+                Refresh
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by seller email or login method..."
+                value={listingSearch}
+                onChange={(e) => setListingSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            {listingsLoading ? (
+              <Skeleton className="h-32" />
+            ) : (
+              (() => {
+                const q = listingSearch.toLowerCase();
+                const filtered = listings.filter(
+                  (l: any) =>
+                    !q ||
+                    l.seller_email?.toLowerCase().includes(q) ||
+                    String(l.login_method || '').toLowerCase().includes(q) ||
+                    String(l.id_level).includes(q)
+                );
+                if (filtered.length === 0) {
+                  return (
+                    <p className="text-center text-muted-foreground py-6">No listings found</p>
+                  );
+                }
+                return (
+                  <div className="overflow-x-auto rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Level</TableHead>
+                          <TableHead>Login</TableHead>
+                          <TableHead>Price</TableHead>
+                          <TableHead>Seller</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Created</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filtered.map((l: any) => (
+                          <TableRow key={l.id}>
+                            <TableCell className="font-semibold">Lvl {l.id_level}</TableCell>
+                            <TableCell className="capitalize text-sm">{l.login_method}</TableCell>
+                            <TableCell className="font-mono">₹{Number(l.price).toFixed(0)}</TableCell>
+                            <TableCell className="text-sm">{l.seller_email}</TableCell>
+                            <TableCell>
+                              {l.is_sold ? (
+                                <Badge className="bg-red-500/20 text-red-400 border-red-500/30">Sold</Badge>
+                              ) : (
+                                <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Active</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground">
+                              {format(new Date(l.created_at), 'dd MMM yy')}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => navigate(`/listing/${l.id}`)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="ghost" className="text-destructive">
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete this listing?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This permanently removes Lvl {l.id_level} listing by {l.seller_email}. This cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => handleDeleteListing(l.id)}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      >
+                                        Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                );
+              })()
+            )}
+          </CardContent>
+        </Card>
+
         {/* Support Reports */}
+
         <Card className="glass-card mb-8">
           <CardHeader>
             <CardTitle className="flex items-center justify-between gap-2">
