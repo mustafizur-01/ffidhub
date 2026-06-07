@@ -129,19 +129,19 @@ const EditListingModal = ({ listing, open, onClose, onSuccess }: EditListingModa
       let imageUrl = listing.image_url;
 
       // Upload new image if changed
-      if (imageFile) {
+      if (imageFile && listing.seller_id) {
         const fileExt = imageFile.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        
+        const filePath = `${listing.seller_id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
         const { error: uploadError } = await supabase.storage
           .from('id-screenshots')
-          .upload(fileName, imageFile);
+          .upload(filePath, imageFile);
 
         if (uploadError) throw uploadError;
 
         const { data: urlData } = supabase.storage
           .from('id-screenshots')
-          .getPublicUrl(fileName);
+          .getPublicUrl(filePath);
 
         imageUrl = urlData.publicUrl;
       }
