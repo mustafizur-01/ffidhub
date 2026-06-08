@@ -14,6 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      auctions: {
+        Row: {
+          bid_count: number
+          created_at: string
+          current_bid: number | null
+          current_bidder: string | null
+          ends_at: string
+          id: string
+          listing_id: string
+          min_increment: number
+          seller_id: string
+          settled_at: string | null
+          start_price: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          bid_count?: number
+          created_at?: string
+          current_bid?: number | null
+          current_bidder?: string | null
+          ends_at: string
+          id?: string
+          listing_id: string
+          min_increment?: number
+          seller_id: string
+          settled_at?: string | null
+          start_price: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          bid_count?: number
+          created_at?: string
+          current_bid?: number | null
+          current_bidder?: string | null
+          ends_at?: string
+          id?: string
+          listing_id?: string
+          min_increment?: number
+          seller_id?: string
+          settled_at?: string | null
+          start_price?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auctions_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: true
+            referencedRelation: "id_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       balance_transactions: {
         Row: {
           admin_id: string
@@ -54,6 +110,41 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bids: {
+        Row: {
+          amount: number
+          auction_id: string
+          bidder_id: string
+          created_at: string
+          id: string
+          status: string
+        }
+        Insert: {
+          amount: number
+          auction_id: string
+          bidder_id: string
+          created_at?: string
+          id?: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          auction_id?: string
+          bidder_id?: string
+          created_at?: string
+          id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bids_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
             referencedColumns: ["id"]
           },
         ]
@@ -173,11 +264,13 @@ export type Database = {
           binded_email: string | null
           contact_number: string
           created_at: string
+          featured_until: string | null
           id: string
           id_level: number
           image_url: string | null
           is_email_binded: boolean
           key_items: string
+          listing_type: string
           login_method: Database["public"]["Enums"]["login_method"]
           price: number
           security_code: string | null
@@ -190,11 +283,13 @@ export type Database = {
           binded_email?: string | null
           contact_number: string
           created_at?: string
+          featured_until?: string | null
           id?: string
           id_level: number
           image_url?: string | null
           is_email_binded?: boolean
           key_items: string
+          listing_type?: string
           login_method: Database["public"]["Enums"]["login_method"]
           price: number
           security_code?: string | null
@@ -207,11 +302,13 @@ export type Database = {
           binded_email?: string | null
           contact_number?: string
           created_at?: string
+          featured_until?: string | null
           id?: string
           id_level?: number
           image_url?: string | null
           is_email_binded?: boolean
           key_items?: string
+          listing_type?: string
           login_method?: Database["public"]["Enums"]["login_method"]
           price?: number
           security_code?: string | null
@@ -290,6 +387,56 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      offers: {
+        Row: {
+          amount: number
+          buyer_id: string
+          counter_amount: number | null
+          created_at: string
+          expires_at: string
+          id: string
+          listing_id: string
+          message: string | null
+          seller_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          buyer_id: string
+          counter_amount?: number | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          listing_id: string
+          message?: string | null
+          seller_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          buyer_id?: string
+          counter_amount?: number | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          listing_id?: string
+          message?: string | null
+          seller_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "id_listings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -639,6 +786,48 @@ export type Database = {
         }
         Relationships: []
       }
+      vip_subscriptions: {
+        Row: {
+          admin_note: string | null
+          amount: number
+          created_at: string
+          expires_at: string | null
+          id: string
+          started_at: string | null
+          status: string
+          tier: string
+          updated_at: string
+          user_id: string
+          utr_number: string | null
+        }
+        Insert: {
+          admin_note?: string | null
+          amount: number
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          started_at?: string | null
+          status?: string
+          tier: string
+          updated_at?: string
+          user_id: string
+          utr_number?: string | null
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: number
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          started_at?: string | null
+          status?: string
+          tier?: string
+          updated_at?: string
+          user_id?: string
+          utr_number?: string | null
+        }
+        Relationships: []
+      }
       withdrawal_requests: {
         Row: {
           account_holder: string
@@ -680,6 +869,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_approve_vip: {
+        Args: { _approve: boolean; _note?: string; _sub_id: string }
+        Returns: Json
+      }
       admin_resolve_dispute: {
         Args: { _action: string; _note?: string; _purchase_id: string }
         Returns: Json
@@ -687,11 +880,34 @@ export type Database = {
       claim_daily_reward: { Args: never; Returns: Json }
       claim_referral_reward: { Args: never; Returns: Json }
       confirm_purchase: { Args: { _purchase_id: string }; Returns: Json }
+      create_auction: {
+        Args: {
+          _duration_hours: number
+          _listing_id: string
+          _start_price: number
+        }
+        Returns: Json
+      }
+      create_offer: {
+        Args: { _amount: number; _listing_id: string; _message?: string }
+        Returns: Json
+      }
       dispute_purchase: {
         Args: { _purchase_id: string; _reason: string }
         Returns: Json
       }
+      feature_listing: {
+        Args: { _days: number; _listing_id: string }
+        Returns: Json
+      }
       generate_referral_code: { Args: never; Returns: string }
+      get_active_vip: {
+        Args: { _user_id: string }
+        Returns: {
+          expires_at: string
+          tier: string
+        }[]
+      }
       get_featured_sellers: {
         Args: { _limit?: number }
         Returns: {
@@ -759,10 +975,20 @@ export type Database = {
       is_listing_sold: { Args: { _listing_id: string }; Returns: boolean }
       is_verified_seller: { Args: { _user_id: string }; Returns: boolean }
       mark_purchase_delivered: { Args: { _purchase_id: string }; Returns: Json }
+      place_bid: {
+        Args: { _amount: number; _auction_id: string }
+        Returns: Json
+      }
+      request_vip: { Args: { _tier: string; _utr: string }; Returns: Json }
       request_withdrawal: {
         Args: { _account_holder: string; _amount: number; _upi_id: string }
         Returns: Json
       }
+      respond_offer: {
+        Args: { _action: string; _counter?: number; _offer_id: string }
+        Returns: Json
+      }
+      settle_auction: { Args: { _auction_id: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "user"

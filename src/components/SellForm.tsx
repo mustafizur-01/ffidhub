@@ -27,6 +27,8 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { AIPriceEstimator } from '@/components/AIPriceEstimator';
+import { Gavel, Tag } from 'lucide-react';
 
 const formSchema = z.object({
   id_level: z.number().min(1, 'Level must be at least 1').max(100, 'Level cannot exceed 100'),
@@ -49,6 +51,8 @@ const SellForm = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [listingType, setListingType] = useState<'fixed' | 'auction'>('fixed');
+  const [auctionHours, setAuctionHours] = useState<number>(24);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -112,7 +116,7 @@ const SellForm = () => {
         imageUrl = urlData.publicUrl;
       }
 
-      const { error } = await supabase.from('id_listings').insert({
+      const { data: inserted, error } = await supabase.from('id_listings').insert({
         id_level: values.id_level,
         login_method: values.login_method,
         key_items: values.key_items,
@@ -125,11 +129,23 @@ const SellForm = () => {
         binded_email: values.is_email_binded ? values.binded_email : null,
         security_code: values.is_email_binded ? values.security_code : null,
         seller_id: user.id,
-      });
+        listing_type: listingType,
+      }).select('id').single();
 
       if (error) throw error;
 
-      toast.success('🔥 ID Listed Successfully!');
+      if (listingType === 'auction' && inserted?.id) {
+        const { data: auctionData, error: auctionError } = await supabase.rpc('create_auction', {
+          _listing_id: inserted.id,
+          _start_price: values.price,
+          _duration_hours: auctionHours,
+        });
+        if (auctionError) throw auctionError;
+        const result = auctionData as any;
+        if (result && result.ok === false) throw new Error(result.reason || 'Auction creation failed');
+      }
+
+      toast.success(listingType === 'auction' ? '⚡ Auction Started!' : '🔥 ID Listed Successfully!');
       navigate('/');
     } catch (error: any) {
       toast.error(error.message || 'Failed to create listing');
@@ -141,6 +157,54 @@ const SellForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Listing type selector */}
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => setListingType('fixed')}
+            className={`card-gaming p-4 text-left transition-all ${listingType === 'fixed' ? 'border-primary glow-subtle' : 'opacity-60 hover:opacity-100'}`}
+          >
+            <Tag className="h-5 w-5 text-primary mb-1" />
+            <div className="font-display font-bold text-sm">Fixed Price</div>
+            <div className="text-xs text-muted-foreground">Standard listing</div>
+          </button>
+          <button
+            type="button"
+            onClick={() => setListingType('auction')}
+            className={`card-gaming p-4 text-left transition-all ${listingType === 'auction' ? 'border-accent glow-cyan' : 'opacity-60 hover:opacity-100'}`}
+          >
+            <Gavel className="h-5 w-5 text-accent mb-1" />
+            <div className="font-display font-bold text-sm">Auction</div>
+            <div className="text-xs text-muted-foreground">Timed bidding</div>
+          </button>
+        </div>
+
+        {listingType === 'auction' && (
+          <div className="card-gaming p-4 border-accent/30">
+            <Label className="text-sm font-display">Auction Duration</Label>
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              {[1, 6, 24, 72].map((h) => (
+                <button
+                  key={h}
+                  type="button"
+                  onClick={() => setAuctionHours(h)}
+                  className={`py-2 rounded-lg text-sm font-bold transition-all ${auctionHours === h ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/70'}`}
+                >
+                  {h < 24 ? `${h}h` : `${h / 24}d`}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <AIPriceEstimator
+          id_level={form.watch('id_level')}
+          login_method={form.watch('login_method')}
+          key_items={form.watch('key_items')}
+          is_email_binded={form.watch('is_email_binded')}
+          onSuggest={(p) => form.setValue('price', p, { shouldValidate: true })}
+        />
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* ID Level */}
           <FormField
@@ -193,7 +257,7 @@ const SellForm = () => {
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price (₹)</FormLabel>
+                <FormLabel>{listingType === 'auction' ? 'Starting Price (₹)' : 'Price (₹)'}</FormLabel>
                 <FormControl>
                   <Input
                     type="number"

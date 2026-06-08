@@ -1,117 +1,123 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Gaming Dark Theme - Free Fire Max */
+/* Esports Dark Theme - Free Fire MAX Marketplace */
 @layer base {
   :root {
-    /* Dark gaming theme - always dark */
-    --background: 0 0% 5%;
+    --background: 0 0% 4%;
     --foreground: 0 0% 98%;
 
-    --card: 0 0% 8%;
+    --card: 0 0% 7%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 10%;
+    --popover: 0 0% 9%;
     --popover-foreground: 0 0% 98%;
 
-    /* Fiery Orange Primary */
-    --primary: 24 100% 50%;
-    --primary-foreground: 0 0% 2%;
+    /* Neon Orange */
+    --primary: 22 100% 52%;
+    --primary-foreground: 0 0% 4%;
+    --primary-glow: 30 100% 60%;
 
-    /* Charcoal Secondary */
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 90%;
+    /* Electric secondary (cyan accent for esports) */
+    --secondary: 0 0% 13%;
+    --secondary-foreground: 0 0% 92%;
 
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 0 0% 11%;
+    --muted-foreground: 0 0% 62%;
 
-    --accent: 24 100% 50%;
-    --accent-foreground: 0 0% 2%;
+    --accent: 192 95% 55%;
+    --accent-foreground: 0 0% 4%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 84% 55%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 18%;
-    --input: 0 0% 15%;
-    --ring: 24 100% 50%;
+    --border: 0 0% 16%;
+    --input: 0 0% 13%;
+    --ring: 22 100% 52%;
 
     --radius: 0.75rem;
 
-    /* Custom gaming tokens */
-    --gaming-glow: 24 100% 50%;
+    --gaming-glow: 22 100% 52%;
     --gaming-dark: 0 0% 3%;
-    --gaming-charcoal: 0 0% 12%;
-    --gaming-success: 142 76% 36%;
+    --gaming-charcoal: 0 0% 11%;
+    --gaming-success: 142 76% 42%;
+    --gaming-rare: 280 90% 60%;
+    --gaming-legendary: 45 100% 55%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(22 100% 52%), hsl(35 100% 58%));
+    --gradient-fire: linear-gradient(135deg, hsl(0 90% 55%), hsl(22 100% 52%), hsl(45 100% 55%));
+    --gradient-dark: linear-gradient(145deg, hsl(0 0% 10%), hsl(0 0% 5%));
+    --gradient-glow: radial-gradient(circle at 50% 0%, hsl(22 100% 52% / 0.25), transparent 60%);
+
+    --shadow-glow: 0 0 24px hsl(22 100% 52% / 0.45), 0 0 48px hsl(22 100% 52% / 0.2);
+    --shadow-card: 0 8px 32px -4px hsl(0 0% 0% / 0.6);
+    --shadow-elevated: 0 20px 60px -10px hsl(22 100% 52% / 0.35);
   }
 
-  .dark {
-    --background: 0 0% 5%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 24 100% 50%;
-    --primary-foreground: 0 0% 2%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 90%;
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 24 100% 50%;
-    --accent-foreground: 0 0% 2%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 18%;
-    --input: 0 0% 15%;
-    --ring: 24 100% 50%;
-  }
+  .dark { color-scheme: dark; }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground font-body antialiased; }
+  h1, h2, h3, h4, h5, h6 { @apply font-display font-bold tracking-tight; }
 
-  body {
-    @apply bg-background text-foreground font-body antialiased;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-display font-bold tracking-tight;
-  }
+  ::selection { background: hsl(var(--primary) / 0.4); color: hsl(var(--foreground)); }
 }
 
 @layer utilities {
+  .font-mono-display { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.04em; }
+
   .text-gradient {
-    @apply bg-gradient-to-r from-primary via-orange-400 to-yellow-500 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary via-orange-400 to-yellow-400 bg-clip-text text-transparent;
+  }
+  .text-gradient-fire {
+    background: var(--gradient-fire);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   .glow-primary {
-    box-shadow: 0 0 20px hsl(var(--primary) / 0.4),
-                0 0 40px hsl(var(--primary) / 0.2),
-                0 0 60px hsl(var(--primary) / 0.1);
+    box-shadow: var(--shadow-glow);
   }
-
-  .glow-subtle {
-    box-shadow: 0 0 15px hsl(var(--primary) / 0.3);
-  }
+  .glow-subtle { box-shadow: 0 0 14px hsl(var(--primary) / 0.3); }
+  .glow-cyan { box-shadow: 0 0 18px hsl(var(--accent) / 0.5); }
 
   .card-gaming {
     @apply bg-card border border-border rounded-xl;
-    background: linear-gradient(145deg, hsl(0 0% 10%), hsl(0 0% 6%));
+    background: var(--gradient-dark);
+    box-shadow: var(--shadow-card);
   }
-
-  .card-gaming-hover {
-    @apply transition-all duration-300;
-  }
-
+  .card-gaming-hover { @apply transition-all duration-300; }
   .card-gaming-hover:hover {
-    @apply border-primary/50;
-    box-shadow: 0 0 25px hsl(var(--primary) / 0.2);
-    transform: translateY(-2px);
+    @apply border-primary/60;
+    box-shadow: 0 0 28px hsl(var(--primary) / 0.25), var(--shadow-card);
+    transform: translateY(-3px);
+  }
+
+  .card-featured {
+    background: linear-gradient(145deg, hsl(22 100% 12% / 0.4), hsl(0 0% 6%));
+    border: 1px solid hsl(var(--primary) / 0.5);
+    box-shadow: 0 0 30px hsl(var(--primary) / 0.25), inset 0 1px 0 hsl(var(--primary) / 0.3);
+  }
+
+  .glass-panel {
+    background: hsl(0 0% 8% / 0.7);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid hsl(0 0% 100% / 0.06);
+  }
+
+  .scanline::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent 0 2px, hsl(0 0% 100% / 0.02) 2px 3px);
+    pointer-events: none;
+    border-radius: inherit;
   }
 
   .btn-gaming {
@@ -125,10 +131,62 @@
   }
 
   .badge-level {
-    @apply bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold px-3 py-1 rounded-full text-sm;
+    @apply bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold px-3 py-1 rounded-full text-xs;
+  }
+  .badge-method {
+    @apply bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-xs font-medium;
+  }
+  .badge-vip-bronze {
+    background: linear-gradient(135deg, #b87333, #d99655);
+    @apply text-black font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider;
+  }
+  .badge-vip-silver {
+    background: linear-gradient(135deg, #b0b0b0, #e8e8e8);
+    @apply text-black font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider;
+  }
+  .badge-vip-gold {
+    background: linear-gradient(135deg, #f0c419, #fff2a8);
+    @apply text-black font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider;
+    box-shadow: 0 0 12px hsl(45 100% 60% / 0.6);
   }
 
-  .badge-method {
-    @apply bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm font-medium;
+  .ribbon-featured {
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(35 100% 58%));
+    @apply text-primary-foreground text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded;
+    box-shadow: 0 0 12px hsl(var(--primary) / 0.6);
   }
+
+  @keyframes border-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .animated-border::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: conic-gradient(from 0deg, transparent, hsl(var(--primary)), transparent 30%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: border-spin 4s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes shimmer-x {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+  }
+  .shimmer-overlay::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(110deg, transparent 35%, hsl(0 0% 100% / 0.18) 50%, transparent 65%);
+    animation: shimmer-x 2.4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
