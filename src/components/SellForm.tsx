@@ -27,6 +27,8 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { AIPriceEstimator } from '@/components/AIPriceEstimator';
+import { Gavel, Tag } from 'lucide-react';
 
 const formSchema = z.object({
   id_level: z.number().min(1, 'Level must be at least 1').max(100, 'Level cannot exceed 100'),
@@ -49,6 +51,8 @@ const SellForm = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [listingType, setListingType] = useState<'fixed' | 'auction'>('fixed');
+  const [auctionHours, setAuctionHours] = useState<number>(24);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -112,7 +116,7 @@ const SellForm = () => {
         imageUrl = urlData.publicUrl;
       }
 
-      const { error } = await supabase.from('id_listings').insert({
+      const { data: inserted, error } = await supabase.from('id_listings').insert({
         id_level: values.id_level,
         login_method: values.login_method,
         key_items: values.key_items,
@@ -125,11 +129,23 @@ const SellForm = () => {
         binded_email: values.is_email_binded ? values.binded_email : null,
         security_code: values.is_email_binded ? values.security_code : null,
         seller_id: user.id,
-      });
+        listing_type: listingType,
+      }).select('id').single();
 
       if (error) throw error;
 
-      toast.success('🔥 ID Listed Successfully!');
+      if (listingType === 'auction' && inserted?.id) {
+        const { data: auctionData, error: auctionError } = await supabase.rpc('create_auction', {
+          _listing_id: inserted.id,
+          _start_price: values.price,
+          _duration_hours: auctionHours,
+        });
+        if (auctionError) throw auctionError;
+        const result = auctionData as any;
+        if (result && result.ok === false) throw new Error(result.reason || 'Auction creation failed');
+      }
+
+      toast.success(listingType === 'auction' ? '⚡ Auction Started!' : '🔥 ID Listed Successfully!');
       navigate('/');
     } catch (error: any) {
       toast.error(error.message || 'Failed to create listing');
