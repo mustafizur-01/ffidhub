@@ -242,7 +242,8 @@ const SellerDashboard = () => {
                           </p>
                         </div>
 
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
+                          <FeatureBoostDialog listingId={listing.id} onBoosted={fetchMyListings} />
                           <Button
                             variant="outline"
                             size="sm"
