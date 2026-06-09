@@ -281,7 +281,10 @@ const SellerDashboard = () => {
             ))}
           </div>
         )}
+          </TabsContent>
+        </Tabs>
       </div>
+
 
       {/* Edit Modal */}
       <EditListingModal
