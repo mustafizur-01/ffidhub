@@ -44,7 +44,7 @@ const Index = () => {
     try {
       let query = supabase
         .from('id_listings')
-        .select('id, id_level, login_method, key_items, price, image_url, is_email_binded, seller_id, created_at, updated_at');
+        .select('id, id_level, login_method, key_items, price, image_url, is_email_binded, seller_id, created_at, updated_at, featured_until, listing_type');
 
       switch (filters.sort) {
         case 'price_asc':

@@ -1,13 +1,13 @@
 import { IdListing } from '@/types/listing';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Shield, ShieldOff } from 'lucide-react';
+import { Eye, Shield, ShieldOff, Sparkles, Gavel } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import VerifiedSellerBadge from '@/components/VerifiedSellerBadge';
 import FavoriteButton from '@/components/FavoriteButton';
 
 interface ListingCardProps {
-  listing: IdListing;
+  listing: IdListing & { featured_until?: string | null; listing_type?: string };
   isSold?: boolean;
   isVerifiedSeller?: boolean;
 }
@@ -21,8 +21,21 @@ const ListingCard = ({ listing, isSold = false, isVerifiedSeller = false }: List
     }).format(price);
   };
 
+  const isFeatured = listing.featured_until && new Date(listing.featured_until) > new Date();
+  const isAuction = listing.listing_type === 'auction';
+
   return (
-    <div className={`card-gaming card-gaming-hover overflow-hidden group relative ${isSold ? 'opacity-75' : ''}`}>
+    <div className={`card-gaming card-gaming-hover overflow-hidden group relative ${isSold ? 'opacity-75' : ''} ${isFeatured ? 'card-featured' : ''}`}>
+      {isFeatured && !isSold && (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 ribbon-featured flex items-center gap-1">
+          <Sparkles className="h-3 w-3" /> FEATURED
+        </div>
+      )}
+      {isAuction && !isSold && (
+        <div className="absolute bottom-[5.5rem] left-3 z-20 bg-accent text-accent-foreground text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded flex items-center gap-1 animate-pulse">
+          <Gavel className="h-3 w-3" /> AUCTION
+        </div>
+      )}
       {/* Sold Overlay */}
       {isSold && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm">
