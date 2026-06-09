@@ -20,6 +20,8 @@ import FavoritesPage from "./pages/FavoritesPage";
 import WithdrawPage from "./pages/WithdrawPage";
 import SellerProfilePage from "./pages/SellerProfilePage";
 import EscrowPage from "./pages/EscrowPage";
+import AuctionsPage from "./pages/AuctionsPage";
+import VipPage from "./pages/VipPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +48,8 @@ const App = () => (
             <Route path="/withdraw" element={<WithdrawPage />} />
             <Route path="/seller/:id" element={<SellerProfilePage />} />
             <Route path="/escrow" element={<EscrowPage />} />
+            <Route path="/auctions" element={<AuctionsPage />} />
+            <Route path="/vip" element={<VipPage />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
