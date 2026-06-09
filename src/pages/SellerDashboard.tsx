@@ -209,6 +209,15 @@ const SellerDashboard = () => {
                         <div className="flex items-center gap-2 flex-wrap">
                           <Badge variant="outline">Level {listing.id_level}</Badge>
                           <Badge variant="secondary">{listing.login_method}</Badge>
+                          {listing.featured_until && new Date(listing.featured_until) > new Date() && (
+                            <Badge className="bg-primary/20 text-primary border-primary/40">
+                              <Sparkles className="h-3 w-3 mr-1" />
+                              Featured
+                            </Badge>
+                          )}
+                          {listing.listing_type === 'auction' && (
+                            <Badge className="bg-accent/20 text-accent border-accent/40">Auction</Badge>
+                          )}
                           {listing.is_email_binded && (
                             <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
                               Email Secured
