@@ -29,6 +29,8 @@ import EscrowActions, { EscrowStatusBadge, EscrowStatus } from '@/components/Esc
 import MessageModal from '@/components/MessageModal';
 import VerifiedSellerBadge from '@/components/VerifiedSellerBadge';
 import SellerReviews from '@/components/SellerReviews';
+import MakeOfferDialog from '@/components/MakeOfferDialog';
+import AuctionBidPanel from '@/components/AuctionBidPanel';
 import { toast } from 'sonner';
 
 interface Purchase {
@@ -39,7 +41,7 @@ interface Purchase {
 const ListingDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { user, profile, refreshProfile } = useAuth();
-  const [listing, setListing] = useState<IdListing | null>(null);
+  const [listing, setListing] = useState<(IdListing & { featured_until?: string | null; listing_type?: string }) | null>(null);
   const [credentials, setCredentials] = useState<{
     contact_number: string | null;
     account_login_id: string | null;
@@ -73,7 +75,7 @@ const ListingDetails = () => {
     try {
       const { data, error } = await supabase
         .from('id_listings')
-        .select('id, id_level, login_method, key_items, price, image_url, is_email_binded, seller_id, created_at, updated_at')
+        .select('id, id_level, login_method, key_items, price, image_url, is_email_binded, seller_id, created_at, updated_at, featured_until, listing_type')
         .eq('id', id)
         .maybeSingle();
 
