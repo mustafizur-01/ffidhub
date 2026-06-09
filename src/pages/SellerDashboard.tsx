@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Edit2, ExternalLink, Loader2, Package, Trash2, MessageSquare, Clock } from 'lucide-react';
+import { Edit2, ExternalLink, Loader2, Package, Trash2, MessageSquare, Clock, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,11 +20,15 @@ import { useAuth } from '@/hooks/useAuth';
 import { IdListing } from '@/types/listing';
 import EditListingModal from '@/components/EditListingModal';
 import MessageModal from '@/components/MessageModal';
+import FeatureBoostDialog from '@/components/FeatureBoostDialog';
+import SellerOffersList from '@/components/SellerOffersList';
 import { toast } from 'sonner';
 
 interface ListingWithStatus extends IdListing {
   pendingPurchases: number;
   unreadMessages: number;
+  featured_until?: string | null;
+  listing_type?: string;
 }
 
 const SellerDashboard = () => {
@@ -55,7 +60,7 @@ const SellerDashboard = () => {
       // Fetch listings
       const { data: listingsData, error: listingsError } = await supabase
         .from('id_listings')
-        .select('id, id_level, login_method, key_items, price, image_url, is_email_binded, seller_id, created_at, updated_at')
+        .select('id, id_level, login_method, key_items, price, image_url, is_email_binded, seller_id, created_at, updated_at, featured_until, listing_type')
         .eq('seller_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -154,6 +159,15 @@ const SellerDashboard = () => {
           </Button>
         </div>
 
+        <Tabs defaultValue="listings">
+          <TabsList className="mb-6">
+            <TabsTrigger value="listings">My Listings</TabsTrigger>
+            <TabsTrigger value="offers">Offers</TabsTrigger>
+          </TabsList>
+          <TabsContent value="offers">
+            <SellerOffersList />
+          </TabsContent>
+          <TabsContent value="listings">
         {listings.length === 0 ? (
           <Card className="card-gaming">
             <CardContent className="flex flex-col items-center justify-center py-16">
@@ -169,6 +183,7 @@ const SellerDashboard = () => {
           </Card>
         ) : (
           <div className="grid gap-4">
+
             {listings.map((listing) => (
               <Card key={listing.id} className="card-gaming overflow-hidden">
                 <CardContent className="p-0">
