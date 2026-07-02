@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { IndianRupee, QrCode, Clock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { IndianRupee, QrCode, Clock, CheckCircle, XCircle, Loader2, Upload, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
