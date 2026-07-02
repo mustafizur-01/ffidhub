@@ -61,23 +61,55 @@ const AddMoneyPage = () => {
       toast.error('Please enter Transaction ID / UTR');
       return;
     }
+    if (!screenshot) {
+      toast.error('Please upload payment screenshot as proof');
+      return;
+    }
 
     setSubmitting(true);
-    const { error } = await supabase.from('deposit_requests').insert({
-      user_id: user!.id,
-      amount: amt,
-      utr_number: utrNumber.trim(),
-    });
+    try {
+      // Upload screenshot to per-user folder
+      const ext = screenshot.name.split('.').pop() || 'jpg';
+      const path = `${user!.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('payment-proofs')
+        .upload(path, screenshot, { cacheControl: '3600', upsert: false });
+      if (upErr) throw upErr;
 
-    if (error) {
-      toast.error('Something went wrong, please try again');
-    } else {
+      const { error } = await supabase.from('deposit_requests').insert({
+        user_id: user!.id,
+        amount: amt,
+        utr_number: utrNumber.trim(),
+        screenshot_url: path,
+      });
+      if (error) throw error;
+
       toast.success('Deposit request submitted! Balance will be added after admin approval.');
       setAmount('');
       setUtrNumber('');
+      setScreenshot(null);
+      setScreenshotPreview(null);
       fetchDeposits();
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong, please try again');
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be under 5MB');
+      return;
+    }
+    setScreenshot(file);
+    setScreenshotPreview(URL.createObjectURL(file));
   };
 
   const statusIcon = (status: string) => {
