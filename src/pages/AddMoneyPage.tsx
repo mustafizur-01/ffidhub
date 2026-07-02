@@ -187,6 +187,24 @@ const AddMoneyPage = () => {
                   onChange={(e) => setUtrNumber(e.target.value)}
                 />
               </div>
+              <div>
+                <label className="text-sm text-muted-foreground mb-1 block">Payment Screenshot (Proof)</label>
+                <label className="flex flex-col items-center justify-center gap-2 p-4 rounded-lg border-2 border-dashed border-border hover:border-primary/50 cursor-pointer transition-colors bg-muted/20">
+                  {screenshotPreview ? (
+                    <>
+                      <img src={screenshotPreview} alt="Payment proof preview" className="max-h-40 rounded" />
+                      <p className="text-xs text-muted-foreground">Click to change</p>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-6 w-6 text-primary" />
+                      <p className="text-sm">Upload payment screenshot</p>
+                      <p className="text-xs text-muted-foreground">PNG / JPG, max 5MB</p>
+                    </>
+                  )}
+                  <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                </label>
+              </div>
               <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <IndianRupee className="h-4 w-4 mr-2" />}
                 Submit Request
