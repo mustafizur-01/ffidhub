@@ -26,6 +26,8 @@ const AddMoneyPage = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const [amount, setAmount] = useState('');
   const [utrNumber, setUtrNumber] = useState('');
+  const [screenshot, setScreenshot] = useState<File | null>(null);
+  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [deposits, setDeposits] = useState<DepositRequest[]>([]);
   const [depositsLoading, setDepositsLoading] = useState(true);
