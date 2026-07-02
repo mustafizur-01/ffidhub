@@ -17,6 +17,7 @@ interface DepositRequest {
   utr_number: string;
   status: string;
   admin_note: string | null;
+  screenshot_url: string | null;
   created_at: string;
 }
 
