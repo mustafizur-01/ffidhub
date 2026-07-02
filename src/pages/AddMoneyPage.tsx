@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { IndianRupee, QrCode, Clock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { IndianRupee, QrCode, Clock, CheckCircle, XCircle, Loader2, Upload, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -17,6 +17,7 @@ interface DepositRequest {
   utr_number: string;
   status: string;
   admin_note: string | null;
+  screenshot_url: string | null;
   created_at: string;
 }
 
@@ -25,6 +26,8 @@ const AddMoneyPage = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const [amount, setAmount] = useState('');
   const [utrNumber, setUtrNumber] = useState('');
+  const [screenshot, setScreenshot] = useState<File | null>(null);
+  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [deposits, setDeposits] = useState<DepositRequest[]>([]);
   const [depositsLoading, setDepositsLoading] = useState(true);
@@ -58,23 +61,55 @@ const AddMoneyPage = () => {
       toast.error('Please enter Transaction ID / UTR');
       return;
     }
+    if (!screenshot) {
+      toast.error('Please upload payment screenshot as proof');
+      return;
+    }
 
     setSubmitting(true);
-    const { error } = await supabase.from('deposit_requests').insert({
-      user_id: user!.id,
-      amount: amt,
-      utr_number: utrNumber.trim(),
-    });
+    try {
+      // Upload screenshot to per-user folder
+      const ext = screenshot.name.split('.').pop() || 'jpg';
+      const path = `${user!.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('payment-proofs')
+        .upload(path, screenshot, { cacheControl: '3600', upsert: false });
+      if (upErr) throw upErr;
 
-    if (error) {
-      toast.error('Something went wrong, please try again');
-    } else {
+      const { error } = await supabase.from('deposit_requests').insert({
+        user_id: user!.id,
+        amount: amt,
+        utr_number: utrNumber.trim(),
+        screenshot_url: path,
+      });
+      if (error) throw error;
+
       toast.success('Deposit request submitted! Balance will be added after admin approval.');
       setAmount('');
       setUtrNumber('');
+      setScreenshot(null);
+      setScreenshotPreview(null);
       fetchDeposits();
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong, please try again');
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be under 5MB');
+      return;
+    }
+    setScreenshot(file);
+    setScreenshotPreview(URL.createObjectURL(file));
   };
 
   const statusIcon = (status: string) => {
@@ -151,6 +186,24 @@ const AddMoneyPage = () => {
                   value={utrNumber}
                   onChange={(e) => setUtrNumber(e.target.value)}
                 />
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground mb-1 block">Payment Screenshot (Proof)</label>
+                <label className="flex flex-col items-center justify-center gap-2 p-4 rounded-lg border-2 border-dashed border-border hover:border-primary/50 cursor-pointer transition-colors bg-muted/20">
+                  {screenshotPreview ? (
+                    <>
+                      <img src={screenshotPreview} alt="Payment proof preview" className="max-h-40 rounded" />
+                      <p className="text-xs text-muted-foreground">Click to change</p>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-6 w-6 text-primary" />
+                      <p className="text-sm">Upload payment screenshot</p>
+                      <p className="text-xs text-muted-foreground">PNG / JPG, max 5MB</p>
+                    </>
+                  )}
+                  <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                </label>
               </div>
               <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <IndianRupee className="h-4 w-4 mr-2" />}

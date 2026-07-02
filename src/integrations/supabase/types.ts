@@ -209,6 +209,7 @@ export type Database = {
           amount: number
           created_at: string
           id: string
+          screenshot_url: string | null
           status: string
           updated_at: string
           user_id: string
@@ -219,6 +220,7 @@ export type Database = {
           amount: number
           created_at?: string
           id?: string
+          screenshot_url?: string | null
           status?: string
           updated_at?: string
           user_id: string
@@ -229,6 +231,7 @@ export type Database = {
           amount?: number
           created_at?: string
           id?: string
+          screenshot_url?: string | null
           status?: string
           updated_at?: string
           user_id?: string
