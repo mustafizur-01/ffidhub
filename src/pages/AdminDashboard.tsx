@@ -39,6 +39,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import AdminExtraTools from '@/components/AdminExtraTools';
 
 interface Message {
   id: string;
@@ -901,8 +902,8 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        {/* Pending Deposits Stat */}
-        
+        {/* Extra admin power tools: disputes, VIP approvals, broadcast */}
+        <AdminExtraTools />
 
         {/* Deposit Requests */}
         <Card className="glass-card mb-8">
