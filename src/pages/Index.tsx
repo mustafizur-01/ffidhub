@@ -296,6 +296,8 @@ const Index = () => {
                     listing={listing}
                     isSold={soldListingIds.has(listing.id)}
                     isVerifiedSeller={!!listing.seller_id && verifiedSellerIds.has(listing.seller_id)}
+                    sellerName={listing.seller_id ? sellerMap[listing.seller_id]?.display_name : null}
+                    sellerAvatar={listing.seller_id ? sellerMap[listing.seller_id]?.avatar_url : null}
                   />
                 ))}
               </div>
