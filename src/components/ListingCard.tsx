@@ -1,6 +1,7 @@
 import { IdListing } from '@/types/listing';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Eye, Shield, ShieldOff, Sparkles, Gavel } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import VerifiedSellerBadge from '@/components/VerifiedSellerBadge';
@@ -10,9 +11,11 @@ interface ListingCardProps {
   listing: IdListing & { featured_until?: string | null; listing_type?: string };
   isSold?: boolean;
   isVerifiedSeller?: boolean;
+  sellerName?: string | null;
+  sellerAvatar?: string | null;
 }
 
-const ListingCard = ({ listing, isSold = false, isVerifiedSeller = false }: ListingCardProps) => {
+const ListingCard = ({ listing, isSold = false, isVerifiedSeller = false, sellerName, sellerAvatar }: ListingCardProps) => {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
