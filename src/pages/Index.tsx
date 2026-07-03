@@ -21,6 +21,7 @@ const Index = () => {
   const [listings, setListings] = useState<IdListing[]>([]);
   const [soldListingIds, setSoldListingIds] = useState<Set<string>>(new Set());
   const [verifiedSellerIds, setVerifiedSellerIds] = useState<Set<string>>(new Set());
+  const [sellerMap, setSellerMap] = useState<Record<string, { display_name: string | null; avatar_url: string | null; is_verified_seller: boolean }>>({});
   const [upcomingTournaments, setUpcomingTournaments] = useState<any[]>([]);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -92,24 +93,39 @@ const Index = () => {
       const fetchedListings = (data as IdListing[]) || [];
       setListings(fetchedListings);
 
-      // Check sold + verified seller status for each listing
+      // Check sold status + fetch seller public profiles
       if (fetchedListings.length > 0) {
         const soldSet = new Set<string>();
         const verifiedSet = new Set<string>();
-        await Promise.all(
-          fetchedListings.map(async (listing) => {
-            const [{ data: isSold }, { data: isVerified }] = await Promise.all([
-              supabase.rpc('is_listing_sold', { _listing_id: listing.id }),
-              listing.seller_id
-                ? supabase.rpc('is_verified_seller', { _user_id: listing.seller_id })
-                : Promise.resolve({ data: false }),
-            ]);
-            if (isSold) soldSet.add(listing.id);
-            if (isVerified && listing.seller_id) verifiedSet.add(listing.seller_id);
-          })
-        );
+        const sellerMap: Record<string, { display_name: string | null; avatar_url: string | null; is_verified_seller: boolean }> = {};
+
+        const uniqueSellerIds = [
+          ...new Set(fetchedListings.map((l) => l.seller_id).filter(Boolean)),
+        ] as string[];
+
+        const [soldResults, ...profileResults] = await Promise.all([
+          Promise.all(fetchedListings.map((l) => supabase.rpc('is_listing_sold', { _listing_id: l.id }))),
+          ...uniqueSellerIds.map((sellerId) =>
+            supabase.rpc('get_seller_public_profile', { _user_id: sellerId })
+          ),
+        ]);
+
+        soldResults.forEach((result, index) => {
+          if (result.data) soldSet.add(fetchedListings[index].id);
+        });
+
+        profileResults.forEach((result, index) => {
+          const sellerId = uniqueSellerIds[index];
+          const profile = (result.data as any)?.[0];
+          if (profile) {
+            sellerMap[sellerId] = profile;
+            if (profile.is_verified_seller) verifiedSet.add(sellerId);
+          }
+        });
+
         setSoldListingIds(soldSet);
         setVerifiedSellerIds(verifiedSet);
+        setSellerMap(sellerMap);
       }
     } catch (error) {
       console.error('Error fetching listings:', error);
@@ -257,7 +273,10 @@ const Index = () => {
                 <div key={i} className="card-gaming overflow-hidden">
                   <Skeleton className="aspect-video w-full" />
                   <div className="p-4 space-y-3">
-                    <Skeleton className="h-6 w-24" />
+                    <div className="flex items-center justify-between">
+                      <Skeleton className="h-6 w-32" />
+                      <Skeleton className="h-6 w-16" />
+                    </div>
                     <Skeleton className="h-4 w-full" />
                     <Skeleton className="h-10 w-full" />
                   </div>
@@ -277,6 +296,8 @@ const Index = () => {
                     listing={listing}
                     isSold={soldListingIds.has(listing.id)}
                     isVerifiedSeller={!!listing.seller_id && verifiedSellerIds.has(listing.seller_id)}
+                    sellerName={listing.seller_id ? sellerMap[listing.seller_id]?.display_name : null}
+                    sellerAvatar={listing.seller_id ? sellerMap[listing.seller_id]?.avatar_url : null}
                   />
                 ))}
               </div>
