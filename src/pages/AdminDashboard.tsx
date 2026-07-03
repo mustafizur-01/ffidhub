@@ -39,6 +39,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import AdminExtraTools from '@/components/AdminExtraTools';
 
 interface Message {
   id: string;
