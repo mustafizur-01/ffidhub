@@ -93,11 +93,20 @@ const ListingCard = ({ listing, isSold = false, isVerifiedSeller = false, seller
       {/* Content Section */}
       <div className="p-4 space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <span className="badge-method">{listing.login_method}</span>
-          <VerifiedSellerBadge verified={isVerifiedSeller} />
+          <div className="flex items-center gap-2 min-w-0">
+            <Avatar className="h-6 w-6 shrink-0">
+              <AvatarImage src={sellerAvatar || undefined} alt={sellerName || 'Seller'} />
+              <AvatarFallback className="text-xs bg-primary/10 text-primary font-display">
+                {sellerName?.charAt(0).toUpperCase() || 'U'}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-sm font-medium truncate">{sellerName || 'Unknown Seller'}</span>
+          </div>
+          <span className="badge-method shrink-0">{listing.login_method}</span>
         </div>
 
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-between gap-2">
+          <VerifiedSellerBadge verified={isVerifiedSeller} />
           <span className="font-display text-xl font-bold text-primary">
             {formatPrice(listing.price)}
           </span>
