@@ -21,6 +21,7 @@ const Index = () => {
   const [listings, setListings] = useState<IdListing[]>([]);
   const [soldListingIds, setSoldListingIds] = useState<Set<string>>(new Set());
   const [verifiedSellerIds, setVerifiedSellerIds] = useState<Set<string>>(new Set());
+  const [sellerMap, setSellerMap] = useState<Record<string, { display_name: string | null; avatar_url: string | null; is_verified_seller: boolean }>>({});
   const [upcomingTournaments, setUpcomingTournaments] = useState<any[]>([]);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [loading, setLoading] = useState(true);
