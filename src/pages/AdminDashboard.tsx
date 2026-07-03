@@ -901,8 +901,8 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        {/* Pending Deposits Stat */}
-        
+        {/* Extra admin power tools: disputes, VIP approvals, broadcast */}
+        <AdminExtraTools />
 
         {/* Deposit Requests */}
         <Card className="glass-card mb-8">
