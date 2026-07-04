@@ -155,9 +155,69 @@ export default function AdminExtraTools() {
     }
   };
 
+  const fetchVerRequests = async () => {
+    setVerLoading(true);
+    try {
+      const { data, error } = await (supabase as any)
+        .from('seller_verification_requests')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+
+      const ids = [...new Set((data || []).map((v: any) => v.user_id))] as string[];
+      const { data: profs } = ids.length
+        ? await supabase.from('profiles').select('user_id, email').in('user_id', ids)
+        : { data: [] as any[] };
+      const map = new Map((profs || []).map((p: any) => [p.user_id, p.email]));
+
+      const rows: SellerVerReq[] = (data || []).map((r: any) => ({
+        ...r,
+        user_email: map.get(r.user_id) || 'Unknown',
+      }));
+      setVerReqs(rows);
+
+      // Signed URLs for screenshots
+      const urlMap: Record<string, string> = {};
+      await Promise.all(
+        rows.map(async (r) => {
+          if (r.screenshot_url) {
+            const { data: signed } = await supabase.storage
+              .from('payment-proofs')
+              .createSignedUrl(r.screenshot_url, 3600);
+            if (signed?.signedUrl) urlMap[r.id] = signed.signedUrl;
+          }
+        })
+      );
+      setVerImageUrls(urlMap);
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to load verification requests');
+    } finally {
+      setVerLoading(false);
+    }
+  };
+
+  const handleVerification = async (r: SellerVerReq, approve: boolean) => {
+    try {
+      const { data, error } = await supabase.rpc('admin_approve_seller_verification' as any, {
+        _req_id: r.id,
+        _approve: approve,
+        _note: verNote[r.id] || null,
+      } as any);
+      if (error) throw error;
+      const res = data as any;
+      if (!res?.ok) throw new Error(res?.reason || 'Failed');
+      toast.success(approve ? 'Seller verified' : 'Request rejected');
+      fetchVerRequests();
+    } catch (e: any) {
+      toast.error(e.message || 'Failed');
+    }
+  };
+
   useEffect(() => {
     fetchDisputes();
     fetchVipRequests();
+    fetchVerRequests();
   }, []);
 
   const handleResolve = async () => {
