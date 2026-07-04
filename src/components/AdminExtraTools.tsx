@@ -468,6 +468,89 @@ export default function AdminExtraTools() {
         </CardContent>
       </Card>
 
+      {/* Seller Verification Requests */}
+      <Card className="glass-card mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            Seller Verification Requests
+            {verReqs.length > 0 && (
+              <Badge className="bg-primary/20 text-primary border-primary/30">
+                {verReqs.length} pending
+              </Badge>
+            )}
+            <Button
+              size="sm"
+              variant="ghost"
+              className="ml-auto"
+              onClick={fetchVerRequests}
+              disabled={verLoading}
+            >
+              <RefreshCw className={`h-4 w-4 ${verLoading ? 'animate-spin' : ''}`} />
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {verLoading ? (
+            <Skeleton className="h-32" />
+          ) : verReqs.length === 0 ? (
+            <p className="text-center text-muted-foreground py-4">No pending verification requests</p>
+          ) : (
+            <div className="space-y-4">
+              {verReqs.map((r) => (
+                <div key={r.id} className="p-4 rounded-lg border border-border bg-muted/20 space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                    <div><span className="text-muted-foreground">User:</span> {r.user_email}</div>
+                    <div><span className="text-muted-foreground">Name:</span> {r.full_name}</div>
+                    <div><span className="text-muted-foreground">Phone:</span> {r.phone}</div>
+                    <div><span className="text-muted-foreground">FF UID:</span> {r.ff_uid}</div>
+                    <div><span className="text-muted-foreground">In-Game Name:</span> {r.in_game_name}</div>
+                    <div><span className="text-muted-foreground">Experience:</span> {r.experience || '-'}</div>
+                    <div className="md:col-span-2"><span className="text-muted-foreground">Reason:</span> {r.reason || '-'}</div>
+                    <div className="text-xs text-muted-foreground md:col-span-2">
+                      Submitted {format(new Date(r.created_at), 'dd MMM yyyy, hh:mm a')}
+                    </div>
+                  </div>
+                  {verImageUrls[r.id] && (
+                    <a
+                      href={verImageUrls[r.id]}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 text-xs text-primary hover:underline"
+                    >
+                      <ExternalLink className="h-3 w-3" /> View proof screenshot
+                    </a>
+                  )}
+                  <Input
+                    placeholder="Optional note to applicant"
+                    value={verNote[r.id] || ''}
+                    onChange={(e) => setVerNote((s) => ({ ...s, [r.id]: e.target.value }))}
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => handleVerification(r, true)}
+                    >
+                      <CheckCircle className="h-3 w-3 mr-1" /> Approve
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleVerification(r, false)}
+                    >
+                      <XCircle className="h-3 w-3 mr-1" /> Reject
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+
+
       {/* Broadcast */}
       <Card className="glass-card mb-8">
         <CardHeader>
