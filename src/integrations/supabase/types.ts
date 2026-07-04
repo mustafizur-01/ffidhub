@@ -577,6 +577,54 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_verification_requests: {
+        Row: {
+          admin_note: string | null
+          created_at: string
+          experience: string | null
+          ff_uid: string
+          full_name: string
+          id: string
+          in_game_name: string
+          phone: string
+          reason: string | null
+          screenshot_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          created_at?: string
+          experience?: string | null
+          ff_uid: string
+          full_name: string
+          id?: string
+          in_game_name: string
+          phone: string
+          reason?: string | null
+          screenshot_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          created_at?: string
+          experience?: string | null
+          ff_uid?: string
+          full_name?: string
+          id?: string
+          in_game_name?: string
+          phone?: string
+          reason?: string | null
+          screenshot_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       support_reports: {
         Row: {
           admin_note: string | null
@@ -796,6 +844,7 @@ export type Database = {
           created_at: string
           expires_at: string | null
           id: string
+          screenshot_url: string | null
           started_at: string | null
           status: string
           tier: string
@@ -809,6 +858,7 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           id?: string
+          screenshot_url?: string | null
           started_at?: string | null
           status?: string
           tier: string
@@ -822,6 +872,7 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           id?: string
+          screenshot_url?: string | null
           started_at?: string | null
           status?: string
           tier?: string
@@ -872,6 +923,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_approve_seller_verification: {
+        Args: { _approve: boolean; _note?: string; _req_id: string }
+        Returns: Json
+      }
       admin_approve_vip: {
         Args: { _approve: boolean; _note?: string; _sub_id: string }
         Returns: Json
@@ -982,7 +1037,12 @@ export type Database = {
         Args: { _amount: number; _auction_id: string }
         Returns: Json
       }
-      request_vip: { Args: { _tier: string; _utr: string }; Returns: Json }
+      request_vip:
+        | { Args: { _tier: string; _utr: string }; Returns: Json }
+        | {
+            Args: { _screenshot_url?: string; _tier: string; _utr: string }
+            Returns: Json
+          }
       request_withdrawal: {
         Args: { _account_holder: string; _amount: number; _upi_id: string }
         Returns: Json
