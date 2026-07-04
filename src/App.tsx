@@ -22,6 +22,7 @@ import SellerProfilePage from "./pages/SellerProfilePage";
 import EscrowPage from "./pages/EscrowPage";
 import AuctionsPage from "./pages/AuctionsPage";
 import VipPage from "./pages/VipPage";
+import SellerVerifyPage from "./pages/SellerVerifyPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/escrow" element={<EscrowPage />} />
             <Route path="/auctions" element={<AuctionsPage />} />
             <Route path="/vip" element={<VipPage />} />
+            <Route path="/seller-verify" element={<SellerVerifyPage />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
