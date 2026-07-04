@@ -146,7 +146,7 @@ export default function SellerVerifyPage() {
   }
 
   const hasPending = requests.some((r) => r.status === 'pending');
-  const alreadyVerified = !!profile?.is_verified_seller;
+  const alreadyVerified = !!(profile as any)?.is_verified_seller;
 
   return (
     <div className="min-h-screen bg-background">
