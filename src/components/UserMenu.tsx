@@ -153,6 +153,13 @@ const UserMenu = () => {
           </DropdownMenuItem>
         </Link>
 
+        <Link to="/seller-verify">
+          <DropdownMenuItem className="cursor-pointer text-primary">
+            <ShieldCheck className="h-4 w-4 mr-2" />
+            Become Verified Seller
+          </DropdownMenuItem>
+        </Link>
+
         <Link to="/profile">
           <DropdownMenuItem className="cursor-pointer">
             <User className="h-4 w-4 mr-2" />
