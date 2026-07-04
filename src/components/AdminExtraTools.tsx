@@ -14,7 +14,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { AlertTriangle, Crown, Megaphone, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Crown, Megaphone, CheckCircle, XCircle, RefreshCw, ShieldCheck, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -38,6 +38,21 @@ type VipReq = {
   tier: string;
   amount: number;
   utr_number: string | null;
+  status: string;
+  created_at: string;
+  user_email?: string;
+};
+
+type SellerVerReq = {
+  id: string;
+  user_id: string;
+  full_name: string;
+  phone: string;
+  ff_uid: string;
+  in_game_name: string;
+  experience: string | null;
+  reason: string | null;
+  screenshot_url: string | null;
   status: string;
   created_at: string;
   user_email?: string;
