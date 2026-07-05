@@ -42,14 +42,27 @@ export default function SellerVerifyPage() {
 
   const [requests, setRequests] = useState<VerificationRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [vipTier, setVipTier] = useState<string | null>(null);
+  const [vipLoading, setVipLoading] = useState(true);
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/');
       return;
     }
-    if (user) fetchRequests();
+    if (user) {
+      fetchRequests();
+      fetchVip();
+    }
   }, [user, authLoading]);
+
+  const fetchVip = async () => {
+    setVipLoading(true);
+    const { data } = await (supabase as any).rpc('get_active_vip', { _user_id: user!.id });
+    const tier = Array.isArray(data) && data[0]?.tier ? data[0].tier : null;
+    setVipTier(tier);
+    setVipLoading(false);
+  };
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -79,6 +92,10 @@ export default function SellerVerifyPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (vipTier !== 'gold') {
+      toast.error('Gold VIP membership required to apply for seller verification');
+      return;
+    }
     if (!fullName.trim() || !phone.trim() || !ffUid.trim() || !ign.trim()) {
       toast.error('Please fill all required fields');
       return;
@@ -183,7 +200,23 @@ export default function SellerVerifyPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {hasPending ? (
+              {vipLoading ? (
+                <p className="text-center text-muted-foreground py-4">Checking VIP status...</p>
+              ) : vipTier !== 'gold' ? (
+                <div className="text-center py-4 space-y-3">
+                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-yellow-500/10">
+                    <ShieldCheck className="h-7 w-7 text-yellow-400" />
+                  </div>
+                  <p className="font-semibold">Gold VIP Membership Required</p>
+                  <p className="text-sm text-muted-foreground">
+                    Only Gold VIP members can apply for seller verification.
+                    {vipTier ? ` Your current tier: ${vipTier}.` : ' You have no active VIP.'}
+                  </p>
+                  <Button onClick={() => navigate('/vip')} className="w-full">
+                    Get Gold VIP
+                  </Button>
+                </div>
+              ) : hasPending ? (
                 <p className="text-center text-muted-foreground py-4">
                   Your request is under review. Please wait for admin approval.
                 </p>
