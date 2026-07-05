@@ -181,9 +181,12 @@ const WithdrawPage = () => {
                   maxLength={100}
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                Your balance is held when you submit. Admin will pay out within 24 hours.
-              </p>
+              <div className="text-xs text-muted-foreground space-y-1 p-3 rounded-md bg-muted/30 border border-border">
+                <p className="font-semibold text-foreground">Withdrawal fees</p>
+                <p>• Regular: 5% &nbsp;•&nbsp; Bronze VIP: 4%</p>
+                <p>• Silver VIP: 2.5% &nbsp;•&nbsp; <span className="text-yellow-400 font-semibold">Gold VIP: 0% (free)</span></p>
+                <p className="pt-1">Balance is held on submit. Admin pays out within 24 hours.</p>
+              </div>
               <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
