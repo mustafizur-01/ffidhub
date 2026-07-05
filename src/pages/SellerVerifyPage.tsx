@@ -42,14 +42,27 @@ export default function SellerVerifyPage() {
 
   const [requests, setRequests] = useState<VerificationRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [vipTier, setVipTier] = useState<string | null>(null);
+  const [vipLoading, setVipLoading] = useState(true);
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/');
       return;
     }
-    if (user) fetchRequests();
+    if (user) {
+      fetchRequests();
+      fetchVip();
+    }
   }, [user, authLoading]);
+
+  const fetchVip = async () => {
+    setVipLoading(true);
+    const { data } = await (supabase as any).rpc('get_active_vip', { _user_id: user!.id });
+    const tier = Array.isArray(data) && data[0]?.tier ? data[0].tier : null;
+    setVipTier(tier);
+    setVipLoading(false);
+  };
 
   const fetchRequests = async () => {
     setLoading(true);
