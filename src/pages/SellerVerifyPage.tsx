@@ -92,6 +92,10 @@ export default function SellerVerifyPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (vipTier !== 'gold') {
+      toast.error('Gold VIP membership required to apply for seller verification');
+      return;
+    }
     if (!fullName.trim() || !phone.trim() || !ffUid.trim() || !ign.trim()) {
       toast.error('Please fill all required fields');
       return;
