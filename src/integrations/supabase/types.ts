@@ -841,6 +841,8 @@ export type Database = {
         Row: {
           admin_note: string | null
           amount: number
+          boosts_quota: number
+          boosts_used: number
           created_at: string
           expires_at: string | null
           id: string
@@ -855,6 +857,8 @@ export type Database = {
         Insert: {
           admin_note?: string | null
           amount: number
+          boosts_quota?: number
+          boosts_used?: number
           created_at?: string
           expires_at?: string | null
           id?: string
@@ -869,6 +873,8 @@ export type Database = {
         Update: {
           admin_note?: string | null
           amount?: number
+          boosts_quota?: number
+          boosts_used?: number
           created_at?: string
           expires_at?: string | null
           id?: string
@@ -975,6 +981,12 @@ export type Database = {
           display_name: string
           email: string
           total_sales: number
+          user_id: string
+        }[]
+      }
+      get_gold_vip_user_ids: {
+        Args: never
+        Returns: {
           user_id: string
         }[]
       }

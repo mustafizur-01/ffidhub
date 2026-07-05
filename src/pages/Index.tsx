@@ -90,7 +90,21 @@ const Index = () => {
       const { data, error } = await query;
 
       if (error) throw error;
-      const fetchedListings = (data as IdListing[]) || [];
+      let fetchedListings = (data as IdListing[]) || [];
+
+      // Gold VIP sellers get top placement
+      try {
+        const { data: goldRows } = await supabase.rpc('get_gold_vip_user_ids' as any);
+        const goldSet = new Set<string>(((goldRows as any[]) || []).map((r) => r.user_id));
+        if (goldSet.size > 0) {
+          fetchedListings = [...fetchedListings].sort((a, b) => {
+            const ag = goldSet.has(a.seller_id) ? 1 : 0;
+            const bg = goldSet.has(b.seller_id) ? 1 : 0;
+            return bg - ag;
+          });
+        }
+      } catch {}
+
       setListings(fetchedListings);
 
       // Check sold status + fetch seller public profiles
