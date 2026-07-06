@@ -223,11 +223,64 @@ const WithdrawPage = () => {
                   maxLength={100}
                 />
               </div>
-              <div className="text-xs text-muted-foreground space-y-1 p-3 rounded-md bg-muted/30 border border-border">
-                <p className="font-semibold text-foreground">Withdrawal fees</p>
-                <p>• Regular: 5% &nbsp;•&nbsp; Bronze VIP: 4%</p>
-                <p>• Silver VIP: 2.5% &nbsp;•&nbsp; <span className="text-yellow-400 font-semibold">Gold VIP: 0% (free)</span></p>
-                <p className="pt-1">Balance is held on submit. Admin pays out within 24 hours.</p>
+              <div className="space-y-3">
+                <div className="text-xs text-muted-foreground space-y-1 p-3 rounded-md bg-muted/30 border border-border">
+                  <div className="flex items-center justify-between">
+                    <p className="font-semibold text-foreground">Withdrawal fees</p>
+                    {!vipLoading && vipTier && (
+                      <Badge
+                        className={cn(
+                          'capitalize border-none text-[10px]',
+                          vipTier === 'gold' && 'bg-yellow-400/20 text-yellow-400',
+                          vipTier === 'silver' && 'bg-slate-300/20 text-slate-300',
+                          vipTier === 'bronze' && 'bg-amber-600/20 text-amber-500'
+                        )}
+                      >
+                        <Crown className="h-3 w-3 mr-1" />
+                        {vipTier} VIP
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1">
+                    {[
+                      { tier: 'gold', pct: 0, label: 'Gold' },
+                      { tier: 'silver', pct: 2.5, label: 'Silver' },
+                      { tier: 'bronze', pct: 4, label: 'Bronze' },
+                      { tier: null, pct: 5, label: 'Regular' },
+                    ].map((item) => (
+                      <span
+                        key={item.label}
+                        className={cn(
+                          vipTier === item.tier && 'text-primary font-semibold'
+                        )}
+                      >
+                        • {item.label}: {item.pct === 0 ? '0% (free)' : `${item.pct}%`}
+                      </span>
+                    ))}
+                  </div>
+                  <p>Balance is held on submit. Admin pays out within 24 hours.</p>
+                </div>
+
+                {amountNum > 0 && (
+                  <div className="p-3 rounded-md bg-primary/10 border border-primary/20 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Request Amount</span>
+                      <span className="font-medium">₹{amountNum.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Fee ({feePercent}%)
+                      </span>
+                      <span className="font-medium text-destructive">
+                        -₹{feeAmount.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="border-t border-border/50 pt-2 flex justify-between">
+                      <span className="font-semibold">Final Amount</span>
+                      <span className="font-bold text-primary">₹{netAmount.toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
               </div>
               <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting ? (
