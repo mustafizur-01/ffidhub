@@ -43,14 +43,34 @@ const WithdrawPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [requests, setRequests] = useState<WithdrawalRequest[]>([]);
   const [requestsLoading, setRequestsLoading] = useState(true);
+  const [vipTier, setVipTier] = useState<string | null>(null);
+  const [vipLoading, setVipLoading] = useState(true);
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/');
       return;
     }
-    if (user) fetchRequests();
+    if (user) {
+      fetchRequests();
+      fetchVipTier();
+    }
   }, [user, authLoading]);
+
+  const fetchVipTier = async () => {
+    setVipLoading(true);
+    try {
+      const { data, error } = await supabase
+        .rpc('get_active_vip', { _user_id: user?.id })
+        .maybeSingle();
+      if (error) throw error;
+      setVipTier(data?.tier || null);
+    } catch (error) {
+      console.error('Error fetching VIP tier:', error);
+    } finally {
+      setVipLoading(false);
+    }
+  };
 
   const fetchRequests = async () => {
     const { data, error } = await supabase
