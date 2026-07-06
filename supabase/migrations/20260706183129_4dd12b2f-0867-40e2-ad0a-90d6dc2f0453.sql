@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.claim_daily_reward() TO authenticated;
