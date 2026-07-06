@@ -14,9 +14,13 @@ import {
   XCircle,
   Loader2,
   Wallet,
+  Crown,
+  Sparkles,
+  ArrowRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface WithdrawalRequest {
   id: string;
