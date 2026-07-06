@@ -249,6 +249,21 @@ const ProfilePage = () => {
                   onChange={handleAvatarUpload}
                 />
               </div>
+
+              {/* VIP Badge under avatar */}
+              {!loadingVip && vip && (
+                <Badge
+                  className={cn(
+                    'capitalize border-none',
+                    vip.tier === 'gold' && 'bg-yellow-400/20 text-yellow-400',
+                    vip.tier === 'silver' && 'bg-slate-300/20 text-slate-300',
+                    vip.tier === 'bronze' && 'bg-amber-600/20 text-amber-500'
+                  )}
+                >
+                  <Crown className="h-3 w-3 mr-1" />
+                  {vip.tier} VIP
+                </Badge>
+              )}
             </div>
 
             {/* Display Name */}
