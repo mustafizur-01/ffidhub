@@ -97,8 +97,14 @@ const WithdrawPage = () => {
 
   const feePercent = getFeePercent(vipTier);
   const amountNum = parseFloat(amount) || 0;
-  const feeAmount = amountNum > 0 ? Math.round((amountNum * feePercent) / 100 * 100) / 100 : 0;
-  const netAmount = amountNum > 0 ? Math.round((amountNum - feeAmount) * 100) / 100 : 0;
+  const feeAmount =
+    amountNum > 0
+      ? Number(((amountNum * feePercent) / 100).toFixed(2))
+      : 0;
+  const netAmount =
+    amountNum > 0
+      ? Number((amountNum - feeAmount).toFixed(2))
+      : 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
