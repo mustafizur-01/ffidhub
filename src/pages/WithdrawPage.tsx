@@ -14,9 +14,13 @@ import {
   XCircle,
   Loader2,
   Wallet,
+  Crown,
+  Sparkles,
+  ArrowRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface WithdrawalRequest {
   id: string;
@@ -39,14 +43,34 @@ const WithdrawPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [requests, setRequests] = useState<WithdrawalRequest[]>([]);
   const [requestsLoading, setRequestsLoading] = useState(true);
+  const [vipTier, setVipTier] = useState<string | null>(null);
+  const [vipLoading, setVipLoading] = useState(true);
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/');
       return;
     }
-    if (user) fetchRequests();
+    if (user) {
+      fetchRequests();
+      fetchVipTier();
+    }
   }, [user, authLoading]);
+
+  const fetchVipTier = async () => {
+    setVipLoading(true);
+    try {
+      const { data, error } = await supabase
+        .rpc('get_active_vip', { _user_id: user?.id })
+        .maybeSingle();
+      if (error) throw error;
+      setVipTier(data?.tier || null);
+    } catch (error) {
+      console.error('Error fetching VIP tier:', error);
+    } finally {
+      setVipLoading(false);
+    }
+  };
 
   const fetchRequests = async () => {
     const { data, error } = await supabase
@@ -57,6 +81,30 @@ const WithdrawPage = () => {
     if (!error && data) setRequests(data as WithdrawalRequest[]);
     setRequestsLoading(false);
   };
+
+  const getFeePercent = (tier: string | null) => {
+    switch (tier) {
+      case 'gold':
+        return 0;
+      case 'silver':
+        return 2.5;
+      case 'bronze':
+        return 4;
+      default:
+        return 5;
+    }
+  };
+
+  const feePercent = getFeePercent(vipTier);
+  const amountNum = parseFloat(amount) || 0;
+  const feeAmount =
+    amountNum > 0
+      ? Number(((amountNum * feePercent) / 100).toFixed(2))
+      : 0;
+  const netAmount =
+    amountNum > 0
+      ? Number((amountNum - feeAmount).toFixed(2))
+      : 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +134,13 @@ const WithdrawPage = () => {
       toast.error('Could not submit request');
       return;
     }
-    const res = data as { ok: boolean; reason?: string };
+    const res = data as {
+      ok: boolean;
+      reason?: string;
+      fee_pct?: number;
+      fee_amount?: number;
+      net_amount?: number;
+    };
     if (!res?.ok) {
       const map: Record<string, string> = {
         insufficient_balance: 'Insufficient balance',
@@ -96,7 +150,9 @@ const WithdrawPage = () => {
       toast.error(map[res?.reason || ''] || 'Could not submit request');
       return;
     }
-    toast.success('Withdrawal request submitted!');
+    toast.success(
+      `Withdrawal request submitted! Net amount: ₹${res.net_amount?.toFixed(2) || netAmount.toFixed(2)}`,
+    );
     setAmount('');
     setUpi('');
     setHolder('');
@@ -181,11 +237,64 @@ const WithdrawPage = () => {
                   maxLength={100}
                 />
               </div>
-              <div className="text-xs text-muted-foreground space-y-1 p-3 rounded-md bg-muted/30 border border-border">
-                <p className="font-semibold text-foreground">Withdrawal fees</p>
-                <p>• Regular: 5% &nbsp;•&nbsp; Bronze VIP: 4%</p>
-                <p>• Silver VIP: 2.5% &nbsp;•&nbsp; <span className="text-yellow-400 font-semibold">Gold VIP: 0% (free)</span></p>
-                <p className="pt-1">Balance is held on submit. Admin pays out within 24 hours.</p>
+              <div className="space-y-3">
+                <div className="text-xs text-muted-foreground space-y-1 p-3 rounded-md bg-muted/30 border border-border">
+                  <div className="flex items-center justify-between">
+                    <p className="font-semibold text-foreground">Withdrawal fees</p>
+                    {!vipLoading && vipTier && (
+                      <Badge
+                        className={cn(
+                          'capitalize border-none text-[10px]',
+                          vipTier === 'gold' && 'bg-yellow-400/20 text-yellow-400',
+                          vipTier === 'silver' && 'bg-slate-300/20 text-slate-300',
+                          vipTier === 'bronze' && 'bg-amber-600/20 text-amber-500'
+                        )}
+                      >
+                        <Crown className="h-3 w-3 mr-1" />
+                        {vipTier} VIP
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1">
+                    {[
+                      { tier: 'gold', pct: 0, label: 'Gold' },
+                      { tier: 'silver', pct: 2.5, label: 'Silver' },
+                      { tier: 'bronze', pct: 4, label: 'Bronze' },
+                      { tier: null, pct: 5, label: 'Regular' },
+                    ].map((item) => (
+                      <span
+                        key={item.label}
+                        className={cn(
+                          vipTier === item.tier && 'text-primary font-semibold'
+                        )}
+                      >
+                        • {item.label}: {item.pct === 0 ? '0% (free)' : `${item.pct}%`}
+                      </span>
+                    ))}
+                  </div>
+                  <p>Balance is held on submit. Admin pays out within 24 hours.</p>
+                </div>
+
+                {amountNum > 0 && (
+                  <div className="p-3 rounded-md bg-primary/10 border border-primary/20 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Request Amount</span>
+                      <span className="font-medium">₹{amountNum.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Fee ({feePercent}%)
+                      </span>
+                      <span className="font-medium text-destructive">
+                        -₹{feeAmount.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="border-t border-border/50 pt-2 flex justify-between">
+                      <span className="font-semibold">Final Amount</span>
+                      <span className="font-bold text-primary">₹{netAmount.toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
               </div>
               <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting ? (
