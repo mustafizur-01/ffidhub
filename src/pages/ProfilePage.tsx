@@ -363,6 +363,94 @@ const ProfilePage = () => {
             </p>
           </div>
 
+          {/* VIP Membership Card */}
+          <div className="card-gaming p-6 space-y-4">
+            <h2 className="font-display text-xl font-bold flex items-center gap-2">
+              <Crown className="h-5 w-5 text-yellow-400" />
+              VIP Membership
+            </h2>
+
+            {loadingVip ? (
+              <div className="flex justify-center py-6">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : vip ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Current Plan</span>
+                  <Badge
+                    className={cn(
+                      'capitalize border-none',
+                      vip.tier === 'gold' && 'bg-yellow-400/20 text-yellow-400',
+                      vip.tier === 'silver' && 'bg-slate-300/20 text-slate-300',
+                      vip.tier === 'bronze' && 'bg-amber-600/20 text-amber-500'
+                    )}
+                  >
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    {vip.tier} VIP
+                  </Badge>
+                </div>
+
+                <div className="bg-secondary/50 rounded-lg p-4 text-center">
+                  <div className="text-3xl font-bold capitalize text-gradient">
+                    {vip.tier}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Expires {new Date(vip.expires_at).toLocaleDateString('en-IN', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Listing Boosts</span>
+                    <span className="font-medium">
+                      {vip.boosts_used} / {vip.boosts_quota} used
+                    </span>
+                  </div>
+                  <Progress
+                    value={Math.min(
+                      (vip.boosts_used / Math.max(vip.boosts_quota, 1)) * 100,
+                      100
+                    )}
+                    className="h-2"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {vip.tier === 'gold'
+                      ? 'Gold VIP includes unlimited free boosts.'
+                      : `You have ${Math.max(0, vip.boosts_quota - vip.boosts_used)} free boosts remaining this period.`}
+                  </p>
+                </div>
+
+                <Link to="/vip">
+                  <Button variant="gaming" size="sm" className="w-full">
+                    Upgrade / Renew
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-4 text-center">
+                <div className="bg-secondary/50 rounded-lg p-4">
+                  <Crown className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                  <p className="font-medium">No active VIP membership</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Unlock free boosts, lower fees, and top listings.
+                  </p>
+                </div>
+                <Link to="/vip">
+                  <Button variant="gaming" size="sm" className="w-full">
+                    Get VIP
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
+
           {/* Daily Bonus Card */}
           <DailyRewardCard />
         </div>
