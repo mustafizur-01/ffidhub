@@ -36,6 +36,7 @@ interface VipStatus {
   expires_at: string;
   boosts_quota: number;
   boosts_used: number;
+  started_at: string | null;
 }
 
 
