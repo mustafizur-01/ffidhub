@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import {
   User,
   Wallet,
@@ -10,11 +10,15 @@ import {
   Camera,
   Pencil,
   Check,
+  Crown,
+  Sparkles,
+  ArrowRight,
 } from 'lucide-react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -25,6 +29,14 @@ interface ReferralStats {
   totalReferrals: number;
   totalEarned: number;
 }
+
+interface VipStatus {
+  tier: string;
+  expires_at: string;
+  boosts_quota: number;
+  boosts_used: number;
+}
+
 
 const ProfilePage = () => {
   const { user, profile, loading, refreshProfile } = useAuth();
