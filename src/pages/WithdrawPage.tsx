@@ -128,7 +128,13 @@ const WithdrawPage = () => {
       toast.error('Could not submit request');
       return;
     }
-    const res = data as { ok: boolean; reason?: string };
+    const res = data as {
+      ok: boolean;
+      reason?: string;
+      fee_pct?: number;
+      fee_amount?: number;
+      net_amount?: number;
+    };
     if (!res?.ok) {
       const map: Record<string, string> = {
         insufficient_balance: 'Insufficient balance',
@@ -138,7 +144,9 @@ const WithdrawPage = () => {
       toast.error(map[res?.reason || ''] || 'Could not submit request');
       return;
     }
-    toast.success('Withdrawal request submitted!');
+    toast.success(
+      `Withdrawal request submitted! Net amount: ₹${res.net_amount?.toFixed(2) || netAmount.toFixed(2)}`,
+    );
     setAmount('');
     setUpi('');
     setHolder('');
