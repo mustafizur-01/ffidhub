@@ -82,6 +82,24 @@ const WithdrawPage = () => {
     setRequestsLoading(false);
   };
 
+  const getFeePercent = (tier: string | null) => {
+    switch (tier) {
+      case 'gold':
+        return 0;
+      case 'silver':
+        return 2.5;
+      case 'bronze':
+        return 4;
+      default:
+        return 5;
+    }
+  };
+
+  const feePercent = getFeePercent(vipTier);
+  const amountNum = parseFloat(amount) || 0;
+  const feeAmount = amountNum > 0 ? Math.round((amountNum * feePercent) / 100 * 100) / 100 : 0;
+  const netAmount = amountNum > 0 ? Math.round((amountNum - feeAmount) * 100) / 100 : 0;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const amt = parseFloat(amount);
