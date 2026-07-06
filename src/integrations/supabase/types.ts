@@ -968,6 +968,8 @@ export type Database = {
       get_active_vip: {
         Args: { _user_id: string }
         Returns: {
+          boosts_quota: number
+          boosts_used: number
           expires_at: string
           tier: string
         }[]
