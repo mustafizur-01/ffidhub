@@ -24,6 +24,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import DailyRewardCard from '@/components/DailyRewardCard';
+import { cn } from '@/lib/utils';
 
 interface ReferralStats {
   totalReferrals: number;
