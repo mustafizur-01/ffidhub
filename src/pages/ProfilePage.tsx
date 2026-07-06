@@ -49,14 +49,36 @@ const ProfilePage = () => {
   const [displayName, setDisplayName] = useState('');
   const [savingName, setSavingName] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [vip, setVip] = useState<VipStatus | null>(null);
+  const [loadingVip, setLoadingVip] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (profile) {
       fetchReferralStats();
+      fetchVipStatus();
       setDisplayName(profile.display_name || '');
     }
   }, [profile]);
+
+  const fetchVipStatus = async () => {
+    setLoadingVip(true);
+    try {
+      const { data, error } = await supabase
+        .rpc('get_active_vip', { _user_id: user?.id })
+        .maybeSingle();
+      if (error) throw error;
+      if (data) {
+        setVip(data as VipStatus);
+      } else {
+        setVip(null);
+      }
+    } catch (error) {
+      console.error('Error fetching VIP status:', error);
+    } finally {
+      setLoadingVip(false);
+    }
+  };
 
   const fetchReferralStats = async () => {
     if (!profile) return;
