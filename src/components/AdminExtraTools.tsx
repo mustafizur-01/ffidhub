@@ -141,7 +141,7 @@ export default function AdminExtraTools() {
     try {
       const { data, error } = await supabase
         .from('vip_subscriptions')
-        .select('id, user_id, tier, amount, utr_number, status, created_at')
+        .select('id, user_id, tier, amount, utr_number, screenshot_url, status, created_at')
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -151,13 +151,28 @@ export default function AdminExtraTools() {
         ? await supabase.from('profiles').select('user_id, email').in('user_id', ids)
         : { data: [] as any[] };
       const map = new Map((profs || []).map((p: any) => [p.user_id, p.email]));
-      setVipReqs((data || []).map((v) => ({ ...v, user_email: map.get(v.user_id) || 'Unknown' })));
+      const rows: VipReq[] = (data || []).map((v: any) => ({ ...v, user_email: map.get(v.user_id) || 'Unknown' }));
+      setVipReqs(rows);
+
+      const urlMap: Record<string, string> = {};
+      await Promise.all(
+        rows.map(async (r) => {
+          if (r.screenshot_url) {
+            const { data: signed } = await supabase.storage
+              .from('payment-proofs')
+              .createSignedUrl(r.screenshot_url, 3600);
+            if (signed?.signedUrl) urlMap[r.id] = signed.signedUrl;
+          }
+        })
+      );
+      setVipImageUrls(urlMap);
     } catch (e: any) {
       toast.error(e.message || 'Failed to load VIP requests');
     } finally {
       setVipLoading(false);
     }
   };
+
 
   const fetchVerRequests = async () => {
     setVerLoading(true);
