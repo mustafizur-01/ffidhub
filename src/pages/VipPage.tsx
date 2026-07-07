@@ -89,7 +89,7 @@ export default function VipPage() {
                   <li key={p} className="flex gap-2"><Check className="h-4 w-4 text-gaming-success shrink-0 mt-0.5" />{p}</li>
                 ))}
               </ul>
-              <VipPurchaseDialog tier={t.key} amount={t.price} disabled={!!active} userId={user?.id} />
+              <VipPurchaseDialog tier={t.key} amount={t.price} disabled={!!active} userId={user?.id} balance={profile?.balance || 0} onDone={reload} />
             </div>
           ))}
         </div>
