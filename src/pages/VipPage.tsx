@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
-import { Crown, Check, Loader2, Upload, QrCode } from 'lucide-react';
+import { Crown, Check, Loader2, Upload, QrCode, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+
 
 const TIERS = [
   {
