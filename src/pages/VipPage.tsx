@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
-import { Crown, Check, Loader2, Upload, QrCode } from 'lucide-react';
+import { Crown, Check, Loader2, Upload, QrCode, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+
 
 const TIERS = [
   {
@@ -34,19 +36,20 @@ const TIERS = [
 ];
 
 export default function VipPage() {
-  const { user } = useAuth();
+  const { user, profile, refreshProfile } = useAuth() as any;
   const [active, setActive] = useState<{ tier: string; expires_at: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    (async () => {
-      if (!user) { setLoading(false); return; }
-      const { data } = await supabase.rpc('get_active_vip', { _user_id: user.id });
-      const row = Array.isArray(data) ? data[0] : null;
-      setActive(row ? { tier: row.tier, expires_at: row.expires_at } : null);
-      setLoading(false);
-    })();
-  }, [user]);
+  const reload = async () => {
+    if (!user) { setLoading(false); return; }
+    const { data } = await supabase.rpc('get_active_vip', { _user_id: user.id });
+    const row = Array.isArray(data) ? data[0] : null;
+    setActive(row ? { tier: row.tier, expires_at: row.expires_at } : null);
+    setLoading(false);
+  };
+
+  useEffect(() => { reload(); }, [user]);
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -86,7 +89,7 @@ export default function VipPage() {
                   <li key={p} className="flex gap-2"><Check className="h-4 w-4 text-gaming-success shrink-0 mt-0.5" />{p}</li>
                 ))}
               </ul>
-              <VipPurchaseDialog tier={t.key} amount={t.price} disabled={!!active} userId={user?.id} />
+              <VipPurchaseDialog tier={t.key} amount={t.price} disabled={!!active} userId={user?.id} balance={profile?.balance || 0} onDone={reload} />
             </div>
           ))}
         </div>
@@ -95,12 +98,29 @@ export default function VipPage() {
   );
 }
 
-function VipPurchaseDialog({ tier, amount, disabled, userId }: { tier: string; amount: number; disabled: boolean; userId?: string }) {
+function VipPurchaseDialog({
+  tier,
+  amount,
+  disabled,
+  userId,
+  balance,
+  onDone,
+}: {
+  tier: string;
+  amount: number;
+  disabled: boolean;
+  userId?: string;
+  balance: number;
+  onDone?: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const [utr, setUtr] = useState('');
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [walletBusy, setWalletBusy] = useState(false);
+
+  const canPayFromWallet = balance >= amount;
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -115,6 +135,33 @@ function VipPurchaseDialog({ tier, amount, disabled, userId }: { tier: string; a
     }
     setScreenshot(file);
     setPreview(URL.createObjectURL(file));
+  };
+
+  const payFromWallet = async () => {
+    if (!userId) {
+      toast.error('Please sign in first');
+      return;
+    }
+    if (!canPayFromWallet) {
+      toast.error('Insufficient wallet balance');
+      return;
+    }
+    setWalletBusy(true);
+    try {
+      const { data, error } = await supabase.rpc('purchase_vip_with_balance' as any, {
+        _tier: tier,
+      });
+      if (error) throw error;
+      const r = data as any;
+      if (r?.ok === false) throw new Error(r.reason || 'Failed');
+      toast.success(`${tier.toUpperCase()} VIP activated!`);
+      setOpen(false);
+      onDone?.();
+    } catch (e: any) {
+      toast.error(e.message || 'Failed');
+    } finally {
+      setWalletBusy(false);
+    }
   };
 
   const submit = async () => {
@@ -170,46 +217,92 @@ function VipPurchaseDialog({ tier, amount, disabled, userId }: { tier: string; a
         <DialogHeader>
           <DialogTitle className="font-display capitalize">Activate {tier} VIP — ₹{amount}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <div className="card-gaming p-4 text-center">
-            <p className="text-sm font-medium mb-3 flex items-center justify-center gap-2">
-              <QrCode className="h-4 w-4 text-primary" /> Pay ₹{amount} via PhonePe
-            </p>
-            <div className="bg-white rounded-xl p-3 shadow-md inline-block">
-              <img src="/images/phonepe-qr.jpg" alt="PhonePe QR Code" className="w-48 h-48 object-contain" />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">Scan and pay ₹{amount}</p>
-          </div>
 
-          <div>
-            <label className="text-sm font-medium">Transaction UTR</label>
-            <Input value={utr} onChange={(e) => setUtr(e.target.value)} className="mt-1" placeholder="12-digit UTR" />
-          </div>
+        <Tabs defaultValue="wallet" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="wallet">
+              <Wallet className="h-4 w-4 mr-1" /> Wallet
+            </TabsTrigger>
+            <TabsTrigger value="upi">
+              <QrCode className="h-4 w-4 mr-1" /> UPI / QR
+            </TabsTrigger>
+          </TabsList>
 
-          <div>
-            <label className="text-sm font-medium">Payment Screenshot (Proof)</label>
-            <label className="mt-1 flex flex-col items-center justify-center gap-2 p-4 rounded-lg border-2 border-dashed border-border hover:border-primary/50 cursor-pointer transition-colors bg-muted/20">
-              {preview ? (
-                <>
-                  <img src={preview} alt="Proof preview" className="max-h-32 rounded" />
-                  <p className="text-xs text-muted-foreground">Click to change</p>
-                </>
-              ) : (
-                <>
-                  <Upload className="h-6 w-6 text-primary" />
-                  <p className="text-sm">Upload screenshot</p>
-                  <p className="text-xs text-muted-foreground">PNG / JPG, max 5MB</p>
-                </>
+          <TabsContent value="wallet" className="space-y-4 mt-4">
+            <div className="card-gaming p-4 text-center space-y-2">
+              <Wallet className="h-8 w-8 text-primary mx-auto" />
+              <p className="text-sm text-muted-foreground">Your balance</p>
+              <p className="font-display text-3xl font-black text-primary">₹{balance.toFixed(2)}</p>
+              <div className="text-sm border-t border-border pt-3 mt-3">
+                <div className="flex justify-between"><span className="text-muted-foreground">Price</span><span>₹{amount}</span></div>
+                <div className="flex justify-between font-semibold mt-1">
+                  <span>After purchase</span>
+                  <span className={canPayFromWallet ? 'text-gaming-success' : 'text-destructive'}>
+                    ₹{(balance - amount).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+              {!canPayFromWallet && (
+                <p className="text-xs text-destructive">
+                  Insufficient balance. Add ₹{(amount - balance).toFixed(2)} more.
+                </p>
               )}
-              <input type="file" accept="image/*" className="hidden" onChange={handleFile} />
-            </label>
-          </div>
+            </div>
+            <Button
+              variant="gaming"
+              className="w-full"
+              onClick={payFromWallet}
+              disabled={walletBusy || !canPayFromWallet}
+            >
+              {walletBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : `Pay ₹${amount} from Wallet`}
+            </Button>
+            <p className="text-xs text-center text-muted-foreground">
+              Instant activation — no admin approval needed.
+            </p>
+          </TabsContent>
 
-          <Button variant="gaming" className="w-full" onClick={submit} disabled={busy}>
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Submit for Approval'}
-          </Button>
-        </div>
+          <TabsContent value="upi" className="space-y-4 mt-4">
+            <div className="card-gaming p-4 text-center">
+              <p className="text-sm font-medium mb-3 flex items-center justify-center gap-2">
+                <QrCode className="h-4 w-4 text-primary" /> Pay ₹{amount} via PhonePe
+              </p>
+              <div className="bg-white rounded-xl p-3 shadow-md inline-block">
+                <img src="/images/phonepe-qr.jpg" alt="PhonePe QR Code" className="w-48 h-48 object-contain" />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">Scan and pay ₹{amount}</p>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Transaction UTR</label>
+              <Input value={utr} onChange={(e) => setUtr(e.target.value)} className="mt-1" placeholder="12-digit UTR" />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Payment Screenshot (Proof)</label>
+              <label className="mt-1 flex flex-col items-center justify-center gap-2 p-4 rounded-lg border-2 border-dashed border-border hover:border-primary/50 cursor-pointer transition-colors bg-muted/20">
+                {preview ? (
+                  <>
+                    <img src={preview} alt="Proof preview" className="max-h-32 rounded" />
+                    <p className="text-xs text-muted-foreground">Click to change</p>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-6 w-6 text-primary" />
+                    <p className="text-sm">Upload screenshot</p>
+                    <p className="text-xs text-muted-foreground">PNG / JPG, max 5MB</p>
+                  </>
+                )}
+                <input type="file" accept="image/*" className="hidden" onChange={handleFile} />
+              </label>
+            </div>
+
+            <Button variant="gaming" className="w-full" onClick={submit} disabled={busy}>
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Submit for Approval'}
+            </Button>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
 }
+

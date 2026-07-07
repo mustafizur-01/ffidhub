@@ -1051,6 +1051,7 @@ export type Database = {
         Args: { _amount: number; _auction_id: string }
         Returns: Json
       }
+      purchase_vip_with_balance: { Args: { _tier: string }; Returns: Json }
       request_vip:
         | { Args: { _tier: string; _utr: string }; Returns: Json }
         | {
