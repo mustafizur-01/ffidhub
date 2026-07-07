@@ -435,6 +435,7 @@ export default function AdminExtraTools() {
                     <TableHead>Tier</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>UTR</TableHead>
+                    <TableHead>Proof</TableHead>
                     <TableHead>Note</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -451,6 +452,26 @@ export default function AdminExtraTools() {
                       <TableCell className="font-bold">₹{v.amount}</TableCell>
                       <TableCell className="font-mono text-xs">{v.utr_number}</TableCell>
                       <TableCell>
+                        {vipImageUrls[v.id] ? (
+                          <a
+                            href={vipImageUrls[v.id]}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block"
+                          >
+                            <img
+                              src={vipImageUrls[v.id]}
+                              alt="Payment proof"
+                              className="h-16 w-16 object-cover rounded border border-border hover:opacity-80 transition"
+                            />
+                          </a>
+                        ) : v.screenshot_url ? (
+                          <span className="text-xs text-muted-foreground">Loading…</span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">None</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <Input
                           placeholder="Optional note"
                           value={vipNote[v.id] || ''}
@@ -460,6 +481,7 @@ export default function AdminExtraTools() {
                           className="min-w-[140px]"
                         />
                       </TableCell>
+
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
