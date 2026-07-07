@@ -65,10 +65,12 @@ export default function AdminExtraTools() {
   const [disputesLoading, setDisputesLoading] = useState(true);
   const [vipReqs, setVipReqs] = useState<VipReq[]>([]);
   const [vipLoading, setVipLoading] = useState(true);
+  const [vipImageUrls, setVipImageUrls] = useState<Record<string, string>>({});
   const [verReqs, setVerReqs] = useState<SellerVerReq[]>([]);
   const [verLoading, setVerLoading] = useState(true);
   const [verNote, setVerNote] = useState<Record<string, string>>({});
   const [verImageUrls, setVerImageUrls] = useState<Record<string, string>>({});
+
 
   const [resolveTarget, setResolveTarget] = useState<{ p: Dispute; action: 'release' | 'refund' } | null>(null);
   const [resolveNote, setResolveNote] = useState('');
