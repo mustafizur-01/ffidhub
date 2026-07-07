@@ -36,19 +36,20 @@ const TIERS = [
 ];
 
 export default function VipPage() {
-  const { user } = useAuth();
+  const { user, profile, refreshProfile } = useAuth() as any;
   const [active, setActive] = useState<{ tier: string; expires_at: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    (async () => {
-      if (!user) { setLoading(false); return; }
-      const { data } = await supabase.rpc('get_active_vip', { _user_id: user.id });
-      const row = Array.isArray(data) ? data[0] : null;
-      setActive(row ? { tier: row.tier, expires_at: row.expires_at } : null);
-      setLoading(false);
-    })();
-  }, [user]);
+  const reload = async () => {
+    if (!user) { setLoading(false); return; }
+    const { data } = await supabase.rpc('get_active_vip', { _user_id: user.id });
+    const row = Array.isArray(data) ? data[0] : null;
+    setActive(row ? { tier: row.tier, expires_at: row.expires_at } : null);
+    setLoading(false);
+  };
+
+  useEffect(() => { reload(); }, [user]);
+
 
   return (
     <div className="min-h-screen bg-background">
