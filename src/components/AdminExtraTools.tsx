@@ -38,10 +38,12 @@ type VipReq = {
   tier: string;
   amount: number;
   utr_number: string | null;
+  screenshot_url: string | null;
   status: string;
   created_at: string;
   user_email?: string;
 };
+
 
 type SellerVerReq = {
   id: string;
