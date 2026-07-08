@@ -255,21 +255,31 @@ const SellForm = () => {
           <FormField
             control={form.control}
             name="price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{listingType === 'auction' ? 'Starting Price (₹)' : 'Price (₹)'}</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="e.g., 5000"
-                    className="input-gaming"
-                    {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const price = Number(field.value) || 0;
+              const fee = Math.round(price * 0.05 * 100) / 100;
+              const net = Math.max(0, price - fee);
+              return (
+                <FormItem>
+                  <FormLabel>{listingType === 'auction' ? 'Starting Price (₹)' : 'Price (₹)'}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="e.g., 5000"
+                      className="input-gaming"
+                      {...field}
+                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    />
+                  </FormControl>
+                  {price > 0 && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Platform fee 5% (₹{fee}) • You receive <span className="text-primary font-semibold">₹{net}</span> on sale
+                    </p>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           {/* Contact Number */}
