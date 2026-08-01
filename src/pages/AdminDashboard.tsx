@@ -936,54 +936,106 @@ const AdminDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {depositsLoading ? (
-              <Skeleton className="h-32" />
-            ) : depositRequests.length === 0 ? (
-              <p className="text-center text-muted-foreground py-4">No deposit requests</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>User</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>UTR</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {depositRequests.map((d: any) => (
-                      <TableRow key={d.id}>
-                        <TableCell className="text-sm">{d.user_email}</TableCell>
-                        <TableCell className="font-bold">₹{d.amount}</TableCell>
-                        <TableCell className="font-mono text-xs">{d.utr_number}</TableCell>
-                        <TableCell>
-                          {d.status === 'approved' && <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Approved</Badge>}
-                          {d.status === 'rejected' && <Badge variant="destructive">Rejected</Badge>}
-                          {d.status === 'pending' && <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Pending</Badge>}
-                        </TableCell>
-                        <TableCell className="text-xs">{format(new Date(d.created_at), 'dd MMM yyyy, hh:mm a')}</TableCell>
-                        <TableCell>
-                          {d.status === 'pending' && (
-                            <div className="flex gap-2">
-                              <Button size="sm" onClick={() => handleApproveDeposit(d)} className="bg-green-600 hover:bg-green-700 text-white">
-                                <CheckCircle className="h-3 w-3 mr-1" /> Approve
-                              </Button>
-                              <Button size="sm" variant="destructive" onClick={() => handleRejectDeposit(d)}>
-                                <XCircle className="h-3 w-3 mr-1" /> Reject
-                              </Button>
-                            </div>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+            <div className="flex flex-col sm:flex-row gap-2 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by email, UTR or amount"
+                  value={depositSearch}
+                  onChange={(e) => setDepositSearch(e.target.value)}
+                  className="pl-9"
+                />
               </div>
-            )}
+              <Select value={depositFilter} onValueChange={(v: any) => setDepositFilter(v)}>
+                <SelectTrigger className="w-full sm:w-40"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                  <SelectItem value="all">All</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" onClick={fetchDepositRequests}>Refresh</Button>
+            </div>
+            {(() => {
+              const q = depositSearch.trim().toLowerCase();
+              const filteredDeposits = depositRequests.filter((d: any) => {
+                const statusOk = depositFilter === 'all' || d.status === depositFilter;
+                const searchOk =
+                  !q ||
+                  (d.user_email || '').toLowerCase().includes(q) ||
+                  (d.utr_number || '').toLowerCase().includes(q) ||
+                  String(d.amount).includes(q);
+                return statusOk && searchOk;
+              });
+              return depositsLoading ? (
+                <Skeleton className="h-32" />
+              ) : filteredDeposits.length === 0 ? (
+                <p className="text-center text-muted-foreground py-4">No deposit requests found</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>User</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>UTR</TableHead>
+                        <TableHead>Proof</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredDeposits.map((d: any) => (
+                        <TableRow key={d.id}>
+                          <TableCell className="text-sm">{d.user_email}</TableCell>
+                          <TableCell className="font-bold">₹{d.amount}</TableCell>
+                          <TableCell className="font-mono text-xs">{d.utr_number}</TableCell>
+                          <TableCell>
+                            {depositImageUrls[d.id] ? (
+                              <button
+                                type="button"
+                                onClick={() => setProofUrl(depositImageUrls[d.id])}
+                                className="block"
+                              >
+                                <img
+                                  src={depositImageUrls[d.id]}
+                                  alt={`Payment proof from ${d.user_email}`}
+                                  className="h-14 w-14 object-cover rounded border border-border hover:opacity-80 transition"
+                                />
+                              </button>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">No proof</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {d.status === 'approved' && <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Approved</Badge>}
+                            {d.status === 'rejected' && <Badge variant="destructive">Rejected</Badge>}
+                            {d.status === 'pending' && <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Pending</Badge>}
+                          </TableCell>
+                          <TableCell className="text-xs">{format(new Date(d.created_at), 'dd MMM yyyy, hh:mm a')}</TableCell>
+                          <TableCell>
+                            {d.status === 'pending' && (
+                              <div className="flex gap-2">
+                                <Button size="sm" onClick={() => handleApproveDeposit(d)} className="bg-green-600 hover:bg-green-700 text-white">
+                                  <CheckCircle className="h-3 w-3 mr-1" /> Approve
+                                </Button>
+                                <Button size="sm" variant="destructive" onClick={() => handleRejectDeposit(d)}>
+                                  <XCircle className="h-3 w-3 mr-1" /> Reject
+                                </Button>
+                              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              );
+            })()}
           </CardContent>
+
         </Card>
 
         {/* Withdrawal Requests */}
