@@ -148,10 +148,14 @@ const AddMoneyPage = () => {
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-4">
             <div className="bg-white rounded-xl p-3 shadow-md">
-              <img src="/images/phonepe-qr.jpg" alt="PhonePe QR Code" className="w-56 h-56 object-contain" />
+              <img src="/images/phonepe-qr.png" alt="PhonePe QR Code" className="w-56 h-56 object-contain" />
+            </div>
+            <div className="w-full rounded-lg border border-primary/30 bg-muted/30 p-3 text-center">
+              <p className="text-xs text-muted-foreground mb-1">UPI ID</p>
+              <p className="font-mono font-semibold text-primary select-all">7501146196@axl</p>
             </div>
             <div className="text-center text-sm text-muted-foreground space-y-1">
-              <p>1. Scan the QR code above</p>
+              <p>1. Scan the QR code or pay to the UPI ID above</p>
               <p>2. Make the payment</p>
               <p>3. Enter the Transaction ID / UTR below</p>
             </div>
