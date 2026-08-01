@@ -102,8 +102,13 @@ const AdminDashboard = () => {
   const [removeNote, setRemoveNote] = useState('');
   const [depositRequests, setDepositRequests] = useState<any[]>([]);
   const [depositsLoading, setDepositsLoading] = useState(true);
+  const [depositImageUrls, setDepositImageUrls] = useState<Record<string, string>>({});
+  const [depositSearch, setDepositSearch] = useState('');
+  const [depositFilter, setDepositFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
+  const [proofUrl, setProofUrl] = useState<string | null>(null);
   const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
   const [withdrawalsLoading, setWithdrawalsLoading] = useState(true);
+
 
   // Listings management
   const [listings, setListings] = useState<any[]>([]);
