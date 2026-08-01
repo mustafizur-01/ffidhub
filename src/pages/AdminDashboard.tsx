@@ -167,6 +167,31 @@ const AdminDashboard = () => {
     }
   }, [isAdmin]);
 
+  // Instant alert when a new deposit request arrives
+  useEffect(() => {
+    if (!isAdmin) return;
+    const channel = supabase
+      .channel('admin-deposit-requests')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'deposit_requests' },
+        (payload: any) => {
+          const d = payload.new;
+          toast.info(`New deposit request: ₹${d.amount}`, {
+            description: d.screenshot_url ? 'Screenshot attached — review now' : 'No screenshot attached',
+            duration: 10000,
+          });
+          fetchDepositRequests();
+          fetchStats();
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAdmin]);
+
+
   const fetchListings = async () => {
     try {
       setListingsLoading(true);
