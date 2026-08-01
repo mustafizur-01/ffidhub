@@ -267,9 +267,13 @@ function VipPurchaseDialog({
                 <QrCode className="h-4 w-4 text-primary" /> Pay ₹{amount} via PhonePe
               </p>
               <div className="bg-white rounded-xl p-3 shadow-md inline-block">
-                <img src="/images/phonepe-qr.jpg" alt="PhonePe QR Code" className="w-48 h-48 object-contain" />
+                <img src="/images/phonepe-qr.png" alt="PhonePe QR Code" className="w-48 h-48 object-contain" />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">Scan and pay ₹{amount}</p>
+              <div className="mt-3 rounded-lg border border-primary/30 bg-muted/30 p-2">
+                <p className="text-xs text-muted-foreground">UPI ID</p>
+                <p className="font-mono font-semibold text-primary select-all">7501146196@axl</p>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">Scan or pay ₹{amount} to this UPI ID</p>
             </div>
 
             <div>
