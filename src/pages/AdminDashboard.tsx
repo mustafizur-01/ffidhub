@@ -548,6 +548,20 @@ const AdminDashboard = () => {
         return { ...d, user_email: profile?.email || 'Unknown' };
       }));
       setDepositRequests(enriched);
+
+      const urlMap: Record<string, string> = {};
+      await Promise.all(
+        (data || []).map(async (d: any) => {
+          if (d.screenshot_url) {
+            const { data: signed } = await supabase.storage
+              .from('payment-proofs')
+              .createSignedUrl(d.screenshot_url, 3600);
+            if (signed?.signedUrl) urlMap[d.id] = signed.signedUrl;
+          }
+        })
+      );
+      setDepositImageUrls(urlMap);
+
     } catch (error) {
       console.error('Error fetching deposit requests:', error);
     } finally {
