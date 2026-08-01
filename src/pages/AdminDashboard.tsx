@@ -39,6 +39,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AdminExtraTools from '@/components/AdminExtraTools';
 
 interface Message {
@@ -1963,6 +1964,15 @@ const AdminDashboard = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        {/* Payment proof lightbox */}
+        <Dialog open={!!proofUrl} onOpenChange={(o) => !o && setProofUrl(null)}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Payment Proof</DialogTitle>
+            </DialogHeader>
+            {proofUrl && <img src={proofUrl} alt="Payment proof full view" className="w-full rounded" />}
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
