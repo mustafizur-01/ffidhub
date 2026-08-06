@@ -28,6 +28,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { AIPriceEstimator } from '@/components/AIPriceEstimator';
+import { AIImageGenerator } from '@/components/AIImageGenerator';
+
 import { Gavel, Tag } from 'lucide-react';
 
 const formSchema = z.object({
