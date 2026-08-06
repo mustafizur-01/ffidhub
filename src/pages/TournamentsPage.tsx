@@ -1,3 +1,4 @@
+import { AIImageGenerator } from '@/components/AIImageGenerator';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -359,7 +360,21 @@ const TournamentsPage = () => {
                     />
                   </label>
                 )}
+
+                <AIImageGenerator
+                  title="AI Tournament Cover"
+                  hint="Cover image na thakle AI diye banaye nin."
+                  fileName="tournament-cover.png"
+                  buildPrompt={() =>
+                    `Create an epic esports tournament banner poster. Game: ${newTournament.game_name}. Mode: ${newTournament.game_mode}. Title text theme: "${newTournament.title || 'Tournament'}". Dark charcoal background, neon orange glow, dramatic lighting, trophy and battle royale action silhouettes, 16:9 cinematic composition. No readable small text, no real brand logos.`
+                  }
+                  onGenerated={(file, dataUrl) => {
+                    setCoverFile(file);
+                    setCoverPreview(dataUrl);
+                  }}
+                />
               </div>
+
 
               <div className="grid grid-cols-2 gap-3">
                 <Select value={newTournament.game_mode} onValueChange={(v) => setNewTournament({...newTournament, game_mode: v})}>
