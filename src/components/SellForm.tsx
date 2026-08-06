@@ -205,6 +205,20 @@ const SellForm = () => {
           onSuggest={(p) => form.setValue('price', p, { shouldValidate: true })}
         />
 
+        <AIImageGenerator
+          title="AI Listing Image"
+          hint="Screenshot na thakle AI diye listing cover baniye nin."
+          fileName="listing.png"
+          buildPrompt={() =>
+            `Create a bold Free Fire MAX gaming account showcase poster image. Dark charcoal background with neon orange energy effects, esports style. Account level ${form.watch('id_level')}, login method ${form.watch('login_method')}. Highlight these items/bundles: ${form.watch('key_items') || 'rare bundles and weapons'}. Include stylized weapon and character silhouettes. No real logos, no readable small text.`
+          }
+          onGenerated={(file, dataUrl) => {
+            setImageFile(file);
+            setImagePreview(dataUrl);
+          }}
+        />
+
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* ID Level */}
           <FormField
