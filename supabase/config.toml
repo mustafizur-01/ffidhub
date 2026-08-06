@@ -1,1 +1,3 @@
 project_id = "xdkgcqtjtxlquqxobmpy"
+[functions.estimate-price]
+verify_jwt = false
