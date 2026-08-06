@@ -62,7 +62,7 @@ ${items || '(not specified)'}`;
         'X-Lovable-AIG-SDK': 'native-fetch',
       },
       body: JSON.stringify({
-        model: 'google/gemini-3-flash-preview',
+        model: 'google/gemini-3.6-flash',
         messages: [
           { role: 'system', content: system },
           { role: 'user', content: user },
