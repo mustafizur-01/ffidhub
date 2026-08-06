@@ -58,18 +58,44 @@ export const AIPriceEstimator = ({ id_level, login_method, key_items, is_email_b
             Get a fair price range powered by AI based on your account details.
           </p>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={estimate}
-          disabled={loading}
-          className="border-accent/50 text-accent hover:bg-accent/10 hover:text-accent"
-        >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-          {loading ? 'Analyzing...' : 'Suggest Price'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={estimate}
+            disabled={loading}
+            className="border-accent/50 text-accent hover:bg-accent/10 hover:text-accent"
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : result ? (
+              <RefreshCw className="h-4 w-4" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+            {loading ? 'Analyzing...' : result ? 'Suggest Again' : 'Suggest Price'}
+          </Button>
+          {result && !loading && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setResult(null)}
+              className="text-muted-foreground"
+            >
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
+
+      {result && (
+        <p className="mt-3 text-[11px] text-muted-foreground">
+          Inputs change korle abar "Suggest Again" chapun — notun price peye tap korle auto-set hobe.
+        </p>
+      )}
+
 
       {result && (
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
