@@ -20,6 +20,35 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const prompt = String(body?.prompt ?? '').trim().slice(0, 1200);
+    const source = String(body?.source ?? 'unknown').slice(0, 40);
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    let userId: string | null = null;
+    try {
+      const jwt = (req.headers.get('Authorization') ?? '').replace('Bearer ', '');
+      if (jwt) {
+        const payload = JSON.parse(atob(jwt.split('.')[1]));
+        userId = payload?.sub ?? null;
+      }
+    } catch { /* anonymous */ }
+
+    const logGeneration = async (success: boolean) => {
+      if (!supabaseUrl || !serviceKey) return;
+      try {
+        await fetch(`${supabaseUrl}/rest/v1/ai_image_generations`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: serviceKey,
+            Authorization: `Bearer ${serviceKey}`,
+            Prefer: 'return=minimal',
+          },
+          body: JSON.stringify({ user_id: userId, source, prompt: prompt.slice(0, 500), success }),
+        });
+      } catch { /* logging must never break generation */ }
+    };
+
     if (prompt.length < 3) {
       return new Response(JSON.stringify({ error: 'invalid_input' }), {
         status: 400,
