@@ -947,8 +947,14 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
+        {/* AI image generation analytics */}
+        <div className="mb-8">
+          <AdminAiUsage />
+        </div>
+
         {/* Extra admin power tools: disputes, VIP approvals, broadcast */}
         <AdminExtraTools />
+
 
         {/* Deposit Requests */}
         <Card className="glass-card mb-8">
