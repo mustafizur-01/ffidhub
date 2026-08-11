@@ -10,8 +10,10 @@ interface Props {
   hint?: string;
   buildPrompt: () => string;
   fileName?: string;
+  source?: string;
   onGenerated: (file: File, dataUrl: string) => void;
 }
+
 
 const dataUrlToFile = (dataUrl: string, name: string) => {
   const [meta, b64] = dataUrl.split(',');
@@ -27,8 +29,10 @@ export const AIImageGenerator = ({
   hint = 'Generate a cover image with AI instead of uploading one.',
   buildPrompt,
   fileName = 'ai-image.png',
+  source = 'unknown',
   onGenerated,
 }: Props) => {
+
   const [loading, setLoading] = useState(false);
   const [extra, setExtra] = useState('');
   const [preview, setPreview] = useState<string | null>(null);
@@ -41,8 +45,9 @@ export const AIImageGenerator = ({
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: { prompt },
+        body: { prompt, source },
       });
+
       if (error) throw error;
       if (data?.error === 'rate_limited') return toast.error('AI is busy. Try again shortly.');
       if (data?.error === 'credits_exhausted') return toast.error('AI credits exhausted. Contact admin.');

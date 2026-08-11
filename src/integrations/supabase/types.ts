@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_image_generations: {
+        Row: {
+          created_at: string
+          id: string
+          prompt: string | null
+          source: string
+          success: boolean
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          prompt?: string | null
+          source?: string
+          success?: boolean
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          prompt?: string | null
+          source?: string
+          success?: boolean
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       auctions: {
         Row: {
           bid_count: number
@@ -974,6 +1001,7 @@ export type Database = {
           tier: string
         }[]
       }
+      get_ai_image_stats: { Args: never; Returns: Json }
       get_featured_sellers: {
         Args: { _limit?: number }
         Returns: {
