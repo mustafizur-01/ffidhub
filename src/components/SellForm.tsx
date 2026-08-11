@@ -211,6 +211,7 @@ const SellForm = () => {
           title="AI Listing Image"
           hint="Screenshot na thakle AI diye listing cover baniye nin."
           fileName="listing.png"
+          source="listing"
           buildPrompt={() =>
             `Create a bold Free Fire MAX gaming account showcase poster image. Dark charcoal background with neon orange energy effects, esports style. Account level ${form.watch('id_level')}, login method ${form.watch('login_method')}. Highlight these items/bundles: ${form.watch('key_items') || 'rare bundles and weapons'}. Include stylized weapon and character silhouettes. No real logos, no readable small text.`
           }
