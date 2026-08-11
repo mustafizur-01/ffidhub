@@ -10,8 +10,10 @@ interface Props {
   hint?: string;
   buildPrompt: () => string;
   fileName?: string;
+  source?: string;
   onGenerated: (file: File, dataUrl: string) => void;
 }
+
 
 const dataUrlToFile = (dataUrl: string, name: string) => {
   const [meta, b64] = dataUrl.split(',');
