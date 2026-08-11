@@ -29,8 +29,10 @@ export const AIImageGenerator = ({
   hint = 'Generate a cover image with AI instead of uploading one.',
   buildPrompt,
   fileName = 'ai-image.png',
+  source = 'unknown',
   onGenerated,
 }: Props) => {
+
   const [loading, setLoading] = useState(false);
   const [extra, setExtra] = useState('');
   const [preview, setPreview] = useState<string | null>(null);
