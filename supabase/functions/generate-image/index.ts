@@ -84,6 +84,7 @@ Deno.serve(async (req) => {
     }
     if (!aiRes.ok) {
       const t = await aiRes.text();
+      await logGeneration(false);
       return new Response(JSON.stringify({ error: 'ai_error', detail: t.slice(0, 300) }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -95,15 +96,19 @@ Deno.serve(async (req) => {
       aiJson?.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
     if (!image) {
+      await logGeneration(false);
       return new Response(JSON.stringify({ error: 'no_image' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
+    await logGeneration(true);
+
     return new Response(JSON.stringify({ image }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
   } catch (err) {
     return new Response(
       JSON.stringify({ error: 'unhandled', detail: String(err).slice(0, 300) }),
