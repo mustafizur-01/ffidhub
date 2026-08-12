@@ -352,7 +352,7 @@ const SettingsPage = () => {
                       Member since {new Date(user.created_at).toLocaleDateString()}
                     </p>
                   </div>
-                  {profile?.vip_tier && (
+                  {(profile as any)?.vip_tier && (
                     <Badge variant="secondary" className="uppercase">
                       {profile.vip_tier} VIP
                     </Badge>
