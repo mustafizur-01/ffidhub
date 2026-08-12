@@ -7,6 +7,7 @@ import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import UserMenu from './UserMenu';
 import AuthModal from './AuthModal';
 import NotificationBell from './NotificationBell';
+import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
   const location = useLocation();
@@ -74,6 +75,7 @@ const Header = () => {
                 Download
               </Button>
             </a>
+            <ThemeToggle />
             {loading ? (
               <div className="w-24 h-9 bg-muted animate-pulse rounded-md" />
             ) : user ? (
