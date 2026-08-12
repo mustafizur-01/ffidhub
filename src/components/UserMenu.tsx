@@ -13,6 +13,7 @@ import {
   Heart,
   Banknote,
   ShieldCheck,
+  Settings,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -164,6 +165,13 @@ const UserMenu = () => {
           <DropdownMenuItem className="cursor-pointer">
             <User className="h-4 w-4 mr-2" />
             My Profile
+          </DropdownMenuItem>
+        </Link>
+
+        <Link to="/settings">
+          <DropdownMenuItem className="cursor-pointer">
+            <Settings className="h-4 w-4 mr-2" />
+            Settings
           </DropdownMenuItem>
         </Link>
 
