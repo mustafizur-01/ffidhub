@@ -354,7 +354,7 @@ const SettingsPage = () => {
                   </div>
                   {(profile as any)?.vip_tier && (
                     <Badge variant="secondary" className="uppercase">
-                      {profile.vip_tier} VIP
+                      {(profile as any).vip_tier} VIP
                     </Badge>
                   )}
                 </div>
