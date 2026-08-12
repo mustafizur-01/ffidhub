@@ -7,6 +7,57 @@
 /* Esports Dark Theme - Free Fire MAX Marketplace */
 @layer base {
   :root {
+    --background: 0 0% 98%;
+    --foreground: 0 0% 8%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 8%;
+
+    --primary: 22 100% 48%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 30 100% 55%;
+
+    --secondary: 0 0% 94%;
+    --secondary-foreground: 0 0% 12%;
+
+    --muted: 0 0% 93%;
+    --muted-foreground: 0 0% 38%;
+
+    --accent: 192 85% 42%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 78% 48%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 87%;
+    --input: 0 0% 94%;
+    --ring: 22 100% 48%;
+
+    --radius: 0.75rem;
+
+    --gaming-glow: 22 100% 48%;
+    --gaming-dark: 0 0% 96%;
+    --gaming-charcoal: 0 0% 91%;
+    --gaming-success: 142 70% 36%;
+    --gaming-rare: 280 80% 50%;
+    --gaming-legendary: 45 95% 45%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(22 100% 48%), hsl(35 100% 54%));
+    --gradient-fire: linear-gradient(135deg, hsl(0 85% 50%), hsl(22 100% 48%), hsl(45 95% 48%));
+    --gradient-dark: linear-gradient(145deg, hsl(0 0% 100%), hsl(0 0% 97%));
+    --gradient-glow: radial-gradient(circle at 50% 0%, hsl(22 100% 52% / 0.15), transparent 60%);
+
+    --shadow-glow: 0 0 20px hsl(22 100% 52% / 0.25), 0 0 40px hsl(22 100% 52% / 0.12);
+    --shadow-card: 0 8px 24px -6px hsl(0 0% 0% / 0.12);
+    --shadow-elevated: 0 20px 50px -12px hsl(22 100% 52% / 0.25);
+  }
+
+  .dark {
+    color-scheme: dark;
+
     --background: 0 0% 4%;
     --foreground: 0 0% 98%;
 
@@ -38,8 +89,6 @@
     --input: 0 0% 13%;
     --ring: 22 100% 52%;
 
-    --radius: 0.75rem;
-
     --gaming-glow: 22 100% 52%;
     --gaming-dark: 0 0% 3%;
     --gaming-charcoal: 0 0% 11%;
@@ -56,8 +105,6 @@
     --shadow-card: 0 8px 32px -4px hsl(0 0% 0% / 0.6);
     --shadow-elevated: 0 20px 60px -10px hsl(22 100% 52% / 0.35);
   }
-
-  .dark { color-scheme: dark; }
 }
 
 @layer base {
