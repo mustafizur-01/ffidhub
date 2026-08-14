@@ -21,6 +21,7 @@ const Header = () => {
     { path: '/', label: 'Home' },
     { path: '/auctions', label: 'Auctions' },
     { path: '/vip', label: 'VIP' },
+    { path: '/vip-lounge', label: 'VIP Lounge' },
     { path: '/tournaments', label: 'Tournaments' },
     { path: '/sell', label: 'Sell ID', requiresAuth: true },
   ];
@@ -65,16 +66,12 @@ const Header = () => {
 
           {/* Auth Section */}
           <div className="hidden md:flex items-center gap-2">
-            <a
-              href="https://github.com/mustafizur-01/ffidhub/actions"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <Link to="/download">
               <Button variant="outline" size="sm" className="gap-1.5">
                 <Download className="h-4 w-4" />
-                Download
+                Get App
               </Button>
-            </a>
+            </Link>
             <ThemeToggle />
             {loading ? (
               <div className="w-24 h-9 bg-muted animate-pulse rounded-md" />
@@ -135,17 +132,12 @@ const Header = () => {
                 </Link>
               ))}
               
-              <a
-                href="https://github.com/mustafizur-01/ffidhub/actions"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setMobileMenuOpen(false)}
-              >
+              <Link to="/download" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="outline" className="w-full justify-start gap-2">
                   <Download className="h-4 w-4" />
-                  Download APK
+                  Download App / APK
                 </Button>
-              </a>
+              </Link>
 
               <div className="border-t border-border pt-4 mt-2">
                 {user ? (

@@ -71,13 +71,13 @@ const VipLoungePage = () => {
             .limit(6),
           supabase
             .from('purchases')
-            .select('amount, status')
+            .select('status, id_listings(price)')
             .eq('buyer_id', user.id),
         ]);
         setEarlyDeals(listings ?? []);
         const total = (purchases ?? [])
           .filter((p: any) => p.status === 'completed' || p.status === 'done')
-          .reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0);
+          .reduce((sum: number, p: any) => sum + Number(p.id_listings?.price || 0), 0);
         setSpend(total);
       } catch (e) {
         console.error('Error loading VIP lounge data:', e);

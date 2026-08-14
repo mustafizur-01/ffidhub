@@ -14,6 +14,8 @@ import {
   Banknote,
   ShieldCheck,
   Settings,
+  Crown,
+  Download,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -165,6 +167,20 @@ const UserMenu = () => {
           <DropdownMenuItem className="cursor-pointer">
             <User className="h-4 w-4 mr-2" />
             My Profile
+          </DropdownMenuItem>
+        </Link>
+
+        <Link to="/vip-lounge">
+          <DropdownMenuItem className="cursor-pointer text-yellow-500">
+            <Crown className="h-4 w-4 mr-2" />
+            VIP Lounge
+          </DropdownMenuItem>
+        </Link>
+
+        <Link to="/download">
+          <DropdownMenuItem className="cursor-pointer">
+            <Download className="h-4 w-4 mr-2" />
+            Download App
           </DropdownMenuItem>
         </Link>
 
