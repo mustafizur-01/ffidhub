@@ -25,6 +25,8 @@ import AuctionsPage from "./pages/AuctionsPage";
 import VipPage from "./pages/VipPage";
 import SellerVerifyPage from "./pages/SellerVerifyPage";
 import SettingsPage from "./pages/SettingsPage";
+import VipLoungePage from "./pages/VipLoungePage";
+import DownloadPage from "./pages/DownloadPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +58,8 @@ const App = () => (
             <Route path="/vip" element={<VipPage />} />
             <Route path="/seller-verify" element={<SellerVerifyPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/vip-lounge" element={<VipLoungePage />} />
+            <Route path="/download" element={<DownloadPage />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
