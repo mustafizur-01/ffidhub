@@ -19,7 +19,6 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useVipStatus } from '@/hooks/useVipStatus';
-import appIcon from '../../public/images/app-icon-512.png';
 
 const APK_BUILD_URL = 'https://github.com/mustafizur-01/ffidhub/actions';
 
@@ -87,7 +86,7 @@ const DownloadPage = () => {
         <Card className="mb-6 overflow-hidden border-primary/30">
           <div className="bg-gradient-to-br from-primary/20 via-background to-background p-6 flex flex-col sm:flex-row items-center gap-5">
             <img
-              src={appIcon}
+              src="/images/app-icon-512.png"
               alt="FF MAX ID Market app icon"
               width={96}
               height={96}
