@@ -247,6 +247,10 @@ const SettingsPage = () => {
           </CardContent>
         </Card>
 
+        {/* VIP theme personalization */}
+        <ThemeAccentSettings />
+
+
         {/* Notifications */}
         <Card className="mb-5">
           <CardHeader className="pb-2">
