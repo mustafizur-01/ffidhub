@@ -41,6 +41,48 @@ export type Database = {
         }
         Relationships: []
       }
+      app_releases: {
+        Row: {
+          apk_external_url: string | null
+          apk_path: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_published: boolean
+          min_android: string | null
+          release_notes: string | null
+          size_mb: number | null
+          version: string
+          version_code: number
+        }
+        Insert: {
+          apk_external_url?: string | null
+          apk_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_published?: boolean
+          min_android?: string | null
+          release_notes?: string | null
+          size_mb?: number | null
+          version: string
+          version_code?: number
+        }
+        Update: {
+          apk_external_url?: string | null
+          apk_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_published?: boolean
+          min_android?: string | null
+          release_notes?: string | null
+          size_mb?: number | null
+          version?: string
+          version_code?: number
+        }
+        Relationships: []
+      }
       auctions: {
         Row: {
           bid_count: number

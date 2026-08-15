@@ -9,8 +9,11 @@ import {
   Wifi,
   Crown,
   CheckCircle2,
-  Github,
   Share2,
+  RefreshCw,
+  AlertTriangle,
+  Info,
+  Sparkles,
 } from 'lucide-react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -19,8 +22,11 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useVipStatus } from '@/hooks/useVipStatus';
+import { useAdminRole } from '@/hooks/useAdminRole';
+import AdminReleaseUploader from '@/components/AdminReleaseUploader';
+import useAppRelease, { APP_VERSION } from '@/hooks/useAppRelease';
 
-const APK_BUILD_URL = 'https://github.com/mustafizur-01/ffidhub/actions';
+const FALLBACK_BUILD_URL = 'https://github.com/mustafizur-01/ffidhub/actions';
 
 const features = [
   { icon: Zap, title: 'Faster than browser', desc: 'App shell loads instantly, no address bar.' },
@@ -31,8 +37,22 @@ const features = [
 
 const DownloadPage = () => {
   const { isVip, tier } = useVipStatus();
+  const { isAdmin } = useAdminRole();
+  const {
+    release,
+    loading,
+    check,
+    checkedAt,
+    device,
+    compatible,
+    updateAvailable,
+    unseenUpdate,
+    markSeen,
+    getDownloadUrl,
+  } = useAppRelease();
   const [installEvent, setInstallEvent] = useState<any>(null);
   const [installed, setInstalled] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     const onPrompt = (e: any) => {
@@ -53,6 +73,15 @@ const DownloadPage = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (unseenUpdate && release) {
+      toast.info(`Update available: ${release.version}`, {
+        description: 'A newer app build is ready to download.',
+      });
+      markSeen();
+    }
+  }, [unseenUpdate, release, markSeen]);
+
   const handleInstall = async () => {
     if (!installEvent) {
       toast.info('Use your browser menu → "Add to Home screen" to install the app.');
@@ -64,24 +93,49 @@ const DownloadPage = () => {
     setInstallEvent(null);
   };
 
-  const handleShare = async () => {
-    const url = window.location.origin;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'FF MAX ID Market', url });
-        return;
-      } catch {
-        /* user cancelled */
+  const handleDownloadApk = async () => {
+    setDownloading(true);
+    try {
+      const url = await getDownloadUrl();
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+        toast.success('APK download started');
+      } else {
+        toast.info('No APK build uploaded yet — install the web app instead (1-tap install).');
       }
+    } catch {
+      toast.error('Could not start the download. Please try again.');
+    } finally {
+      setDownloading(false);
     }
-    navigator.clipboard.writeText(url);
-    toast.success('App link copied!');
   };
+
+  const hasApk = Boolean(release?.apk_path || release?.apk_external_url);
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container py-8 max-w-3xl">
+        {/* Update banner */}
+        {updateAvailable && release && (
+          <Card className="mb-4 border-primary bg-primary/10">
+            <CardContent className="p-4 flex items-start gap-3">
+              <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold">
+                  Update available — {release.version}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  You are on {APP_VERSION}. {release.release_notes ?? 'Bug fixes and improvements.'}
+                </p>
+              </div>
+              <Button size="sm" onClick={handleDownloadApk} disabled={downloading}>
+                Update
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Hero */}
         <Card className="mb-6 overflow-hidden border-primary/30">
           <div className="bg-gradient-to-br from-primary/20 via-background to-background p-6 flex flex-col sm:flex-row items-center gap-5">
@@ -95,11 +149,12 @@ const DownloadPage = () => {
             <div className="text-center sm:text-left">
               <h1 className="font-display text-2xl font-bold">Get the FF MAX ID Market App</h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Install the Android app for a faster, full-screen marketplace with instant alerts.
+                Install the app for a faster, full-screen marketplace with instant alerts.
               </p>
               <div className="flex flex-wrap gap-2 justify-center sm:justify-start mt-3">
                 <Badge variant="secondary">Android</Badge>
-                <Badge variant="secondary">v1.4.0</Badge>
+                <Badge variant="secondary">Latest {release?.version ?? APP_VERSION}</Badge>
+                {release?.size_mb ? <Badge variant="secondary">{release.size_mb} MB</Badge> : null}
                 <Badge variant="secondary">Free</Badge>
                 {installed && <Badge className="bg-green-600">Installed</Badge>}
               </div>
@@ -110,12 +165,108 @@ const DownloadPage = () => {
               <Smartphone className="h-5 w-5" />
               {installed ? 'App Installed' : 'Install App (1-tap)'}
             </Button>
-            <a href={APK_BUILD_URL} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="lg" className="w-full gap-2">
-                <Download className="h-5 w-5" />
-                Download APK file
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full gap-2"
+              onClick={handleDownloadApk}
+              disabled={downloading || loading}
+            >
+              <Download className="h-5 w-5" />
+              {downloading ? 'Preparing...' : hasApk ? 'Download APK file' : 'APK coming soon'}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Version check */}
+        <Card className="mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-primary" /> Version check
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-lg border border-border p-3">
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Your version</p>
+                <p className="font-mono font-semibold">{APP_VERSION}</p>
+              </div>
+              <div className="rounded-lg border border-border p-3">
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Latest version</p>
+                <p className="font-mono font-semibold">
+                  {loading ? 'Checking...' : (release?.version ?? APP_VERSION)}
+                </p>
+              </div>
+            </div>
+            {release?.release_notes && (
+              <p className="text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">What's new: </span>
+                {release.release_notes}
+              </p>
+            )}
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-xs text-muted-foreground">
+                {updateAvailable
+                  ? 'A newer build is available.'
+                  : "You're on the latest version."}
+                {checkedAt && ` Checked ${checkedAt.toLocaleTimeString()}`}
+              </span>
+              <Button variant="outline" size="sm" onClick={check} disabled={loading} className="gap-1">
+                <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} /> Check now
               </Button>
-            </a>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Device compatibility */}
+        <Card className="mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Smartphone className="h-4 w-4 text-primary" /> Device compatibility
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary">{device.osLabel}</Badge>
+              <Badge variant="secondary">{device.browser}</Badge>
+              <Badge variant="secondary">
+                Requires Android {release?.min_android ?? '7.0'}+
+              </Badge>
+            </div>
+            {device.os === 'android' && compatible === false && (
+              <div className="flex gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3">
+                <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                <p className="text-xs">
+                  Your Android version is older than the minimum required
+                  ({release?.min_android}). The APK may not install — use the 1-tap web app install
+                  instead.
+                </p>
+              </div>
+            )}
+            {device.os === 'android' && compatible !== false && (
+              <div className="flex gap-2 rounded-lg border border-green-500/40 bg-green-500/10 p-3">
+                <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                <p className="text-xs">Your device is compatible with the Android build.</p>
+              </div>
+            )}
+            {device.os === 'ios' && (
+              <div className="flex gap-2 rounded-lg border border-border p-3">
+                <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <p className="text-xs">
+                  iPhone/iPad cannot install APK files. Open this page in Safari, tap Share → "Add to
+                  Home Screen" to get the app icon and full-screen experience.
+                </p>
+              </div>
+            )}
+            {!device.isMobile && (
+              <div className="flex gap-2 rounded-lg border border-border p-3">
+                <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <p className="text-xs">
+                  You are on a desktop. Install the app here for a windowed app, or open this page on
+                  your Android phone to download the APK.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -136,21 +287,30 @@ const DownloadPage = () => {
           ))}
         </div>
 
-        {/* APK install steps */}
+        {isAdmin && <AdminReleaseUploader onPublished={check} />}
+
+        {/* Install steps */}
         <Card className="mb-6">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <Github className="h-4 w-4 text-primary" /> How to install the APK
+              <Download className="h-4 w-4 text-primary" /> How to install
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
-            {[
-              'Tap "Download APK file" — it opens the latest build page.',
-              'Open the newest successful build and download the "ffidhub-apk" artifact.',
-              'Unzip it if needed, then tap app-debug.apk on your phone.',
-              'Allow "Install from unknown sources" when Android asks.',
-              'Open FF ID Hub and sign in with your existing account.',
-            ].map((step, i) => (
+            {(hasApk
+              ? [
+                  'Tap "Download APK file" — the build is hosted here, no GitHub account needed.',
+                  'When Android asks, allow "Install from unknown sources" for your browser.',
+                  'Open the downloaded file and tap Install.',
+                  'Open FF ID Hub and sign in with your existing account.',
+                ]
+              : [
+                  'Tap "Install App (1-tap)" above — it adds the app icon to your home screen.',
+                  'If nothing happens, open your browser menu → "Add to Home screen".',
+                  'Launch it from the icon: full screen, no address bar, same account.',
+                  'An APK build will appear here automatically once a new release is published.',
+                ]
+            ).map((step, i) => (
               <div key={i} className="flex gap-3">
                 <span className="h-6 w-6 rounded-full bg-primary/15 text-primary text-xs font-bold flex items-center justify-center shrink-0">
                   {i + 1}
@@ -163,6 +323,11 @@ const DownloadPage = () => {
               <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
               Your wallet, listings and purchases stay exactly the same in the app.
             </div>
+            <a href={FALLBACK_BUILD_URL} target="_blank" rel="noopener noreferrer">
+              <Button variant="ghost" size="sm" className="text-xs">
+                Advanced: view build pipeline
+              </Button>
+            </a>
           </CardContent>
         </Card>
 
@@ -185,7 +350,24 @@ const DownloadPage = () => {
                   {isVip ? `Open VIP Lounge (${tier.toUpperCase()})` : 'See VIP Lounge'}
                 </Button>
               </Link>
-              <Button variant="outline" size="sm" className="gap-2" onClick={handleShare}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={async () => {
+                  const url = window.location.origin;
+                  if (navigator.share) {
+                    try {
+                      await navigator.share({ title: 'FF MAX ID Market', url });
+                      return;
+                    } catch {
+                      /* cancelled */
+                    }
+                  }
+                  navigator.clipboard.writeText(url);
+                  toast.success('App link copied!');
+                }}
+              >
                 <Share2 className="h-4 w-4" /> Share app
               </Button>
             </div>
