@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import SupportSection from "@/components/SupportSection";
+import { ThemeAccentSync } from "@/hooks/useThemeAccent";
 import Index from "./pages/Index";
 import SellPage from "./pages/SellPage";
 import ListingDetails from "./pages/ListingDetails";
@@ -36,6 +37,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
+        <ThemeAccentSync />
         <Toaster />
         <Sonner />
         <BrowserRouter>

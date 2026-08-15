@@ -22,6 +22,7 @@ import {
   Languages,
 } from 'lucide-react';
 import Header from '@/components/Header';
+import ThemeAccentSettings from '@/components/ThemeAccentSettings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
