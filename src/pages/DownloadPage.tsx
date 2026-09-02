@@ -26,8 +26,6 @@ import { useAdminRole } from '@/hooks/useAdminRole';
 import AdminReleaseUploader from '@/components/AdminReleaseUploader';
 import useAppRelease, { APP_VERSION } from '@/hooks/useAppRelease';
 
-const FALLBACK_BUILD_URL = 'https://github.com/mustafizur-01/ffidhub/actions';
-
 const features = [
   { icon: Zap, title: 'Faster than browser', desc: 'App shell loads instantly, no address bar.' },
   { icon: Bell, title: 'Deal alerts', desc: 'Get notified on offers, messages and deposits.' },
@@ -323,11 +321,6 @@ const DownloadPage = () => {
               <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
               Your wallet, listings and purchases stay exactly the same in the app.
             </div>
-            <a href={FALLBACK_BUILD_URL} target="_blank" rel="noopener noreferrer">
-              <Button variant="ghost" size="sm" className="text-xs">
-                Advanced: view build pipeline
-              </Button>
-            </a>
           </CardContent>
         </Card>
 
