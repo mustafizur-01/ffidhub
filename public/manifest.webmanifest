@@ -1,7 +1,7 @@
 {
-  "name": "FF MAX ID Market",
+  "name": "FF ID Hub",
   "short_name": "FF ID Hub",
-  "description": "Buy and sell Free Fire MAX IDs safely with escrow, auctions and tournaments.",
+  "description": "A secure Free Fire MAX marketplace with protected payments, tournaments and VIP rewards.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

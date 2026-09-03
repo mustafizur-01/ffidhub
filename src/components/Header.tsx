@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Flame, Menu, X, LogIn, MessageCircle, Download } from 'lucide-react';
+import { Menu, X, LogIn, MessageCircle, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -36,16 +36,19 @@ const Header = () => {
       <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="container flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="relative">
-              <Flame className="h-8 w-8 text-primary transition-transform group-hover:scale-110" />
-              <div className="absolute inset-0 blur-lg bg-primary/30 -z-10" />
-            </div>
+            <img
+              src="/images/app-icon-512.png"
+              alt="FF ID Hub logo"
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-xl object-cover shadow-lg shadow-primary/20 transition-transform group-hover:scale-105"
+            />
             <div className="flex flex-col">
               <span className="font-display text-lg font-bold tracking-wider text-gradient">
-                FF MAX
+                FF ID HUB
               </span>
               <span className="text-[10px] text-muted-foreground -mt-1 tracking-widest">
-                ID MARKET
+                GAMING MARKETPLACE
               </span>
             </div>
           </Link>
