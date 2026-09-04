@@ -422,11 +422,7 @@ const SettingsPage = () => {
           </CardHeader>
           <CardContent>
             <SettingRow icon={Download} title="Android app" description="Download the latest APK build">
-              <a
-                href="https://github.com/mustafizur-01/ffidhub/actions"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="/download">
                 <Button variant="outline" size="sm">Open</Button>
               </a>
             </SettingRow>

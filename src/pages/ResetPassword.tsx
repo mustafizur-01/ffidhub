@@ -84,7 +84,7 @@ const ResetPassword = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center space-y-4">
-          <Flame className="h-12 w-12 text-primary mx-auto" />
+          <img src="/images/app-icon-512.png" alt="FF ID Hub logo" width={64} height={64} className="h-16 w-16 rounded-2xl object-cover mx-auto" />
           <h1 className="text-2xl font-bold text-foreground">Invalid or Expired Link</h1>
           <p className="text-muted-foreground">This password reset link is invalid or has expired. Please request a new one.</p>
           <Button variant="gaming" onClick={() => navigate('/')}>Go Home</Button>

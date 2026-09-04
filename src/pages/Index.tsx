@@ -176,7 +176,7 @@ const Index = () => {
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 animate-pulse-glow">
               <Flame className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium text-primary">
-                #1 FF MAX ID Marketplace
+                #1 FF ID Hub Marketplace
               </span>
             </div>
 
