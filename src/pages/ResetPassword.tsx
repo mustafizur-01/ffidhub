@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Flame, KeyRound } from 'lucide-react';
+import { Loader2, KeyRound } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -84,7 +84,7 @@ const ResetPassword = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center space-y-4">
-          <Flame className="h-12 w-12 text-primary mx-auto" />
+          <img src="/images/app-icon-512.png" alt="FF ID Hub logo" width={64} height={64} className="h-16 w-16 rounded-2xl object-cover mx-auto" />
           <h1 className="text-2xl font-bold text-foreground">Invalid or Expired Link</h1>
           <p className="text-muted-foreground">This password reset link is invalid or has expired. Please request a new one.</p>
           <Button variant="gaming" onClick={() => navigate('/')}>Go Home</Button>

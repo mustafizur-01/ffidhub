@@ -422,18 +422,14 @@ const SettingsPage = () => {
           </CardHeader>
           <CardContent>
             <SettingRow icon={Download} title="Android app" description="Download the latest APK build">
-              <a
-                href="https://github.com/mustafizur-01/ffidhub/actions"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="/download">
                 <Button variant="outline" size="sm">Open</Button>
               </a>
             </SettingRow>
             <Separator />
             <div className="flex items-center justify-between py-3 text-sm">
               <span className="text-muted-foreground">App version</span>
-              <span className="font-mono text-xs">FF MAX ID Market v1.4.0</span>
+              <span className="font-mono text-xs">FF ID Hub v1.4.0</span>
             </div>
           </CardContent>
         </Card>
