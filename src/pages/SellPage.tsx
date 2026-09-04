@@ -3,7 +3,7 @@ import Header from '@/components/Header';
 import SellForm from '@/components/SellForm';
 import AuthModal from '@/components/AuthModal';
 import { Button } from '@/components/ui/button';
-import { Flame, LogIn, Lock } from 'lucide-react';
+import { LogIn, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 const SellPage = () => {

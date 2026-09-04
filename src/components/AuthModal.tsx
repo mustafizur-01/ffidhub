@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
-import { Loader2, Flame, Mail, Phone, ArrowLeft } from 'lucide-react';
+import { Loader2, Mail, Phone, ArrowLeft } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
