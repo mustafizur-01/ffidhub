@@ -433,7 +433,7 @@ const SettingsPage = () => {
             <Separator />
             <div className="flex items-center justify-between py-3 text-sm">
               <span className="text-muted-foreground">App version</span>
-              <span className="font-mono text-xs">FF MAX ID Market v1.4.0</span>
+              <span className="font-mono text-xs">FF ID Hub v1.4.0</span>
             </div>
           </CardContent>
         </Card>

@@ -139,13 +139,13 @@ const DownloadPage = () => {
           <div className="bg-gradient-to-br from-primary/20 via-background to-background p-6 flex flex-col sm:flex-row items-center gap-5">
             <img
               src="/images/app-icon-512.png"
-              alt="FF MAX ID Market app icon"
+              alt="FF ID Hub app icon"
               width={96}
               height={96}
               className="h-24 w-24 rounded-2xl shadow-lg"
             />
             <div className="text-center sm:text-left">
-              <h1 className="font-display text-2xl font-bold">Get the FF MAX ID Market App</h1>
+              <h1 className="font-display text-2xl font-bold">Get the FF ID Hub App</h1>
               <p className="text-sm text-muted-foreground mt-1">
                 Install the app for a faster, full-screen marketplace with instant alerts.
               </p>
@@ -351,7 +351,7 @@ const DownloadPage = () => {
                   const url = window.location.origin;
                   if (navigator.share) {
                     try {
-                      await navigator.share({ title: 'FF MAX ID Market', url });
+                      await navigator.share({ title: 'FF ID Hub', url });
                       return;
                     } catch {
                       /* cancelled */

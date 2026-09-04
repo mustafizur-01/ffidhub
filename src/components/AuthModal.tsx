@@ -149,8 +149,14 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
       <DialogContent className="sm:max-w-md bg-card border-border">
         <DialogHeader className="text-center">
           <div className="mx-auto flex items-center justify-center gap-2 mb-1">
-            <Flame className="h-8 w-8 text-primary" />
-            <span className="font-display text-xl font-bold text-gradient">FF MAX</span>
+            <img
+              src="/images/app-icon-512.png"
+              alt="FF ID Hub logo"
+              width={32}
+              height={32}
+              className="h-8 w-8 rounded-lg object-cover"
+            />
+            <span className="font-display text-xl font-bold text-gradient">FF ID HUB</span>
           </div>
           <DialogTitle className="text-center">
             {mode === 'choose' && 'Sign in to continue'}
