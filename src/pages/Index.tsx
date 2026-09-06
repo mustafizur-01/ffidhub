@@ -7,6 +7,7 @@ import SearchFilters from '@/components/SearchFilters';
 import HomeStats from '@/components/HomeStats';
 import RecentlySoldStrip from '@/components/RecentlySoldStrip';
 import FeaturedSellersStrip from '@/components/FeaturedSellersStrip';
+import { AdSlot } from '@/components/ads/AdSlot';
 import { supabase } from '@/integrations/supabase/client';
 import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import { IdListing, ListingFilters } from '@/types/listing';
@@ -216,6 +217,10 @@ const Index = () => {
 
       <FeaturedSellersStrip />
 
+      <div className="container pt-6">
+        <AdSlot slot="home-top" />
+      </div>
+
       {/* Upcoming Tournaments Banner */}
       {upcomingTournaments.length > 0 && (
         <section className="container py-6">
@@ -331,6 +336,10 @@ const Index = () => {
               </div>
             );
           })()}
+        </div>
+
+        <div className="pt-8">
+          <AdSlot slot="home-bottom" />
         </div>
       </section>
     </div>

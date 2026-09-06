@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Header from '@/components/Header';
+import { AdSlot } from '@/components/ads/AdSlot';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -361,6 +362,10 @@ const MiniGamesPage = () => {
             </TabsContent>
           ))}
         </Tabs>
+
+        <div className="mt-6">
+          <AdSlot slot="games-bottom" />
+        </div>
       </div>
     </div>
   );

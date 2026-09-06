@@ -1,4 +1,5 @@
 import { AIImageGenerator } from '@/components/AIImageGenerator';
+import { AdSlot } from '@/components/ads/AdSlot';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -317,6 +318,10 @@ const TournamentsPage = () => {
           )}
         </div>
       </section>
+
+      <div className="container pt-6">
+        <AdSlot slot="tournaments-top" />
+      </div>
 
       {/* Create Tournament Form */}
       {showCreateForm && (
