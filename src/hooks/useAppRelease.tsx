@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export const APP_VERSION = 'v1.4.0';
-export const APP_VERSION_CODE = 140;
+export const APP_VERSION = 'v1.4.1';
+export const APP_VERSION_CODE = 141;
 const SEEN_KEY = 'ffid-seen-version-code';
 
 export interface AppRelease {
