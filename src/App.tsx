@@ -7,6 +7,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import SupportSection from "@/components/SupportSection";
 import { ThemeAccentSync } from "@/hooks/useThemeAccent";
+import { useMessageNotifications } from "@/hooks/useMessageNotifications";
+
+const MessageNotifications = () => {
+  useMessageNotifications();
+  return null;
+};
 import Index from "./pages/Index";
 import SellPage from "./pages/SellPage";
 import ListingDetails from "./pages/ListingDetails";
@@ -38,6 +44,7 @@ const App = () => (
     <AuthProvider>
       <TooltipProvider>
         <ThemeAccentSync />
+        <MessageNotifications />
         <Toaster />
         <Sonner />
         <BrowserRouter>
