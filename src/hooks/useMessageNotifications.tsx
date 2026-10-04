@@ -59,7 +59,7 @@ export const useMessageNotifications = () => {
                     id: Date.now() % 2147483647,
                     title: 'New message — FF ID Hub',
                     body,
-                    smallIcon: 'ic_stat_notify',
+                    smallIcon: 'ic_launcher',
                   },
                 ],
               });
