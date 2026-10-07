@@ -1,1 +1,1 @@
-Use Supabase Edge Functions for server-only AI work in this Classic app; use a database-backed, single-flight hourly claim so automated generation stays bounded and secure.
+Use Lovable Cloud Jobs for recurring server-side AI work in this Classic app; scheduled generation must be bounded, single-flight, and paused on billing or access blocks.
