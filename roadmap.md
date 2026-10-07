@@ -1,4 +1,2 @@
 ## Hourly AI custom status
-- [ ] Add protected status storage, claim and pause/resume controls, and the hourly schedule.
-- [ ] Add the AI generator and public home-screen status display.
-- [ ] Deploy, verify one generated status, and check build/runtime logs.
+- [ ] Create the secure hourly Lovable Cloud Job; this workspace has no supported job-creation control. Then add protected status storage, bounded AI generation, admin pause/resume, and the Home display; deploy and verify.
