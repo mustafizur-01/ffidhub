@@ -3,3 +3,6 @@
 
 ## Message notifications
 - [x] Only listen for new-message alerts while online and subscribed; stop listening when offline and reconnect when online.
+
+## Ad-supported daily bonus
+- [ ] Review the current daily bonus and ad setup; define a safe ad-related task/cooldown before changing claims, without requiring ad clicks or misrepresenting impressions.
