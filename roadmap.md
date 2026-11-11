@@ -5,5 +5,5 @@
 - [x] Only listen for new-message alerts while online and subscribed; stop listening when offline and reconnect when online.
 
 ## Ad-supported daily bonus
-- [ ] User requested an ad-view task for daily wallet bonus. Current bonus is ₹2 with a server-enforced 24-hour cooldown. Do not reward ad views with withdrawable wallet credit; Google allows rewarded ads for access to site content, not direct monetary rewards. Ask user to choose a safe cooldown or a non-ad in-app task before changing the bonus.
-- [ ] Real AdSense ads need the approved publisher ID and numeric ad-unit IDs; current app configuration is absent.
+- [x] Set the ₹2 wallet bonus to a 48-hour minimum interval in the server claim rule and countdown. Do not require ad views for withdrawable credit.
+- [ ] Enable real AdSense placements after the user supplies the publisher ID and ad-unit IDs; the user says AdSense is approved, but the app configuration is absent.

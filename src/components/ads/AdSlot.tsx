@@ -9,6 +9,12 @@ declare global {
 }
 
 const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT as string | undefined;
+const ADSENSE_SLOTS: Record<string, string | undefined> = {
+  'home-top': import.meta.env.VITE_ADSENSE_SLOT_HOME_TOP as string | undefined,
+  'home-bottom': import.meta.env.VITE_ADSENSE_SLOT_HOME_BOTTOM as string | undefined,
+  'tournaments-top': import.meta.env.VITE_ADSENSE_SLOT_TOURNAMENTS_TOP as string | undefined,
+  'games-bottom': import.meta.env.VITE_ADSENSE_SLOT_GAMES_BOTTOM as string | undefined,
+};
 
 interface AdSlotProps {
   /** AdSense ad unit slot id (used only when VITE_ADSENSE_CLIENT is set) */
@@ -60,7 +66,8 @@ export function AdSlot({ slot, variant = 'banner', className = '' }: AdSlotProps
   const pushed = useRef(false);
   const [promoIndex, setPromoIndex] = useState(0);
 
-  const adsenseReady = Boolean(ADSENSE_CLIENT && slot);
+  const adUnitId = slot ? ADSENSE_SLOTS[slot] : undefined;
+  const adsenseReady = Boolean(ADSENSE_CLIENT && adUnitId);
 
   useEffect(() => {
     if (!adsenseReady) return;
@@ -99,7 +106,7 @@ export function AdSlot({ slot, variant = 'banner', className = '' }: AdSlotProps
           className="adsbygoogle"
           style={{ display: 'block' }}
           data-ad-client={ADSENSE_CLIENT}
-          data-ad-slot={slot}
+          data-ad-slot={adUnitId}
           data-ad-format="auto"
           data-full-width-responsive="true"
         />
