@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const REWARD_AMOUNT = 2;
-const COOLDOWN_HOURS = 24;
+const COOLDOWN_HOURS = 48;
 
 const formatRemaining = (hours: number) => {
   const totalSeconds = Math.max(0, Math.floor(hours * 3600));
@@ -73,7 +73,7 @@ const DailyRewardCard = () => {
         <Sparkles className="h-8 w-8 mx-auto text-primary mb-2" />
         <p className="font-display text-3xl font-bold text-gradient">₹{REWARD_AMOUNT}</p>
         <p className="text-xs text-muted-foreground mt-1">
-          Free credit every 24 hours
+          Free credit every 48 hours
         </p>
       </div>
 
