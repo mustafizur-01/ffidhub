@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-const REWARD_AMOUNT = 2;
-const COOLDOWN_HOURS = 48;
+import {
+  DAILY_REWARD_AMOUNT,
+  DAILY_REWARD_COOLDOWN_HOURS,
+  getDailyRewardHoursRemaining,
+} from '@/components/dailyRewardRules';
 
 const formatRemaining = (hours: number) => {
   const totalSeconds = Math.max(0, Math.floor(hours * 3600));
@@ -24,13 +26,9 @@ const DailyRewardCard = () => {
   useEffect(() => {
     if (!profile) return;
     const last = (profile as any).last_daily_claim_at as string | null | undefined;
-    if (!last) {
-      setHoursRemaining(0);
-      return;
-    }
+    const lastClaimAt = last ?? null;
     const tick = () => {
-      const diffH = (Date.now() - new Date(last).getTime()) / 3600_000;
-      setHoursRemaining(Math.max(0, COOLDOWN_HOURS - diffH));
+      setHoursRemaining(getDailyRewardHoursRemaining(lastClaimAt));
     };
     tick();
     const id = setInterval(tick, 1000);
@@ -71,9 +69,9 @@ const DailyRewardCard = () => {
 
       <div className="bg-secondary/50 rounded-lg p-4 text-center">
         <Sparkles className="h-8 w-8 mx-auto text-primary mb-2" />
-        <p className="font-display text-3xl font-bold text-gradient">₹{REWARD_AMOUNT}</p>
+        <p className="font-display text-3xl font-bold text-gradient">₹{DAILY_REWARD_AMOUNT}</p>
         <p className="text-xs text-muted-foreground mt-1">
-          Free credit every 48 hours
+          Free credit every {DAILY_REWARD_COOLDOWN_HOURS} hours
         </p>
       </div>
 
