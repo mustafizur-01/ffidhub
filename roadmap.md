@@ -6,4 +6,4 @@
 
 ## Ad-supported daily bonus
 - [x] Set the ₹2 wallet bonus to a 48-hour minimum interval in the server claim rule and countdown. Do not require ad views for withdrawable credit.
-- [ ] Enable real AdSense placements after the user supplies the approved publisher ID and ad-unit IDs; current app configuration is absent.
+- [ ] Enable real AdSense placements after the user supplies the publisher ID and ad-unit IDs; the user says AdSense is approved, but the app configuration is absent.
