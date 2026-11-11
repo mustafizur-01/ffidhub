@@ -87,7 +87,7 @@ const DailyRewardCard = () => {
       )}
 
       <p className="text-xs text-muted-foreground text-center">
-        Come back daily to grow your wallet for free!
+        Come back after 48 hours to claim your next bonus.
       </p>
     </div>
   );
