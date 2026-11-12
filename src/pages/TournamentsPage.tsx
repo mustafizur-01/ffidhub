@@ -96,10 +96,9 @@ const TournamentsPage = () => {
 
       const enriched = await Promise.all(
         (data || []).map(async (t: any) => {
-          const { count } = await supabase
-            .from('tournament_participants')
-            .select('*', { count: 'exact', head: true })
-            .eq('tournament_id', t.id);
+          const { data: participantCount } = await supabase.rpc('get_tournament_participant_count', {
+            _tournament_id: t.id,
+          });
 
           let has_joined = false;
           if (user) {
@@ -123,7 +122,7 @@ const TournamentsPage = () => {
             winner_email = winnerProfile?.email;
           }
 
-          return { ...t, participant_count: count || 0, has_joined, winner_email };
+          return { ...t, participant_count: participantCount || 0, has_joined, winner_email };
         })
       );
 

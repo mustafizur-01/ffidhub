@@ -1106,6 +1106,10 @@ export type Database = {
           room_password: string
         }[]
       }
+      get_tournament_participant_count: {
+        Args: { _tournament_id: string }
+        Returns: number
+      }
       get_user_reputation: { Args: { _user_id: string }; Returns: Json }
       has_role: {
         Args: {
