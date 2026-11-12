@@ -8,6 +8,13 @@
       "when": 1794420046536,
       "tag": "0000_set_daily_bonus_48_hour_cooldown",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794517090731,
+      "tag": "0001_restrict_auction_participant_and_apk_reads",
+      "breakpoints": true
     }
   ]
 }
