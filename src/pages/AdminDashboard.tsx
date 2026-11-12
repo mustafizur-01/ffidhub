@@ -709,10 +709,9 @@ const AdminDashboard = () => {
 
       const enriched = await Promise.all(
         (data || []).map(async (t: any) => {
-          const { count } = await supabase
-            .from('tournament_participants')
-            .select('*', { count: 'exact', head: true })
-            .eq('tournament_id', t.id);
+          const { data: participantCount } = await supabase.rpc('get_tournament_participant_count', {
+            _tournament_id: t.id,
+          });
 
           // Fetch participants with emails for winner selection
           const { data: participants } = await supabase
@@ -730,7 +729,7 @@ const AdminDashboard = () => {
             participantEmails = profiles || [];
           }
 
-          return { ...t, participant_count: count || 0, participants: participantEmails };
+          return { ...t, participant_count: participantCount || 0, participants: participantEmails };
         })
       );
       setTournamentsList(enriched);
