@@ -15,6 +15,13 @@
       "when": 1794517090731,
       "tag": "0001_restrict_auction_participant_and_apk_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794517140043,
+      "tag": "0002_limit_app_build_storage_to_published_releases",
+      "breakpoints": true
     }
   ]
 }
